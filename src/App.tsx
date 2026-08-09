@@ -82,6 +82,7 @@ import {
   AlertCircle,
   AlertTriangle,
   LayoutDashboard,
+  FolderKanban,
   Eye,
   EyeOff,
   Edit3,
@@ -1877,10 +1878,10 @@ function App() {
   }, [isNotificationsOpen]);
 
   useEffect(() => {
-    console.log("App useEffect: checking auth...");
+
     // Initial Auth Restoration (LanPro v1.3)
     const token = localStorage.getItem("lanpro_jwt_token");
-    console.log("App useEffect: token found:", !!token);
+
     if (!token) {
         setIsLoggedIn(false);
         setLoading(false);
@@ -1892,7 +1893,7 @@ function App() {
       sessionStorage.getItem("sessionUser") ||
       localStorage.getItem("sessionUser");
     
-    console.log("App useEffect: sessionPayload found:", !!sessionPayload);
+
 
     let localUser = null;
     if (sessionPayload) {
@@ -1912,13 +1913,13 @@ function App() {
       const token = localStorage.getItem("lanpro_jwt_token");
       if (!token) {
         setLoading(false);
-        console.log("App useEffect: No token found, skipping session verification");
+
         return;
       }
       try {
         const data = await apiRequest("/api/auth/verify");
         if (data && data.status === "success") {
-          console.log("Token verified successfully");
+
           const verifiedUser = data.user || data.data || localUser;
           if (verifiedUser) {
             if (verifiedUser.permissions && typeof verifiedUser.permissions === 'string') {
@@ -1943,7 +1944,7 @@ function App() {
         await handleLogout(true);
       } finally {
         setLoading(false);
-        console.log("App useEffect: loading set to false after verification");
+
       }
     };
 
@@ -2202,17 +2203,24 @@ function App() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
-  const [selectedTaskForDetail, setSelectedTaskForDetail] =
-    useState<Task | null>(null);
+  const [selectedTaskForDetail, setSelectedTaskForDetail] = useState<Task | null>(null);
   const [selectedUserForDetail, setSelectedUserForDetail] = useState<UserProfile | null>(null);
 
-  const handleSetIsTaskDetailModalOpen = (open: boolean) => {
-    setIsTaskDetailModalOpen(open);
+  // We keep a history of the last view before opening issue detail so we can go back
+  const [previousView, setPreviousView] = useState<string>('list');
+
+  const setIsTaskDetailModalOpen = (open: boolean) => {
     if (open) {
+      if (currentView !== 'issueDetail') {
+        setPreviousView(currentView);
+      }
       setCurrentView('issueDetail' as any);
+    } else {
+      setCurrentView(previousView as any);
     }
   };
+
+  const handleSetIsTaskDetailModalOpen = setIsTaskDetailModalOpen;
 
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
 
@@ -2316,13 +2324,13 @@ function App() {
 
   // Sync selectedTaskForDetail when tasks state changes (e.g. from real-time socket refresh)
   useEffect(() => {
-     if (isTaskDetailModalOpen && selectedTaskForDetail) {
+     if (currentView === 'issueDetail' && selectedTaskForDetail) {
          const updatedTask = tasks.find(t => t.id === selectedTaskForDetail.id);
          if (updatedTask && JSON.stringify(updatedTask) !== JSON.stringify(selectedTaskForDetail)) {
              setSelectedTaskForDetail(updatedTask);
          }
      }
-  }, [tasks, isTaskDetailModalOpen, selectedTaskForDetail]);
+  }, [tasks, currentView, selectedTaskForDetail]);
 
   // Attachments & Links states
   const [newLinkTitle, setNewLinkTitle] = useState("");
@@ -2444,7 +2452,7 @@ function App() {
         return;
     }
     if (isAuthLoading && !force) return;
-    console.log("Attempting custom database login for:", username, "force:", force);
+
 
     try {
       setIsAuthLoading(true);
@@ -2831,7 +2839,7 @@ function App() {
         console.warn("[SOCKET ERROR] Native-like socket onerror caught internally:", err);
       };
       socket.onclose = () => {
-        console.log("[SOCKET] Native-like socket onclose triggered.");
+
       };
 
       if (socket.io) {
@@ -2847,7 +2855,7 @@ function App() {
           console.warn("[SOCKET ENGINE ERROR] Engine onerror suppressed:", err);
         };
         socket.io.engine.onclose = () => {
-          console.log("[SOCKET ENGINE] Engine closed.");
+
         };
       }
     } catch (err) {
@@ -2860,7 +2868,7 @@ function App() {
     
     socket.on("FORCE_LOGOUT_EVENT", (data: any) => {
       if (data.browserSessionId === BROWSER_SESSION_ID) {
-        console.log("[SOCKET] Ignoring force logout event for own session");
+
         return;
       }
       const storedUser = localStorage.getItem("sessionUser");
@@ -2875,7 +2883,7 @@ function App() {
     });
 
     socket.on("connect", () => {
-       console.log("[SOCKET] Terhubung ke server.");
+
        setSocketConnected(true);
     });
     
@@ -3061,7 +3069,7 @@ function App() {
       setSprints([]);
       return;
     }
-    console.log(`Fetching sprints for project: ${selectedProject.id}`);
+
     try {
       const data = await apiRequest(`/api/projects/${selectedProject.id}/sprints`);
       if (data.status === "success") {
@@ -3259,10 +3267,8 @@ function App() {
       const sprintId = data.data.id;
 
       // Assign selected backlog items
-      console.log(
-        "handleCreateSprint: selected backlog count:",
-        selectedSprintBacklog.size,
-      );
+
+      // Sprint backlog assignment
       if (selectedSprintBacklog.size > 0) {
         const promises = Array.from(selectedSprintBacklog as Set<string>).map(
           (taskId) =>
@@ -3270,10 +3276,8 @@ function App() {
               method: "PUT",
               body: { sprintId }
             })
-              .then(() => console.log("Successfully updated task:", taskId))
-              .catch((err) =>
-                console.error("Failed to update task:", taskId, err),
-              ),
+              .then(() => { /* task updated */ })
+.catch((err) => console.error("Failed to update task:", taskId, err))
         );
         await Promise.all(promises);
 
@@ -5183,7 +5187,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     }
   };
 
-  console.log("App component: isLoggedIn:", isLoggedIn);
+
   if (loading) {
     return <GlobalSkeleton />;
   }
@@ -5343,94 +5347,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <div className="absolute inset-0 bg-[#f8fafc]/50 backdrop-blur-3xl z-[-1]" />
 
-        {currentView === "issueDetail" ? (
-          <div className="flex-1 flex flex-col h-full bg-[#f8fafc] overflow-y-auto">
-            <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setCurrentView('list')}
-                  className="p-2 bg-slate-100 hover:bg-indigo-600 hover:text-white rounded-xl text-slate-700 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer shadow-2xs"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Kembali ke Issue List</span>
-                </button>
-                <div className="h-5 w-px bg-slate-200" />
-                <div className="flex flex-col">
-                  <span className="text-xs font-black text-indigo-600 tracking-wider uppercase">
-                    {selectedTaskForDetail?.key || 'ISSUE-DETAIL'}
-                  </span>
-                  <h1 className="text-base font-black text-slate-800 tracking-tight truncate max-w-xl">
-                    {selectedTaskForDetail?.title || 'Detail Issue'}
-                  </h1>
-                </div>
-              </div>
-            </div>
-            <div className="p-6 max-w-7xl mx-auto w-full flex-1">
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden p-4">
-                <TaskDetailModal
-                  projectRole={
-                    selectedProject && currentUser?.uid
-                      ? selectedProject.memberRoles?.[currentUser.uid]
-                      : undefined
-                  }
-                  isUpdatingTask={isUpdatingTask}
-                  isOpen={true}
-                  onClose={() => setCurrentView('list')}
-                  task={selectedTaskForDetail}
-                  tasks={tasks || []}
-                  projectMembers={projectMembers || []}
-                  masterData={masterData || []}
-                  userRole={effectiveRole}
-                  user={currentUser}
-                  currentUserProfile={currentUserProfile!}
-                  sprints={sprints || []}
-                  updateTaskField={updateTaskField}
-                  hasPermission={hasPermission}
-                  activityLogs={activityLogs || []}
-                  comments={comments || []}
-                  newCommentText={newCommentText}
-                  setNewCommentText={setNewCommentText}
-                  handleAddComment={handleAddComment}
-                  handleFileUpload={handleFileUpload}
-                  handleRemoveAttachment={handleRemoveAttachment}
-                  uploadProgress={uploadProgress}
-                  isLoggedIn={!!currentUser}
-                  handleQuickAddSubtask={handleQuickAddSubtask}
-                  mentionState={mentionState}
-                  handleSelectMention={handleSelectMention}
-                  handleCommentChange={handleCommentChange}
-                  removeTaskLink={removeTaskLink}
-                  handleAddLinkedTask={handleAddLinkedTask}
-                  handleRemoveLinkedTask={handleRemoveLinkedTask}
-                  taskLinkTargetId={taskLinkTargetId}
-                  setTaskLinkTargetId={setTaskLinkTargetId}
-                  taskLinkRelation={taskLinkRelation}
-                  setTaskLinkRelation={setTaskLinkRelation}
-                  isAddingTaskLink={isAddingTaskLink}
-                  setIsAddingTaskLink={setIsAddingTaskLink}
-                  isAddingExternalLink={isAddingExternalLink}
-                  setIsAddingExternalLink={setIsAddingExternalLink}
-                  newExternalLinkTitle={newExternalLinkTitle}
-                  setNewExternalLinkTitle={setNewExternalLinkTitle}
-                  newExternalLinkUrl={newExternalLinkUrl}
-                  setNewExternalLinkUrl={setNewExternalLinkUrl}
-                  handleAddExternalLink={handleAddExternalLink}
-                  removeExternalLink={removeExternalLink}
-                  toggleBlockedStatus={toggleBlockedStatus}
-                  handleSuggestStoryPoints={handleSuggestStoryPoints}
-                  handleAddLink={handleAddLink}
-                  newLinkTitle={newLinkTitle}
-                  setNewLinkTitle={setNewLinkTitle}
-                  newLinkUrl={newLinkUrl}
-                  setNewLinkUrl={setNewLinkUrl}
-                  isAddingLink={isAddingLink}
-                  setIsAddingLink={setIsAddingLink}
-                  deleteTask={deleteTask}
-                />
-              </div>
-            </div>
-          </div>
-        ) : currentView === "userDetail" ? (
+        {currentView === "userDetail" ? (
           <UserDetailView
             user={selectedUserForDetail}
             onBack={() => setCurrentView('users')}
@@ -5799,6 +5716,89 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 transition={{ duration: 0.22, ease: "easeOut" }}
                 className="flex-1 flex flex-col min-h-0 bg-slate-50 dark:bg-slate-950 transition-colors duration-200"
               >
+              {currentView === "issueDetail" && (
+                <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-[#f4f7f9] text-left">
+                  <div className="flex-1 flex flex-col min-h-0 bg-white border border-slate-200/80 rounded-lg shadow-sm overflow-hidden">
+                     {/* Table Header / Action Bar */}
+                     <div className="p-6 md:p-7 border-b border-slate-200/80 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
+                        <div className="flex items-center gap-3.5">
+                          <button onClick={() => setIsTaskDetailModalOpen(false)} className="p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-600 shadow-2xs hover:bg-indigo-600 hover:text-white transition-all">
+                            <ArrowLeft className="w-5 h-5" />
+                          </button>
+                          <div>
+                            <h3 className="text-base font-black text-slate-900 tracking-tight">Issue Details</h3>
+                            <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                              {selectedTaskForDetail?.key || 'TASK'}
+                            </p>
+                          </div>
+                        </div>
+                     </div>
+                     
+                     <div className="flex-1 overflow-auto bg-white custom-scrollbar w-full h-full relative">
+                      <TaskDetailModal
+                        projectRole={
+                          selectedProject && currentUser?.uid
+                            ? selectedProject.memberRoles?.[currentUser.uid]
+                            : undefined
+                        }
+                        isUpdatingTask={isUpdatingTask}
+                        isOpen={true}
+                        onClose={() => setIsTaskDetailModalOpen(false)}
+                        task={selectedTaskForDetail}
+                        tasks={tasks || []}
+                        projectMembers={projectMembers || []}
+                        masterData={masterData || []}
+                        userRole={effectiveRole}
+                        user={currentUser}
+                        currentUserProfile={currentUserProfile!}
+                        sprints={sprints || []}
+                        updateTaskField={updateTaskField}
+                        hasPermission={hasPermission}
+                        activityLogs={activityLogs || []}
+                        comments={comments || []}
+                        newCommentText={newCommentText}
+                        setNewCommentText={setNewCommentText}
+                        handleAddComment={handleAddComment}
+                        handleFileUpload={handleFileUpload}
+                        handleRemoveAttachment={handleRemoveAttachment}
+                        uploadProgress={uploadProgress}
+                        isLoggedIn={!!currentUser}
+                        handleQuickAddSubtask={handleQuickAddSubtask}
+                        mentionState={mentionState}
+                        handleSelectMention={handleSelectMention}
+                        handleCommentChange={handleCommentChange}
+                        removeTaskLink={removeTaskLink}
+                        handleAddLinkedTask={handleAddLinkedTask}
+                        handleRemoveLinkedTask={handleRemoveLinkedTask}
+                        taskLinkTargetId={taskLinkTargetId}
+                        setTaskLinkTargetId={setTaskLinkTargetId}
+                        taskLinkRelation={taskLinkRelation}
+                        setTaskLinkRelation={setTaskLinkRelation}
+                        isAddingTaskLink={isAddingTaskLink}
+                        setIsAddingTaskLink={setIsAddingTaskLink}
+                        isAddingExternalLink={isAddingExternalLink}
+                        setIsAddingExternalLink={setIsAddingExternalLink}
+                        newExternalLinkTitle={newExternalLinkTitle}
+                        setNewExternalLinkTitle={setNewExternalLinkTitle}
+                        newExternalLinkUrl={newExternalLinkUrl}
+                        setNewExternalLinkUrl={setNewExternalLinkUrl}
+                        handleAddExternalLink={handleAddExternalLink}
+                        removeExternalLink={removeExternalLink}
+                        toggleBlockedStatus={toggleBlockedStatus}
+                        handleSuggestStoryPoints={handleSuggestStoryPoints}
+                        handleAddLink={handleAddLink}
+                        newLinkTitle={newLinkTitle}
+                        setNewLinkTitle={setNewLinkTitle}
+                        newLinkUrl={newLinkUrl}
+                        setNewLinkUrl={setNewLinkUrl}
+                        isAddingLink={isAddingLink}
+                        setIsAddingLink={setIsAddingLink}
+                        deleteTask={deleteTask}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
                 {currentView === "dashboard" && (
                 <div className="flex-1 flex flex-col overflow-auto bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-200">
                   <DashboardView
@@ -5948,7 +5948,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
                 />
               )}
-              {currentView === "access" && (
+              {((currentView as string) === "access" || (currentView as string) === "team") && (
                 <TeamManagementPanel
                   projectMembers={projectMembers || []}
                   selectedProject={selectedProject!}
@@ -6011,6 +6011,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   projectMembers={projectMembers || []}
                   setSelectedTaskForDetail={setSelectedTaskForDetail}
                   setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+                  currentUserProfile={currentUserProfile}
                 />
               )}
               {currentView === "auditLog" && (
@@ -6061,7 +6062,22 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
             )}
           </React.Fragment>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-gray-50/30 p-8"></div>
+          <div className="flex-1 flex flex-col items-center justify-center bg-slate-50/50 p-8 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-100/80 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-4 shadow-sm">
+              <FolderKanban className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">Pilih atau Buat Proyek Baru</h3>
+            <p className="text-sm text-slate-500 max-w-md mb-6">
+              Silakan pilih salah satu proyek dari sidebar di sebelah kiri, atau buat proyek baru untuk mulai mengelola tugas & sprint tim Anda.
+            </p>
+            <button
+              onClick={() => setIsNewProjectModalOpen(true)}
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Buat Proyek Baru</span>
+            </button>
+          </div>
         )}
 
         {/* </main> */}
@@ -6295,7 +6311,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               </label>
               <Input
                 value={newProjectKey}
-                onChange={(e: any) => setNewProjectKey(e.target.value)}
+                onChange={(e: any) => setNewProjectKey(e.target.value.toUpperCase())}
                 placeholder="e.g. KAN"
               />
             </div>
@@ -7123,66 +7139,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           )}
         </Modal>
 
-        <TaskDetailModal
-          projectRole={
-            selectedProject && currentUser?.uid
-              ? selectedProject.memberRoles?.[currentUser.uid]
-              : undefined
-          }
-          isUpdatingTask={isUpdatingTask}
-          isOpen={isTaskDetailModalOpen}
-          onClose={() => setIsTaskDetailModalOpen(false)}
-          task={selectedTaskForDetail}
-          tasks={tasks || []}
-          projectMembers={projectMembers || []}
-          masterData={masterData || []}
-          userRole={effectiveRole}
-          user={currentUser}
-          currentUserProfile={currentUserProfile!}
-          sprints={sprints || []}
-          updateTaskField={updateTaskField}
-          hasPermission={hasPermission}
-          activityLogs={activityLogs || []}
-          comments={comments || []}
-          newCommentText={newCommentText}
-          setNewCommentText={setNewCommentText}
-          handleAddComment={handleAddComment}
-          handleFileUpload={handleFileUpload}
-          handleRemoveAttachment={handleRemoveAttachment}
-          uploadProgress={uploadProgress}
-          isLoggedIn={!!currentUser}
-          handleQuickAddSubtask={handleQuickAddSubtask}
-          mentionState={mentionState}
-          handleSelectMention={handleSelectMention}
-          handleCommentChange={handleCommentChange}
-          removeTaskLink={removeTaskLink}
-          handleAddLinkedTask={handleAddLinkedTask}
-          handleRemoveLinkedTask={handleRemoveLinkedTask}
-          taskLinkTargetId={taskLinkTargetId}
-          setTaskLinkTargetId={setTaskLinkTargetId}
-          taskLinkRelation={taskLinkRelation}
-          setTaskLinkRelation={setTaskLinkRelation}
-          isAddingTaskLink={isAddingTaskLink}
-          setIsAddingTaskLink={setIsAddingTaskLink}
-          isAddingExternalLink={isAddingExternalLink}
-          setIsAddingExternalLink={setIsAddingExternalLink}
-          newExternalLinkTitle={newExternalLinkTitle}
-          setNewExternalLinkTitle={setNewExternalLinkTitle}
-          newExternalLinkUrl={newExternalLinkUrl}
-          setNewExternalLinkUrl={setNewExternalLinkUrl}
-          handleAddExternalLink={handleAddExternalLink}
-          removeExternalLink={removeExternalLink}
-          toggleBlockedStatus={toggleBlockedStatus}
-          handleSuggestStoryPoints={handleSuggestStoryPoints}
-          handleAddLink={handleAddLink}
-          newLinkTitle={newLinkTitle}
-          setNewLinkTitle={setNewLinkTitle}
-          newLinkUrl={newLinkUrl}
-          setNewLinkUrl={setNewLinkUrl}
-          isAddingLink={isAddingLink}
-          setIsAddingLink={setIsAddingLink}
-          deleteTask={deleteTask}
-        />
+
         <Modal
           isOpen={isEditProjectModalOpen}
           onClose={() => setIsEditProjectModalOpen(false)}

@@ -168,7 +168,7 @@ function createPgPool(connStr?: string): Pool {
     ssl: sslConfig,
     max: parseInt(process.env.DB_CONNECTION_LIMIT || '100', 10),
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
   });
 
   // Attach error listener to prevent unhandled background socket errors from crashing node
@@ -181,7 +181,7 @@ function createPgPool(connStr?: string): Pool {
 
 // Verify connection on startup
 pgPool.query('SELECT 1')
-  .then(() => console.log('✅ [PostgreSQL] Neon connection verified!'))
+
   .catch((err) => {
     console.warn('⚠️ [PostgreSQL] Startup check: Cannot connect to Neon PostgreSQL:', err.message);
     console.warn('   → Will retry connection dynamically on request.');
@@ -306,15 +306,15 @@ export function getDbMode(): 'pg' | 'local' {
 
 export function setDbMode(_mode: 'mysql' | 'pg' | 'local') {
   // Local mode is permanently disabled. This function is a no-op.
-  console.log('[DB] setDbMode() ignored — application is locked to Neon PostgreSQL.');
+
 }
 
 export function updatePoolConfig(config: any) {
-  console.log('🔄 [PostgreSQL] Hot-swapping connection pool...');
+
   const newConnStr = config.connectionString || connectionString;
   pgPool.end().catch(() => {});
   pgPool = createPgPool(newConnStr);
-  console.log('✅ [PostgreSQL] Pool updated.');
+
 }
 
 export default poolProxy;

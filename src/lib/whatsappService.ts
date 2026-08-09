@@ -7,7 +7,7 @@ const WA_API_TOKEN = process.env.WHATSAPP_API_TOKEN || 'TOKEN_ANDA_DISINI';
 
 export const initWhatsAppScheduler = () => {
   cron.schedule('0 7 * * *', async () => {
-    console.log('Running daily task digest scheduler...');
+    // Daily task digest scheduler triggered
     await sendDailyTaskDigest();
   });
 };
@@ -53,7 +53,7 @@ function formatMessage(name: string, tasks: any[]) {
 }
 
 async function sendToWhatsApp(phone: string, message: string) {
-  console.log(`[DEBUG] Attempting to send WhatsApp via Fonnte to ${phone}.`);
+  // Sending WhatsApp notification
   try {
     // Fonnte API expects application/x-www-form-urlencoded
     const formData = new URLSearchParams();
@@ -70,7 +70,7 @@ async function sendToWhatsApp(phone: string, message: string) {
     });
 
     const responseData = await response.json();
-    console.log(`[DEBUG] Fonnte API Response:`, responseData);
+    // WhatsApp API response received
 
     if (!responseData.status) {
         throw new Error(responseData.reason || 'Failed to send WhatsApp message');

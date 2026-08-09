@@ -364,9 +364,13 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                     {!!task.isBlocked && <ShieldAlert className="w-3.5 h-3.5 text-red-500 shrink-0 animate-pulse" />}
 
                     <span 
-                       onClick={() => { setSelectedTaskForDetail(task); setCurrentView('issueDetail'); }}
+                       onClick={() => { 
+                         setSelectedTaskForDetail(task); 
+                         setIsTaskDetailModalOpen(false); 
+                         setCurrentView('issueDetail' as any); 
+                       }}
                        className="text-[13px] font-bold text-slate-700 hover:text-blue-600 transition-colors cursor-pointer truncate max-w-[320px] block"
-                       title="Click to view details"
+                       title="Klik untuk membuka halaman detail issue"
                     >
                       {task.title || (task as any).summary || (task as any).name || ''}
                     </span>
@@ -819,7 +823,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
 
   return (
     <div className="flex-1 p-4 md:p-8 bg-[#f8fafc] overflow-hidden flex flex-col w-full h-full">
-      <div className={cn(styles.container, "rounded-[2rem] flex-1 flex flex-col")}>
+      <div className={cn(styles.container, "rounded-xl flex-1 flex flex-col")}>
       {/* Header Toolbar */}
       <div className={styles.toolbar}>
          <div className="flex items-center gap-4">

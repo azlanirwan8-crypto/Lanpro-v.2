@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { Portal } from './Portal';
 
@@ -12,9 +12,11 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-lg',
     };
     if (isOpen) {
       window.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
     }
     return () => {
       window.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 

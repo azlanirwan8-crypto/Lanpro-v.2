@@ -67,17 +67,17 @@ export const ActivityLogPanel = ({
 
       {/* Summary Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-32 relative overflow-hidden">
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-32 relative overflow-hidden">
               <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4"><Activity className="w-32 h-32" /></div>
               <div className="text-[10px] font-black tracking-[0.2em] uppercase text-slate-400 z-10 flex items-center gap-2"><Zap className="w-3.5 h-3.5" /> Total Events</div>
               <div className="text-4xl font-black text-slate-800 z-10">{activityLogs.length}</div>
           </div>
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-32 relative overflow-hidden">
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-32 relative overflow-hidden">
               <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4"><Users className="w-32 h-32" /></div>
               <div className="text-[10px] font-black tracking-[0.2em] uppercase text-slate-400 z-10 flex items-center gap-2"><Users className="w-3.5 h-3.5" /> Active Actors (24h)</div>
               <div className="text-4xl font-black text-slate-800 z-10">{activeActorsCount}</div>
           </div>
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-32 relative overflow-hidden">
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-32 relative overflow-hidden">
               <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4"><Clock className="w-32 h-32" /></div>
               <div className="text-[10px] font-black tracking-[0.2em] uppercase text-slate-400 z-10 flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> Last Event</div>
               <div className="text-xl font-bold text-slate-800 tracking-tight z-10 flex flex-col">

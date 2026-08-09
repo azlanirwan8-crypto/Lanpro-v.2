@@ -9,7 +9,8 @@
 const fallbackSecrets: Record<string, string> = {
   JWT_SECRET: '1231231231492340234wewefsfsdfsfwe534534tf5654654',
   DATABASE_URL: 'postgresql://neondb_owner:npg_GkyS5zMv7XmC@ep-dawn-shape-aulnhaw2.pooler.region.postgres.neon.tech/neondb?sslmode=require',
-  GEMINI_API_KEY: 'AIzaSyCLtjweG46C63xPMb4aL41ovCzAoGpvGRg'
+  GEMINI_API_KEY: 'AIzaSyCLtjweG46C63xPMb4aL41ovCzAoGpvGRg',
+  DB_PASSWORD: ''
 };
 
 let client: any = null;
@@ -25,10 +26,11 @@ export async function getSecret(name: string): Promise<string> {
     if (fallbackSecrets[name]) {
       return fallbackSecrets[name];
     }
+    return '';
   }
 
-  const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'lanpro-bni-project';
   try {
+    const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'lanpro-bni-project';
     if (!client) {
       const { SecretManagerServiceClient } = await import('@google-cloud/secret-manager');
       client = new SecretManagerServiceClient();
@@ -44,11 +46,11 @@ export async function getSecret(name: string): Promise<string> {
       throw new Error(`Rahasia ${name} kosong atau tidak ditemukan.`);
     }
 
-    console.log(`[SECURITY] Kunci rahasia '${name}' berhasil diambil dari Secret Manager.`);
+    // Secret retrieved successfully
     return payload;
   } catch (err) {
     console.warn(`[SECURITY] Gagal mengambil kunci '${name}' dari Vault, menggunakan fallback bawaan.`);
     if (fallbackSecrets[name]) return fallbackSecrets[name];
-    throw err;
+    return '';
   }
 }

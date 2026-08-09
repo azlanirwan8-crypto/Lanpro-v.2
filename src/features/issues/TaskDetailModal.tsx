@@ -302,58 +302,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     .sort((a,b) => (b.createdAt?.toDate?.()?.getTime() || 0) - (a.createdAt?.toDate?.()?.getTime() || 0));
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-8 overflow-hidden">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={handleSafeClose}
-          className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-        />
-        
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] w-full max-w-7xl max-h-full flex flex-col relative z-10 overflow-hidden border border-slate-200 dark:border-slate-800"
+    <>
+        <div 
+          className="w-full h-full flex flex-col relative z-10"
         >
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50 sticky top-0 z-20">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm shrink-0">
-                {(() => {
-                  const typeData = (masterData || []).find(m => m.type?.toLowerCase() === 'issue_type' && m.label?.toLowerCase() === task.type?.toLowerCase());
-                  if (typeData?.icon) return <Zap className="w-4 h-4" style={{ color: typeData.color }} />;
-                  return <CircleDot className="w-4 h-4 text-slate-400" />;
-                })()}
-                <span className="text-[11px] font-mono font-black text-slate-500 tracking-tighter uppercase">{task.key}</span>
-              </div>
-              <div className="h-4 w-px bg-slate-200 shrink-0" />
-              <div className="flex items-center gap-1.5 text-sm font-bold text-slate-400 shrink-0">
-                <Layout className="w-4 h-4" />
-                <span className="hidden sm:inline">Project</span>
-                <ChevronRight className="w-4 h-4" />
-                <span className="text-slate-900">Issue Details</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <button 
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all active:scale-95"
-                title="Share Issue"
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
-              <div className="h-6 w-px bg-slate-200 mx-1" />
-              <button 
-                onClick={handleSafeClose}
-                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-all active:scale-95"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
 
           {/* Main Content Area */}
           <div className="flex-1 overflow-auto custom-scrollbar">
@@ -1221,8 +1173,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               </div>
             </div>
           </div>
-        </motion.div>
-      </div>
+        </div>
 
       {/* Discard Unsaved Changes Confirmation Modal */}
       <ConfirmationModal
@@ -1256,6 +1207,6 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           setConfirmModalState(prev => ({ ...prev, isOpen: false }));
         }}
       />
-    </AnimatePresence>
+    </>
   );
 };

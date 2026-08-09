@@ -357,7 +357,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       };
 
       mediaRecorder.onstop = async () => {
-        console.log("Recorder stopped, processing file...");
+
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const file = new File([audioBlob], `recording-${new Date().getTime()}.webm`, { type: 'audio/webm' });
         
@@ -588,7 +588,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         console.warn("[SOCKET ERROR] Native-like meeting socket onerror caught internally:", err);
       };
       socket.onclose = () => {
-        console.log("[SOCKET] Native-like meeting socket onclose triggered.");
+
       };
 
       if (socket.io) {
@@ -604,19 +604,17 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           console.warn("[SOCKET ENGINE ERROR] Meeting engine onerror suppressed:", err);
         };
         socket.io.engine.onclose = () => {
-          console.log("[SOCKET ENGINE] Meeting engine closed.");
+
         };
       }
     } catch (err) {
       console.error("[SOCKET FATAL] Failed to initialize meeting socket safely:", err);
     }
     
-    console.log("[SOCKET] Connecting to real-time events for meeting:", meeting.id);
     
     if (socket) {
       socket.on("meeting_ai_status", (data: any) => {
         if (data.meetingId === meeting.id) {
-          console.log("[SOCKET] AI Status update:", data.status, data.progress_percentage);
           if (data.status) {
             setUploadState(data.status);
           }
@@ -628,7 +626,6 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
       socket.on("meeting_ai_completed", (data: any) => {
         if (data.meetingId === meeting.id) {
-          console.log("[SOCKET] AI Processing completed!");
           setTranscript(data.transcript || "");
           if (data.aiSummary) {
             const parsedSummary = typeof data.aiSummary === "string"

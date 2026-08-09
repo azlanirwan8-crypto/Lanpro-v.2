@@ -172,7 +172,7 @@ import { initWhatsAppScheduler, sendDailyTaskDigest } from "./src/lib/whatsappSe
 export const app = express();
 
 async function startServer() {
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3001;
 
   // ============================================
   // SECURE PASSWORD HASHING UTILITIES (v1.5 Security Audit)
@@ -1054,7 +1054,7 @@ async function startServer() {
         const { projectId, id } = req.params;
         const targetProjectId = projectId || id; 
         
-        console.log("DEBUG RBAC - User:", req.user, "ProjectID:", targetProjectId);
+        // RBAC check (debug log removed for production security)
 
         // Auto-decode JWT if authenticateJWT wasn't run before this middleware
         if (!req.user) {
@@ -4714,7 +4714,7 @@ ${aggregatedPrompt}
 
   // AI Meeting Notes Companion: Upload Recording (v1.0 Real File Upload Implementation with Background AI Pipeline and Chunking Support)
   app.post("/api/v1/meetings/:meetingId/upload-recording", upload.single('recording'), async (req, res) => {
-    console.log("DEBUG: Received upload request for meeting:", req.params.meetingId, "Body:", req.body, "File:", req.file ? req.file.path : "No file");
+    // Upload request received (debug log removed for production security)
     try {
       const { meetingId } = req.params;
       const file = req.file;
@@ -7869,7 +7869,7 @@ Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack ata
     try {
       const { projectId } = req.params;
       connection = await mysqlPool.getConnection();
-      const [rows] = await connection.query("SELECT id, projectId, title, type, link, fileName, fileType, createdBy, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC", [projectId]);
+      const [rows] = await connection.query("SELECT id, projectId, title, description, type, link, fileName, fileType, createdBy, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC", [projectId]);
       res.json({ status: "success", data: rows });
     } catch (error: any) {
       console.error(error);

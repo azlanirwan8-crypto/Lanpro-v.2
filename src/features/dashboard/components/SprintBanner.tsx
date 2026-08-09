@@ -17,7 +17,7 @@ export const SprintBanner: React.FC<SprintBannerProps> = ({
   sprintProgress,
 }) => {
   return (
-    <div className="w-full h-auto bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-700 rounded-[2rem] p-6 md:p-8 text-white relative overflow-hidden shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6 select-none">
+    <div className="w-full h-auto bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-700 rounded-xl p-6 md:p-8 text-white relative overflow-hidden shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6 select-none">
       {/* Background subtle geometric patterns */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-40 animate-pulse pointer-events-none"></div>
 

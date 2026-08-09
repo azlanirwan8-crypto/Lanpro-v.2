@@ -377,7 +377,7 @@ export const MasterDataPanel = ({
     <div className="flex-1 overflow-hidden bg-slate-50 flex flex-col w-full h-full animate-in fade-in duration-700">
         <div className="flex flex-1 gap-6 w-full h-full p-4 md:p-6">
           {/* Sidebar for Master Data Types */}
-          <div className="w-[300px] shrink-0 flex flex-col h-full bg-white border border-slate-200/80 rounded-[2rem] overflow-hidden shadow-sm">
+          <div className="w-[300px] shrink-0 flex flex-col h-full bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-sm">
             <div className="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 className="font-black text-slate-800 text-sm tracking-tight">Master Database</h3>
@@ -428,7 +428,7 @@ export const MasterDataPanel = ({
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200/80 mb-6 flex justify-between items-center shadow-sm shrink-0">
+            <div className="bg-white p-6 md:p-8 rounded-xl border border-slate-200/80 mb-6 flex justify-between items-center shadow-sm shrink-0">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">System Master</span>
@@ -465,7 +465,7 @@ export const MasterDataPanel = ({
             </div>
             
             {selectedType === 'modul_aplikasi' ? (
-                <div className="bg-white rounded-[2rem] border border-slate-200/80 shadow-sm p-6 flex-1 overflow-y-auto">
+                <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 flex-1 overflow-y-auto">
                     {loadingModules ? (
                         <div className="flex justify-center items-center h-48">
                             <span className="text-sm font-semibold text-slate-500 animate-pulse">Memuat modul aplikasi...</span>
@@ -587,7 +587,7 @@ export const MasterDataPanel = ({
                         </div>
                     )}
 
-                    <div className="bg-white rounded-[2rem] border border-slate-200/80 shadow-sm p-4 flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 flex-1 overflow-y-auto custom-scrollbar">
                     <DragDropContext 
                         onDragEnd={async (result) => {
                             if (!result.destination) return;

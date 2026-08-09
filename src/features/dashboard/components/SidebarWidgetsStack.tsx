@@ -67,7 +67,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 h-auto p-1 select-none">
       {/* My Active Tasks */}
-      <div className="bg-white shadow-sm border border-slate-200/80 rounded-[2rem] p-6">
+      <div className="bg-white shadow-sm border border-slate-200/80 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-700 flex items-center gap-2">
             <Zap className="w-4 h-4 text-indigo-500" /> My Active Tasks
@@ -132,7 +132,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
 
       {/* Blocked / Stoppers */}
       <div 
-        className="shadow-sm border rounded-[2rem] p-6"
+        className="shadow-sm border rounded-xl p-6"
         style={{
           borderColor: "rgba(239, 68, 68, 0.4)",
           backgroundColor: "rgba(254, 242, 242, 0.5)",
@@ -195,7 +195,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Needs Attention */}
-      <div className="bg-white shadow-sm border border-rose-100/80 rounded-[2rem] p-6">
+      <div className="bg-white shadow-sm border border-rose-100/80 rounded-xl p-6">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-800 flex items-center gap-2 mb-4">
           <AlertCircle className="w-4 h-4 text-rose-500 animate-pulse" /> Needs Attention
         </h3>
@@ -234,7 +234,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Due Soon */}
-      <div className="bg-white shadow-sm border border-slate-100/80 rounded-[2rem] p-6">
+      <div className="bg-white shadow-sm border border-slate-100/80 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-850 flex items-center gap-2">
             <Zap className="w-4 h-4 text-amber-500" /> Due Soon (3 Days)
@@ -293,7 +293,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Recent Meeting Notes */}
-      <div className="bg-white shadow-sm border border-slate-100/80 rounded-[2rem] p-6">
+      <div className="bg-white shadow-sm border border-slate-100/80 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-850 flex items-center gap-2">
             <Video className="w-4 h-4 text-sky-500" /> Recent Meetings
@@ -327,7 +327,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Recent Documentation */}
-      <div className="bg-white shadow-sm border border-slate-100/80 rounded-[2rem] p-6">
+      <div className="bg-white shadow-sm border border-slate-100/80 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-850 flex items-center gap-2">
             <FileText className="w-4 h-4 text-teal-500" /> Documentation
@@ -361,7 +361,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Live Activity (24h) */}
-      <div className="bg-slate-800 rounded-[2rem] p-6 shadow-lg text-white relative overflow-hidden">
+      <div className="bg-slate-800 rounded-xl p-6 shadow-lg text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 -translate-y-4 translate-x-4 opacity-10 pointer-events-none">
           <Globe className="w-32 h-32" />
         </div>

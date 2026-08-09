@@ -29,7 +29,7 @@ export const IssueTypeDropdown = ({ isOpen, onToggle, selectedType, onSelect, ma
 
   const typeData = masterData.find(d => d.type === 'issue_type' && d.label?.toLowerCase() === selectedType?.toLowerCase());
 
-  console.log('Rendering IssueTypeDropdown', { isOpen, selectedType });
+
 
   return (
     <div className="relative">

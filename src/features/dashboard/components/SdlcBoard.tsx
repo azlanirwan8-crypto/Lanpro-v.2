@@ -18,7 +18,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
   handleToggleGate,
 }) => {
   return (
-    <div className="w-full h-auto bg-slate-900 text-white rounded-[2rem] relative overflow-y-auto no-scrollbar shadow-2xl flex flex-col p-6 md:p-8 min-h-[460px]">
+    <div className="w-full h-auto bg-slate-900 text-white rounded-xl relative overflow-y-auto no-scrollbar shadow-2xl flex flex-col p-6 md:p-8 min-h-[460px]">
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-amber-400 via-transparent to-transparent pointer-events-none"></div>
       <div className="absolute -right-10 -bottom-10 opacity-5 pointer-events-none">
         <PackageOpen className="w-64 h-64 text-amber-500" />

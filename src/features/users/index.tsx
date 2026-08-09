@@ -266,7 +266,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       message: 'Apakah Anda yakin ingin mengeluarkan user dari project ini?',
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
-        console.log('Remove project assignment:', { projectId, userId });
+
         try {
           const data = await apiRequest(`/api/projects/${projectId}/members/${userId}`, {
             method: 'DELETE',
@@ -662,7 +662,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
           {/* Statistics Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
-              <div className="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
+              <div className="bg-white p-6 rounded-xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
                   <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
                       <Users className="w-6 h-6" />
                   </div>
@@ -671,7 +671,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       <div className="text-2xl font-black text-slate-800 leading-none mt-1">{totalUsersCount}</div>
                   </div>
               </div>
-              <div className="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
+              <div className="bg-white p-6 rounded-xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
                   <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
                       <CheckCircle className="w-6 h-6" />
                   </div>
@@ -680,7 +680,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       <div className="text-2xl font-black text-slate-800 leading-none mt-1">{approvedUsersCount}</div>
                   </div>
               </div>
-              <div className="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
+              <div className="bg-white p-6 rounded-xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
                   <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center">
                       <Clock className="w-6 h-6" />
                   </div>
@@ -689,7 +689,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       <div className="text-2xl font-black text-slate-800 leading-none mt-1">{pendingUsersCount}</div>
                   </div>
               </div>
-              <div className="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
+              <div className="bg-white p-6 rounded-xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
                   <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center">
                       <Shield className="w-6 h-6" />
                   </div>

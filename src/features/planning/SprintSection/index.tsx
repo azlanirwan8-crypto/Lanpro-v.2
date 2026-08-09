@@ -46,7 +46,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 
         return (
           <div key={sprint.id} className={cn(
-            "bg-white border rounded-[2rem] overflow-hidden mb-4 transition-all duration-300", 
+            "bg-white border rounded-xl overflow-hidden mb-4 transition-all duration-300", 
             sprint.status === 'active' ? (isOverdue ? "border-red-500 shadow-xl shadow-red-100/50 ring-4 ring-red-50" : "border-indigo-500 shadow-xl shadow-indigo-100/50 ring-4 ring-indigo-50") :
             sprint.status === 'planned' ? "border-slate-200 border-dashed hover:border-slate-300 shadow-sm" :
             "border-slate-200 bg-slate-50/50 opacity-90 shadow-sm",

@@ -101,7 +101,7 @@ export const BackupPanel = ({
       <div className="space-y-6 w-full mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Backup Box */}
-          <div className="bg-white border border-slate-200 rounded-[2rem] p-8 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
+          <div className="bg-white border border-slate-200 rounded-xl p-8 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
             <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
               <Download className="w-10 h-10" />
             </div>
@@ -117,7 +117,7 @@ export const BackupPanel = ({
           </div>
 
           {/* Restore Box */}
-          <div className="bg-white border border-slate-200 rounded-[2rem] p-8 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
+          <div className="bg-white border border-slate-200 rounded-xl p-8 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
             <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-6">
               <Upload className="w-10 h-10" />
             </div>

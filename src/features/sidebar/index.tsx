@@ -302,7 +302,14 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
            title="Klik untuk opsi profil & keluar"
         >
           {user?.photoURL ? (
-            <img src={user.photoURL} className="w-8 h-8 rounded-full shrink-0 border border-amber-400/50" referrerPolicy="no-referrer" />
+            <img 
+              src={user.photoURL} 
+              className="w-8 h-8 rounded-full shrink-0 border border-amber-400/50 object-cover" 
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
           ) : (
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0 border border-white/20 shadow-xs">
               {(user?.displayName || user?.email || 'U').charAt(0).toUpperCase()}

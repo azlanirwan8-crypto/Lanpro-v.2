@@ -14,7 +14,8 @@ import { toJpeg } from "html-to-image";
 import { Task, Project } from "../../types";
 import { cn } from "../../lib/utils";
 import { toast } from "sonner";
-import { motion } from "motion/react";
+import { apiRequest } from "../../lib/api";
+import { motion } from "framer-motion";
 import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
 import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { NodeContextMenu } from "./components/NodeContextMenu";
@@ -1389,6 +1390,7 @@ interface FlowchartViewProps {
   projectMembers: any[];
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (isOpen: boolean) => void;
+  currentUserProfile?: any;
 }
 
 export const FlowchartView: React.FC<FlowchartViewProps> = ({
@@ -1396,8 +1398,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   tasks,
   projectMembers,
   setSelectedTaskForDetail,
-  setIsTaskDetailModalOpen
+  setIsTaskDetailModalOpen,
+  currentUserProfile
 }) => {
+  // Get active logged in user author name dynamically
+  const getResolvedAuthor = () => {
+    if (currentUserProfile?.displayName) return currentUserProfile.displayName;
+    if (currentUserProfile?.username) return currentUserProfile.username;
+    try {
+      const saved = sessionStorage.getItem("sessionUser") || localStorage.getItem("sessionUser");
+      if (saved) {
+        const u = JSON.parse(saved);
+        return u?.displayName || u?.username || u?.email || "Administrator";
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    return "Administrator";
+  };
   // Saved Flowcharts list
   const [flowcharts, setFlowcharts] = useState<FlowchartData[]>([]);
   const [selectedFlowId, setSelectedFlowId] = useState<string | null>(null);
@@ -2499,28 +2517,71 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   // Load flowcharts list scoped by project ID on load
   useEffect(() => {
-    const listKey = `lanpro_flowcharts_${selectedProject.id}`;
+    const projId = selectedProject?.id || selectedProject?.key || 'default';
+    const listKey = `lanpro_flowcharts_${projId}`;
     const saved = localStorage.getItem(listKey);
+    let initialList: FlowchartData[] = [];
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as FlowchartData[];
-        setFlowcharts(parsed);
-        setSelectedFlowId(null);
-        setNodes([]);
-        setEdges([]);
+        initialList = JSON.parse(saved) as FlowchartData[];
       } catch (e) {
         console.error("Error parsing flowcharts list", e);
-        createDefaultInitialFlowchart([]);
       }
-    } else {
-      createDefaultInitialFlowchart([]);
     }
-  }, [selectedProject.id]);
 
-    // Init empty flowchart state
+    setFlowcharts(initialList);
+    setSelectedFlowId(null);
+    setNodes([]);
+    setEdges([]);
+
+    // Sync from backend API documents
+    if (selectedProject?.id) {
+      apiRequest(`/api/projects/${selectedProject.id}/documents`)
+        .then((res: any) => {
+          if (res?.data && Array.isArray(res.data)) {
+            const apiFlowcharts = res.data
+              .filter((doc: any) => doc.type === 'flowchart')
+              .map((doc: any) => {
+                let parsedNodes = [];
+                let parsedEdges = [];
+                try {
+                  const payload = JSON.parse(doc.description || '{}');
+                  parsedNodes = payload.nodes || [];
+                  parsedEdges = payload.edges || [];
+                } catch (e) {}
+
+                return {
+                  id: doc.id,
+                  name: doc.title,
+                  category: 'Panduan',
+                  description: doc.description,
+                  nodes: parsedNodes,
+                  edges: parsedEdges,
+                  theme: 'miro',
+                  createdAt: doc.createdAt ? new Date(doc.createdAt).toLocaleDateString('id-ID') : new Date().toLocaleDateString('id-ID'),
+                  createdBy: doc.createdBy || 'Administrator',
+                  lastEditedAt: doc.updatedAt ? new Date(doc.updatedAt).toLocaleString('id-ID') : new Date().toLocaleString('id-ID'),
+                  externalUrl: doc.link || ''
+                };
+              });
+
+            if (apiFlowcharts.length > 0) {
+              setFlowcharts(apiFlowcharts);
+              localStorage.setItem(listKey, JSON.stringify(apiFlowcharts));
+            }
+          }
+        })
+        .catch(err => {
+          console.warn("Could not sync flowcharts from backend API:", err);
+        });
+    }
+  }, [selectedProject?.id, selectedProject?.key]);
+
+  // Init empty flowchart state
   const createDefaultInitialFlowchart = (currentList: FlowchartData[]) => {
+    const projId = selectedProject?.id || selectedProject?.key || 'default';
     setFlowcharts(currentList);
-    localStorage.setItem(`lanpro_flowcharts_${selectedProject.id}`, JSON.stringify(currentList));
+    localStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(currentList));
     
     // Set active flow states to empty (not pre-selected)
     setSelectedFlowId(null);
@@ -2532,15 +2593,40 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setRightViewMode("embed");
   };
 
-  // Helper to transform Google Doc / Sheet / Slides URL to preview/embed mode
+  // Helper to transform Google Drive / Doc / Sheet / Slides / Figma / URL to interactive preview/embed mode
   const getEmbedUrl = (url?: string): string => {
     if (!url) return "";
     let trimmed = url.trim();
     
+    // Google Drive File view link (e.g. drive.google.com/file/d/XYZ/view or /edit)
+    if (trimmed.includes("drive.google.com/file/d/")) {
+      if (trimmed.includes("/view")) {
+        return trimmed.replace(/\/view.*$/, "/preview");
+      }
+      if (trimmed.includes("/edit")) {
+        return trimmed.replace(/\/edit.*$/, "/preview");
+      }
+      if (!trimmed.endsWith("/preview")) {
+        return trimmed + "/preview";
+      }
+      return trimmed;
+    }
+
+    // Google Drive Folder link (e.g. drive.google.com/drive/folders/XYZ)
+    if (trimmed.includes("drive.google.com/drive/folders/")) {
+      const folderId = trimmed.split("folders/")[1]?.split("?")[0];
+      if (folderId) {
+        return `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
+      }
+    }
+
     // Check if it's a Google Doc
     if (trimmed.includes("docs.google.com/document")) {
       if (trimmed.includes("/edit")) {
         return trimmed.split("/edit")[0] + "/preview";
+      }
+      if (!trimmed.includes("/preview")) {
+        return trimmed + "/preview";
       }
       return trimmed;
     }
@@ -2559,6 +2645,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         return trimmed.split("/edit")[0] + "/embed?start=false&loop=false&delayms=3000";
       }
       return trimmed;
+    }
+
+    // Figma URL converter
+    if (trimmed.includes("figma.com/file/") || trimmed.includes("figma.com/design/")) {
+      return `https://www.figma.com/embed?embed_host=lanpro&url=${encodeURIComponent(trimmed)}`;
     }
 
     // Return direct URL otherwise
@@ -2591,16 +2682,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   // Open creation flow modal
   const openCreateModal = () => {
-    let resolvedCreator = "Azlan Irwan";
-    try {
-      const saved = localStorage.getItem("sessionUser");
-      if (saved) {
-        const u = JSON.parse(saved);
-        resolvedCreator = u?.displayName || u?.username || u?.email || "Azlan Irwan";
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    const resolvedCreator = getResolvedAuthor();
 
     setModalMode("create");
     setFlowName("");
@@ -2621,18 +2703,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setFlowEpicId(flow.epicTaskId || "");
     setFlowDescription(flow.description || "");
     setFlowCategory(flow.category || "Panduan");
-    setFlowCreator(flow.createdBy || "Azlan Irwan");
+    setFlowCreator(flow.createdBy || getResolvedAuthor());
     setFlowExternalUrl(flow.externalUrl || "");
     setIsModalOpen(true);
   };
 
-  // Save Flowchart list & current items to LocalStorage
-  const handleSaveWorkspace = () => {
+  // Save Flowchart list & current items to LocalStorage & Backend API
+  const handleSaveWorkspace = async () => {
     if (!selectedFlowId) return;
 
+    const projId = selectedProject?.id || selectedProject?.key || 'default';
+    let targetFlowName = "";
     setFlowcharts(currentFlowcharts => {
       const updatedList = currentFlowcharts.map(f => {
         if (f.id === selectedFlowId) {
+          targetFlowName = f.name;
           return {
             ...f,
             nodes,
@@ -2643,9 +2728,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         }
         return f;
       });
-      localStorage.setItem(`lanpro_flowcharts_${selectedProject.id}`, JSON.stringify(updatedList));
+      localStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(updatedList));
       return updatedList;
     });
+
+    if (selectedProject?.id && !selectedFlowId.startsWith("flow_")) {
+      try {
+        const payload = JSON.stringify({ nodes, edges });
+        await apiRequest(`/api/projects/${selectedProject.id}/documents/${selectedFlowId}`, {
+          method: "PUT",
+          body: {
+            description: payload
+          }
+        });
+      } catch (err) {
+        console.warn("Could not sync flowchart workspace to API:", err);
+      }
+    }
+
     toast.success("Berhasil menyimpan seluruh skema alur flowchart Anda!");
   };
 
@@ -2657,10 +2757,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       isOpen: true,
       title: "Hapus Flowchart",
       message: "Apakah Anda yakin ingin menghapus dokumentasi flowchart ini secara permanen?",
-      onConfirm: () => {
+      onConfirm: async () => {
+        const projId = selectedProject?.id || selectedProject?.key || 'default';
         const remaining = flowcharts.filter(f => f.id !== id);
         setFlowcharts(remaining);
-        localStorage.setItem(`lanpro_flowcharts_${selectedProject.id}`, JSON.stringify(remaining));
+        localStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(remaining));
         
         if (selectedFlowId === id) {
           if (remaining.length > 0) {
@@ -2673,41 +2774,39 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         }
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
         toast.success("Flowchart berhasil dihapus.");
+
+        if (selectedProject?.id && !id.startsWith("flow_")) {
+          try {
+            await apiRequest(`/api/projects/${selectedProject.id}/documents/${id}`, {
+              method: "DELETE"
+            });
+          } catch (err) {
+            console.warn("Could not delete flowchart from API:", err);
+          }
+        }
       }
     });
   };
 
   // Modal Submit (Create / Edit metadata)
-  const handleModalSubmit = (e: React.FormEvent) => {
+  const handleModalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!flowName.trim()) {
       toast.error("Nama flowchart wajib diisi.");
       return;
     }
 
-    const listKey = `lanpro_flowcharts_${selectedProject.id}`;
+    const projId = selectedProject?.id || selectedProject?.key || 'default';
+    const listKey = `lanpro_flowcharts_${projId}`;
     
-    // Get active session user
-    const getSessionUser = () => {
-      try {
-        const saved = localStorage.getItem("sessionUser");
-        if (saved) {
-          const u = JSON.parse(saved);
-          return u?.displayName || u?.username || u?.email || "Azlan Irwan";
-        }
-      } catch (err) {
-        console.error(err);
-      }
-      return "Azlan Irwan";
-    };
-    const currentAuthor = getSessionUser();
+    const currentAuthor = getResolvedAuthor();
     const currentTimestamp = new Date().toLocaleString("id-ID");
 
     if (modalMode === "create") {
       const newId = "flow_" + Date.now();
       const newFlow: FlowchartData = {
         id: newId,
-        name: flowName,
+        name: flowName.trim(),
         category: flowCategory,
         epicTaskId: flowEpicId,
         description: flowDescription,
@@ -2722,20 +2821,43 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         externalUrl: flowExternalUrl
       };
 
-      const updated = [...flowcharts, newFlow];
+      const updated = [newFlow, ...flowcharts];
       setFlowcharts(updated);
       localStorage.setItem(listKey, JSON.stringify(updated));
-      handleSelectFlowchart(newId, updated);
-      setIsEditorActive(true);
+      setSelectedFlowId(null);
+      setNodes([]);
+      setEdges([]);
+      setIsEditorActive(false);
+      setCurrentPage(1);
+      setSearchQuery("");
       setIsModalOpen(false);
       toast.success(`Berhasil membuat flowchart: ${flowName}`);
+
+      // Async sync with backend API
+      if (selectedProject?.id) {
+        try {
+          const payload = JSON.stringify({ nodes: newFlow.nodes, edges: newFlow.edges });
+          await apiRequest(`/api/projects/${selectedProject.id}/documents`, {
+            method: "POST",
+            body: {
+              title: newFlow.name,
+              description: payload,
+              type: "flowchart",
+              link: newFlow.externalUrl || null,
+              createdBy: newFlow.createdBy
+            }
+          });
+        } catch (apiErr) {
+          console.warn("API sync error (saved locally):", apiErr);
+        }
+      }
     } else {
       // Edit
       const updated = flowcharts.map(f => {
         if (f.id === editingFlowId) {
           return {
             ...f,
-            name: flowName,
+            name: flowName.trim(),
             category: flowCategory,
             epicTaskId: flowEpicId,
             description: flowDescription,
@@ -2750,9 +2872,25 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setFlowcharts(updated);
       localStorage.setItem(listKey, JSON.stringify(updated));
       toast.success("Dokumentasi berhasil diperbarui!");
-    }
+      setIsModalOpen(false);
 
-    setIsModalOpen(false);
+      if (selectedProject?.id && editingFlowId && !editingFlowId.startsWith("flow_")) {
+        try {
+          const foundFlow = updated.find(f => f.id === editingFlowId);
+          const payload = JSON.stringify({ nodes: foundFlow?.nodes || [], edges: foundFlow?.edges || [] });
+          await apiRequest(`/api/projects/${selectedProject.id}/documents/${editingFlowId}`, {
+            method: "PUT",
+            body: {
+              title: flowName.trim(),
+              description: payload,
+              link: flowExternalUrl || null
+            }
+          });
+        } catch (apiErr) {
+          console.warn("API sync error:", apiErr);
+        }
+      }
+    }
   };
 
   // Floating Actions node parameters updates
@@ -3917,32 +4055,50 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             <div className="flex-1 overflow-x-auto overflow-y-auto m-6 bg-white rounded-lg border border-slate-200/60 shadow-xs">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50/50 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    <th className="py-4 px-5 w-16 text-center">No</th>
-                    <th className="py-4 px-5">Flowchart Title</th>
-                    <th className="py-4 px-5 w-40">Category</th>
-                    <th className="py-4 px-5 w-48">Author</th>
-                    <th className="py-4 px-5 w-36">Last Updated</th>
-                    <th className="py-4 px-5 w-32 text-center">Action</th>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <th className="py-3.5 px-4 w-14 text-center">No</th>
+                    <th className="py-3.5 px-4 min-w-[180px]">Flowchart Title</th>
+                    <th className="py-3.5 px-4 w-32">Category</th>
+                    <th className="py-3.5 px-4 min-w-[220px]">Deskripsi</th>
+                    <th className="py-3.5 px-4 min-w-[180px]">Task Terkait</th>
+                    <th className="py-3.5 px-4 w-40">Author</th>
+                    <th className="py-3.5 px-4 w-36">Last Updated</th>
+                    <th className="py-3.5 px-4 w-28 text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
                   {currentItems.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-20 text-slate-400">
+                      <td colSpan={8} className="text-center py-20 text-slate-400">
                         <div className="w-14 h-14 rounded-lg bg-indigo-50/60 border border-indigo-100 flex items-center justify-center mx-auto mb-3 shadow-2xs">
                           <Workflow className="w-6 h-6 text-indigo-500" />
                         </div>
                         <p className="font-bold text-slate-800 text-sm">No flowcharts found</p>
-                        <p className="text-xs text-slate-400 mt-1">Create a new flowchart or adjust your search keyword.</p>
+                        <p className="text-xs text-slate-400 mt-1 mb-4">Create a new flowchart or adjust your search keyword.</p>
+                        <button
+                          onClick={openCreateModal}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-bold transition-all shadow-sm shadow-indigo-200 cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4" /> Add Flowchart
+                        </button>
                       </td>
                     </tr>
                   ) : (
                     currentItems.map((fw, index) => {
                       const srNo = (currentPage - 1) * itemsPerPage + index + 1;
-                      const createdBy = fw.createdBy || "Administrator";
-                      const lastEditedAt = fw.lastEditedAt || fw.createdAt ? new Date(fw.lastEditedAt || fw.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' }) : "-";
+                      const activeAuthor = getResolvedAuthor();
+                      const rawAuthor = fw.createdBy;
+                      const createdBy = (!rawAuthor || rawAuthor === "Azlan Irwan") ? activeAuthor : rawAuthor;
+                      const formatDateSafe = (dateVal?: string) => {
+                        if (!dateVal) return "-";
+                        if (dateVal.includes(",") || dateVal.includes("/")) return dateVal;
+                        const d = new Date(dateVal);
+                        if (isNaN(d.getTime())) return dateVal;
+                        return d.toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' });
+                      };
+                      const lastEditedAt = formatDateSafe(fw.lastEditedAt || fw.createdAt);
                       const initials = getInitials(createdBy);
+                      const linkedEpic = tasks.find(t => t.id === fw.epicTaskId);
 
                       return (
                         <tr 
@@ -3951,39 +4107,44 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             handleSelectFlowchart(fw.id);
                             setIsEditorActive(true);
                           }}
-                          className="hover:bg-slate-50/60 transition-colors duration-200 group cursor-pointer"
+                          className="hover:bg-slate-50/70 transition-colors duration-200 group cursor-pointer h-14 whitespace-nowrap"
                         >
-                          <td className="py-4 px-5 text-center text-slate-400 font-bold">
+                          <td className="py-3 px-4 text-center text-slate-400 font-bold whitespace-nowrap">
                             {String(srNo).padStart(2, "0")}
                           </td>
-                          <td className="py-4 px-5 font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                            <div className="line-clamp-1">{fw.name}</div>
-                            {fw.description ? (
-                              <div className="text-slate-400 font-normal text-[11px] line-clamp-1 mt-0.5">
-                                {fw.description}
-                              </div>
-                            ) : (
-                              <div className="text-slate-300 italic text-[11px] mt-0.5">No description</div>
-                            )}
+                          <td className="py-3 px-4 font-bold text-slate-900 group-hover:text-indigo-600 transition-colors max-w-[220px] truncate whitespace-nowrap">
+                            {fw.name}
                           </td>
-                          <td className="py-4 px-5">
-                            <span className="inline-block whitespace-nowrap px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold rounded-lg uppercase">
-                              {fw.category || "Architecture"}
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <span className="inline-block px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold rounded-lg uppercase">
+                              {fw.category || "Panduan"}
                             </span>
                           </td>
-                          <td className="py-4 px-5 text-slate-700 font-semibold">
+                          <td className="py-3 px-4 text-slate-500 font-medium max-w-[260px] truncate whitespace-nowrap">
+                            {fw.description ? fw.description : <span className="text-slate-300 italic">No description</span>}
+                          </td>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            {linkedEpic ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-violet-50 text-violet-700 border border-violet-200 text-[10px] font-extrabold rounded-lg max-w-[180px] truncate" title={linkedEpic.title}>
+                                🎯 {linkedEpic.title}
+                              </span>
+                            ) : (
+                              <span className="text-slate-300 font-normal text-xs">-</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-slate-700 font-semibold whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold shrink-0">
                                 {initials}
                               </div>
-                              <span className="truncate">{createdBy}</span>
+                              <span className="truncate max-w-[120px]">{createdBy}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-5 text-slate-500 font-medium">
+                          <td className="py-3 px-4 text-slate-500 font-medium whitespace-nowrap">
                             {lastEditedAt}
                           </td>
-                          <td className="py-4 px-5 text-center" onClick={(e) => e.stopPropagation()}>
-                            <div className="inline-flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <td className="py-3 px-4 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                            <div className="inline-flex items-center justify-center gap-1.5">
                               <button
                                 onClick={() => {
                                   handleSelectFlowchart(fw.id);
@@ -4046,162 +4207,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     );
   };
 
-  if (!isEditorActive) {
-    return renderDashboard();
-  }
-
   return (
-    <div className="flex-1 flex h-full min-h-0 bg-[#f4f7f9] p-3 md:p-6 gap-6 font-sans overflow-hidden">
+    <div className="flex-1 flex flex-col h-full min-h-0 w-full overflow-hidden relative">
+      {!isEditorActive ? (
+        renderDashboard()
+      ) : (
+        <div className="flex-1 flex h-full min-h-0 bg-[#f4f7f9] p-3 md:p-6 gap-6 font-sans overflow-hidden">
       
-      {/* SISI KIRI: SIDEBAR DAFTAR DOKUMEN / LIST */}
-      <div className="w-full md:w-[320px] lg:w-[360px] shrink-0 border border-slate-200/80 rounded-2xl bg-white flex flex-col min-h-0 shadow-sm">
-        {/* Sidebar Head */}
-        <div className="p-5 border-b border-slate-100 flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-base font-black text-slate-800 tracking-tight flex items-center gap-2">
-              <Workflow className="w-4 h-4 text-violet-600 animate-pulse" />
-              Dokumentasi
-            </h3>
-            <button 
-              onClick={openCreateModal} 
-              className="p-1.5 bg-violet-50 hover:bg-violet-100 text-violet-600 rounded-lg transition-colors border border-violet-150" 
-              title="Tambah Dokumen Baru"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-          </div>
-          {/* Search bar */}
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Cari PRD, Panduan..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:bg-white focus:border-violet-500 transition-all placeholder:font-medium placeholder:text-slate-400"
-            />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          </div>
-        </div>
-
-        {/* Scrollable Document List */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1.5 custom-scrollbar">
-          {filteredFlowcharts.length === 0 ? (
-            <div className="text-center py-10 px-6 mt-4">
-              <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-100">
-                <FileText className="w-5 h-5 text-slate-400" />
-              </div>
-              <h4 className="text-xs font-bold text-slate-700 mb-1">Dokumen Kosong</h4>
-              <p className="text-[11px] text-slate-500 font-medium mb-4">Mulai kelola dokumen PRD dan panduan.</p>
-              <button 
-                onClick={openCreateModal} 
-                className="text-[11px] font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 px-4 py-2 rounded-lg transition-colors border border-violet-150"
-              >
-                + Tambah Dokumen
-              </button>
-            </div>
-          ) : (
-            filteredFlowcharts.map((fw) => {
-              const lastEdited = fw.lastEditedAt || fw.createdAt || "Baru saja";
-              const linkedEpic = tasks.find(t => t.id === fw.epicTaskId);
-              
-              // Select icon based on category
-              const renderCategoryIcon = (category?: string) => {
-                if (category === "PRD") return <FileText className="w-4 h-4 text-slate-600" />;
-                if (category === "Panduan") return <BookOpen className="w-4 h-4 text-blue-600" />;
-                if (category === "Laporan") return <Activity className="w-4 h-4 text-emerald-600" />;
-                return <Workflow className="w-4 h-4 text-violet-600" />;
-              };
-
-              return (
-                <div 
-                  key={fw.id} 
-                  onClick={() => handleSelectFlowchart(fw.id)}
-                  className={cn(
-                    "p-3 rounded-xl border transition-all cursor-pointer flex gap-3 items-start relative group/item",
-                    selectedFlowId === fw.id 
-                      ? "bg-blue-50/70 border-blue-200/70 text-slate-900 shadow-sm" 
-                      : "border-transparent hover:bg-slate-50 text-slate-700"
-                  )}
-                >
-                  <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5",
-                    selectedFlowId === fw.id 
-                      ? "bg-blue-600 text-white shadow-sm" 
-                      : "bg-slate-100 text-slate-500 border border-slate-200"
-                  )}>
-                    {renderCategoryIcon(fw.category)}
-                  </div>
-                  <div className="flex-1 min-w-0 pr-12">
-                    <h4 className={cn(
-                      "text-[13px] font-bold line-clamp-1 leading-snug",
-                      selectedFlowId === fw.id ? "text-blue-950 font-black" : "text-slate-850"
-                    )}>
-                      {fw.name}
-                    </h4>
-                    {fw.description && (
-                      <p className="text-[10px] text-slate-400 font-medium line-clamp-1 mt-0.5">
-                        {fw.description}
-                      </p>
-                    )}
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
-                      {/* Category Badge */}
-                      {fw.category === "PRD" && (
-                        <span className="text-[9px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-md">
-                          PRD
-                        </span>
-                      )}
-                      {fw.category === "Panduan" && (
-                        <span className="text-[9px] font-bold text-blue-700 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-md">
-                          Panduan
-                        </span>
-                      )}
-                      {fw.category === "Laporan" && (
-                        <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-md">
-                          Laporan
-                        </span>
-                      )}
-                      
-                      <span className="text-[9px] font-medium text-slate-400">
-                        {lastEdited}
-                      </span>
-                      {fw.externalUrl && (
-                        <span className="text-[9px] text-indigo-600 bg-indigo-50 border border-indigo-100 px-1 py-0.5 rounded flex items-center gap-0.5" title="Tersambung ke Google Docs / Tautan Eksternal">
-                          <ExternalLink className="w-2.5 h-2.5" /> Link
-                        </span>
-                      )}
-                      {linkedEpic && (
-                        <span className="text-[9px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-md truncate max-w-[100px]" title={linkedEpic.title}>
-                          🎯 {linkedEpic.title}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions (Sunting / Hapus) - visible on hover */}
-                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center gap-1">
-                    <button 
-                      onClick={(e) => openEditModal(fw, e)}
-                      className="p-1 text-slate-400 hover:text-violet-600 hover:bg-slate-100 rounded"
-                      title="Edit metadata dokumen"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                    <button 
-                      onClick={(e) => handleDeleteFlowchart(fw.id, e)}
-                      className="p-1 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded"
-                      title="Hapus dokumen"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      {/* SISI KANAN: VIEW-PORT UTAMA (DASHBOARD DENGAN EMBED VIEWER & TOGGLE KANVAS) */}
+      {/* VIEW-PORT UTAMA (DASHBOARD DENGAN EMBED VIEWER & TOGGLE KANVAS) */}
       <div className="flex-1 flex flex-col min-h-0 bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden relative">
         {!selectedFlowId ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50/30">
@@ -4225,7 +4238,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               <div className="space-y-1.5 flex-1 min-w-0">
                 <div className="mb-2">
                   <button
-                    onClick={() => setIsEditorActive(false)}
+                    onClick={() => {
+                      setIsEditorActive(false);
+                      setSelectedFlowId(null);
+                      setCurrentPage(1);
+                    }}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
                   >
                     ← Kembali ke Daftar Flowchart
@@ -6141,14 +6158,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             )}
 
           </div>
-
-          </div>
-        )}
-      </div>
-
-      </div>
-    )}
+        </div>
+      )}
+    </div>
   </div>
+)}
+</div>
+</div>
+)}
 
       {/* DETAILED POPUP DIALOG: MULTI-FORMAT DIAGRAM IMPORT (Draw.io, Miro, JSON) */}
       {isImportModalOpen && (

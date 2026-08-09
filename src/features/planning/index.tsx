@@ -17,7 +17,7 @@ import { BacklogSection } from './BacklogSection';
 import { SprintSection } from './SprintSection';
 
 export const PlanningView: React.FC<PlanningViewProps> = (props) => {
-  console.log('PlanningView props:', props);
+
   const {
     tasks,
     sprints,
@@ -49,7 +49,11 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
             className="outline-none"
           >
             <div
-              onClick={() => { setSelectedTaskForDetail(task); setIsTaskDetailModalOpen(true); }}
+              onClick={() => { 
+                setSelectedTaskForDetail(task); 
+                setIsTaskDetailModalOpen(false); 
+                useAppStore.getState().setCurrentView('issueDetail' as any); 
+              }}
               className={cn(
                 "transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] select-none",
                 variant === 'card' ? 
@@ -143,7 +147,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
     <div className="flex-1 overflow-hidden bg-[#f8fafc] flex flex-col pt-8 px-8 pb-0 h-screen">
       <DragDropContext onDragEnd={handleDragEndPlanning}>
         <div className="flex flex-1 gap-8 w-full h-full pb-8">
-          <div className="w-[450px] shrink-0 flex flex-col h-full bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+          <div className="w-[450px] shrink-0 flex flex-col h-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <Droppable droppableId="backlog">
               {(provided: any) => (
                   <div {...provided.droppableProps} ref={provided.innerRef} className="h-full flex flex-col">
@@ -154,7 +158,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
             </Droppable>
           </div>
           <div className="flex-1 flex flex-col h-full overflow-hidden">
-            <div className="bg-white p-6 rounded-[2rem] border border-slate-200 mb-6 flex justify-between items-center shadow-sm shrink-0">
+            <div className="bg-white p-6 rounded-xl border border-slate-200 mb-6 flex justify-between items-center shadow-sm shrink-0">
               <div>
                 <h2 className="text-[22px] font-black text-slate-800 tracking-tight">Sprint Planning</h2>
                 <p className="text-[13px] font-bold text-slate-400 mt-1">Manage your project timeline and task allocation</p>

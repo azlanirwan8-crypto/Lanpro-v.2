@@ -102,7 +102,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
         console.warn("[SOCKET ERROR] Native-like enterprise socket onerror caught internally:", err);
       };
       socket.onclose = () => {
-        console.log("[SOCKET] Native-like enterprise socket onclose triggered.");
+
       };
 
       if (socket.io) {
@@ -118,7 +118,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
           console.warn("[SOCKET ENGINE ERROR] Enterprise engine onerror suppressed:", err);
         };
         socket.io.engine.onclose = () => {
-          console.log("[SOCKET ENGINE] Enterprise engine closed.");
+
         };
       }
     } catch (err) {

@@ -90,7 +90,7 @@ export const PresenceProvider: React.FC<{
   };
 
   const reconnectPresence = async () => {
-    console.log('[PRESENCE] Reconnecting presence...');
+
     const activeUser = currentUserRef.current;
     // Emit socket join if possible
     if (socket && socket.connected && activeUser) {

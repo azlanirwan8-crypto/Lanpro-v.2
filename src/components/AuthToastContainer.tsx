@@ -103,7 +103,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           message: payload?.message || 'Akun Anda belum aktif, silakan hubungi admin.',
           actionLabel: 'Lihat Instruksi Aktivasi',
           onAction: onActivationClick || (() => {
-            console.log("Default activation instruction triggered");
+
           }),
           duration: 10000 // Show warning longer since it contains actionable buttons
         });
