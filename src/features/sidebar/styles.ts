@@ -1,0 +1,22 @@
+export const styles = {
+  aside: "fixed inset-y-0 left-0 z-40 transform md:translate-x-0 md:static bg-[#405189] border-r border-[#364574] flex flex-col transition-all duration-300 text-[#abb9e8] select-none",
+  asideMobileOpen: "translate-x-0 shadow-2xl",
+  asideMobileClosed: "-translate-x-full",
+  asideCollapsed: "md:w-20",
+  asideExpanded: "md:w-64",
+  collapseButton: "hidden md:absolute md:flex -right-3 top-6 bg-[#364574] border border-[#4a5c96] rounded-full p-1 text-slate-200 hover:text-white shadow-md z-10 hover:scale-110 transition-transform cursor-pointer",
+  logoWrapper: "p-5 flex items-center shrink-0 border-b border-[#364574]/70",
+  logoIcon: "w-8 h-8 bg-gradient-to-tr from-indigo-500 via-blue-500 to-cyan-400 rounded-md flex items-center justify-center shrink-0 shadow-md",
+  logoText: "font-bold text-2xl tracking-widest text-white uppercase font-sans",
+  nav: "flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar py-3",
+  sectionLabelWrapper: "flex items-center justify-between mb-1.5 px-3 mt-5 group",
+  sectionLabel: "text-[11px] font-semibold text-[#878a99] uppercase tracking-wider",
+  newButton: "p-1 text-xs text-[#abb9e8] hover:text-white hover:bg-white/10 rounded transition-all flex items-center gap-1",
+  projectButton: "w-full flex items-center py-2 rounded-md transition-all text-sm",
+  projectButtonSelected: "bg-[#364574] text-white font-semibold shadow-sm border-l-3 border-amber-400",
+  projectButtonDefault: "text-[#abb9e8] hover:bg-white/5 hover:text-white",
+  indicator: "w-2 h-2 rounded-full shrink-0",
+  demoWrapper: "px-2 py-4",
+  demoButton: "w-full flex items-center justify-between gap-2 p-3 rounded-xl border border-blue-400/20 bg-white/5 text-blue-200 hover:bg-white/10 hover:text-white transition-all shadow-sm",
+};
+

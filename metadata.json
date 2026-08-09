@@ -1,0 +1,6 @@
+{
+  "name": "LanPro",
+  "description": "Platform manajemen SDLC kelas profesional untuk keunggulan teknis teknik.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

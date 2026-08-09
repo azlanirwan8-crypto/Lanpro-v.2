@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      (function() {
+        var createMemoryStorage = function() {
+          var store = {};
+          return {
+            getItem: function(key) { return store[key] !== undefined ? store[key] : null; },
+            setItem: function(key, value) { store[key] = String(value); },
+            removeItem: function(key) { delete store[key]; },
+            clear: function() { store = {}; },
+            key: function(index) { return Object.keys(store)[index] || null; },
+            get length() { return Object.keys(store).length; }
+          };
+        };
+
+        var storageOk = false;
+        try {
+          if (window.localStorage) {
+            window.localStorage.setItem('__storage_test', '1');
+            window.localStorage.removeItem('__storage_test');
+            storageOk = true;
+          }
+        } catch (e) {
+          console.warn("localStorage is blocked, applying memory storage polyfill:", e);
+        }
+
+        if (!storageOk) {
+          try {
+            var mockLS = createMemoryStorage();
+            var mockSS = createMemoryStorage();
+            
+            Object.defineProperty(window, 'localStorage', {
+              value: mockLS,
+              configurable: true,
+              enumerable: true,
+              writable: true
+            });
+            Object.defineProperty(window, 'sessionStorage', {
+              value: mockSS,
+              configurable: true,
+              enumerable: true,
+              writable: true
+            });
+          } catch (e1) {
+            console.warn("Failed to define storage on window directly, trying prototype:", e1);
+            try {
+              Object.defineProperty(Window.prototype, 'localStorage', {
+                get: function() { return this.__mockLS || (this.__mockLS = createMemoryStorage()); },
+                configurable: true,
+                enumerable: true
+              });
+              Object.defineProperty(Window.prototype, 'sessionStorage', {
+                get: function() { return this.__mockSS || (this.__mockSS = createMemoryStorage()); },
+                configurable: true,
+                enumerable: true
+              });
+            } catch (e2) {
+              console.error("Critical: Could not polyfill storage:", e2);
+            }
+          }
+        }
+      })();
+    </script>
+    <script>
+      (function() {
+        window.addEventListener('error', function(event) {
+          // Suppress benign resize observer errors and extension script errors
+          if (event.message && (
+            event.message.indexOf("ResizeObserver") !== -1 ||
+            event.message.indexOf("Script error") !== -1 ||
+            event.message.indexOf("Extension") !== -1
+          )) {
+            return;
+          }
+          showErrorBanner("Kesalahan Global Terdeteksi", event.error || event.message);
+        });
+        window.addEventListener('unhandledrejection', function(event) {
+          console.warn("Penolakan Janji Tidak Ditangani (Tersemat):", event.reason);
+        });
+
+        function showErrorBanner(title, error) {
+          console.error("Early error logger:", title, error);
+          var container = document.getElementById('early-error-container');
+          if (!container) {
+            container = document.createElement('div');
+            container.id = 'early-error-container';
+            container.style.position = 'fixed';
+            container.style.inset = '0';
+            container.style.zIndex = '999999';
+            container.style.display = 'flex';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'center';
+            container.style.padding = '16px';
+            container.style.background = 'rgba(15, 23, 42, 0.75)';
+            container.style.backdropFilter = 'blur(8px)';
+            container.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+            
+            var card = document.createElement('div');
+            card.style.background = '#ffffff';
+            card.style.color = '#0f172a';
+            card.style.width = '100%';
+            card.style.maxWidth = '500px';
+            card.style.borderRadius = '16px';
+            card.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+            card.style.border = '1px solid #e2e8f0';
+            card.style.overflow = 'hidden';
+            
+            var header = document.createElement('div');
+            header.style.background = '#fef2f2';
+            header.style.borderBottom = '1px solid #fee2e2';
+            header.style.padding = '20px';
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.gap = '12px';
+            
+            var icon = document.createElement('div');
+            icon.style.background = '#fee2e2';
+            icon.style.color = '#ef4444';
+            icon.style.width = '40px';
+            icon.style.height = '40px';
+            icon.style.borderRadius = '10px';
+            icon.style.display = 'flex';
+            icon.style.alignItems = 'center';
+            icon.style.justifyContent = 'center';
+            icon.style.fontSize = '20px';
+            icon.innerHTML = '⚠️';
+            
+            var titleEl = document.createElement('h2');
+            titleEl.style.margin = '0';
+            titleEl.style.fontSize = '17px';
+            titleEl.style.fontWeight = '700';
+            titleEl.style.color = '#991b1b';
+            titleEl.innerText = title;
+            
+            header.appendChild(icon);
+            header.appendChild(titleEl);
+            card.appendChild(header);
+            
+            var body = document.createElement('div');
+            body.style.padding = '20px';
+            
+            var msg = document.createElement('p');
+            msg.style.margin = '0 0 12px 0';
+            msg.style.fontSize = '14px';
+            msg.style.lineHeight = '1.5';
+            msg.style.fontWeight = '600';
+            msg.style.color = '#0f172a';
+            msg.innerText = error ? error.toString() : 'Terjadi kesalahan yang tidak diketahui.';
+            body.appendChild(msg);
+            
+            if (error && error.stack) {
+              var stack = document.createElement('pre');
+              stack.style.margin = '0';
+              stack.style.padding = '12px';
+              stack.style.background = '#f8fafc';
+              stack.style.border = '1px solid #e2e8f0';
+              stack.style.borderRadius = '8px';
+              stack.style.fontSize = '11px';
+              stack.style.fontFamily = 'monospace';
+              stack.style.overflow = 'auto';
+              stack.style.maxHeight = '180px';
+              stack.style.color = '#475569';
+              stack.style.whiteSpace = 'pre-wrap';
+              stack.innerText = error.stack;
+              body.appendChild(stack);
+            }
+            
+            var actions = document.createElement('div');
+            actions.style.marginTop = '20px';
+            actions.style.display = 'flex';
+            actions.style.gap = '8px';
+            
+            var reloadBtn = document.createElement('button');
+            reloadBtn.style.flex = '1';
+            reloadBtn.style.padding = '10px 16px';
+            reloadBtn.style.background = '#ef4444';
+            reloadBtn.style.color = '#ffffff';
+            reloadBtn.style.border = 'none';
+            reloadBtn.style.borderRadius = '8px';
+            reloadBtn.style.fontSize = '13px';
+            reloadBtn.style.fontWeight = '600';
+            reloadBtn.style.cursor = 'pointer';
+            reloadBtn.innerText = 'Segarkan Cache & Muat Ulang';
+            reloadBtn.onclick = function() {
+              localStorage.clear();
+              sessionStorage.clear();
+              window.location.reload();
+            };
+            
+            actions.appendChild(reloadBtn);
+            body.appendChild(actions);
+            card.appendChild(body);
+            container.appendChild(card);
+            
+            var appendToBody = function() {
+              if (document.body) {
+                document.body.appendChild(container);
+              } else {
+                setTimeout(appendToBody, 50);
+              }
+            };
+            appendToBody();
+          }
+        }
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>LanPro App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

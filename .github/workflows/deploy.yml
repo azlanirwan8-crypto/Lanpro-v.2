@@ -1,0 +1,95 @@
+name: LanPro v1.5 CI/CD Pipeline (BNI Compliance Edition)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # 1. Tahap Audit & Quality Control
+  test-and-scan:
+    name: Pengujian & Pemindaian Keamanan (SAST)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Kode
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instal Dependensi
+        run: npm install
+
+      - name: Validasi Kode (Lint & Type Check)
+        run: npm run lint
+
+      - name: Menjalankan Stress Test Concurrency (Jest)
+        run: npm test src/tests/concurrency.test.ts
+        env:
+          # Secret dipanggil hanya saat dibutuhkan oleh test runner
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+      - name: Pemindaian Rahasia (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 2. Tahap Artifact Creation
+  build-and-push:
+    name: Artefak Build (Docker)
+    needs: test-and-scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Kode
+        uses: actions/checkout@v4
+
+      - name: Login ke Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/lanpro-app:${{ github.sha }}
+
+  # 3. Tahap Deployment dengan Approval Gate (Segregation of Duties - SoD)
+  deploy:
+    name: Deployment ke Produksi (Approval Required)
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    # Kepatuhan BNI: Menggunakan Environment Produksi untuk memaksa jeda persetujuan manual (Required Reviewers)
+    environment: 
+      name: Production
+      url: https://lanpro-bni-internal.bank
+    steps:
+      - name: Eksekusi SSH ke Server Produksi
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          script: |
+            echo "[DEVSECOP] Mengautentikasi rilis versi: ${{ github.sha }}"
+            cd /opt/lanpro
+            
+            # Update tag image di docker-compose
+            sed -i 's/lanpro-app:.*/lanpro-app:${{ github.sha }}/g' docker-compose.yml
+            
+            docker-compose pull
+            
+            # Rolling update: Update kontainer tanpa menghentikan layanan (Zero Downtime)
+            docker-compose up -d --no-deps lanpro-backend
+            
+            # Pembersihan cache Docker lama
+            docker system prune -f
+            
+            echo "[BNI-AUDIT] Rilis versi ${{ github.sha }} telah disebarkan dengan persetujuan manajerial."

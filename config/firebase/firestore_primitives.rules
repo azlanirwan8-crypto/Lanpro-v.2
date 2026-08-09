@@ -1,0 +1,15 @@
+// Phase 3: Primitive Definition
+
+function isSignedIn() { return request.auth != null; }
+
+function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+function isEmailVerified() { return request.auth.token.email_verified == true; }
+
+function incoming() { return request.resource.data; }
+
+function existing() { return resource.data; }
+
+// Auth tokens NEVER contain custom claims. Look up roles using get() on a trusted database document.
+function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+

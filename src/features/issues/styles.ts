@@ -1,0 +1,17 @@
+export const styles = {
+  container: "flex flex-col bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm font-sans relative flex-1 min-h-[500px] overflow-hidden",
+  toolbar: "flex items-center justify-between px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/30 shrink-0",
+  searchWrapper: "relative group",
+  searchInput: "pl-9 pr-4 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 w-64 placeholder:font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all",
+  filterPill: "px-2 py-0.5 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900 rounded-md text-[10px] font-black uppercase tracking-tighter",
+  filterPillAmber: "px-2 py-0.5 bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900 rounded-md text-[10px] font-black uppercase tracking-tighter",
+  tableWrapper: "overflow-auto w-full custom-scrollbar relative flex-1 min-h-0 max-h-[calc(100vh-220px)]",
+  table: "w-full text-left border-collapse flex-none",
+  tableHeader: "bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 shadow-[0_1px_0_rgba(0,0,0,0.05)]",
+  tableHeaderCell: "group relative px-4 py-2.5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider border-r border-slate-100 dark:border-slate-800",
+  tableRow: "group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-all duration-200 cursor-default border-b border-slate-100 dark:border-slate-800",
+  selectedTableRow: "bg-blue-50/30 dark:bg-blue-950/30",
+  inlineAddRow: "bg-white dark:bg-slate-900 group/inline-add animate-in fade-in slide-in-from-top-1 duration-200 relative overflow-visible",
+  inlineAddBorderedCell: "p-0 border-r border-slate-100/50 dark:border-slate-800 relative border-y-2 border-blue-500",
+  inlineAddInput: "w-full bg-transparent border-none text-[11px] font-bold text-slate-800 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:ring-0 outline-none",
+};

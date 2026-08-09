@@ -1,0 +1,138 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- GLOBAL HELPERS ---
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        getUserData().role == 'admin' || 
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function getProject(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)).data;
+    }
+
+    function isProjectMember(projectId) {
+      let project = getProject(projectId);
+      return isSignedIn() && (request.auth.uid in project.memberRoles || request.auth.uid == project.ownerId);
+    }
+
+    function isProjectManager(projectId) {
+      let project = getProject(projectId);
+      let role = project.memberRoles[request.auth.uid];
+      return isSignedIn() && (role == 'manager' || role == 'admin' || request.auth.uid == project.ownerId || isAdmin());
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- DEFAULT DENY ---
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- USERS ---
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId && 
+                    !incoming().diff(existing()).affectedKeys().hasAny(['role', 'permissions']);
+      allow delete: if isAdmin();
+    }
+
+    // --- PROJECTS ---
+    match /projects/{projectId} {
+      allow read: if isProjectMember(projectId);
+      allow create: if isSignedIn();
+      allow update: if isProjectManager(projectId);
+      allow delete: if isAdmin() || (isSignedIn() && existing().ownerId == request.auth.uid);
+
+      // --- TASKS ---
+      match /tasks/{taskId} {
+        function isValidTask(data) {
+          return data.keys().hasAll(['title', 'status', 'priority', 'projectId', 'reporterId']) &&
+                 data.title is string && data.title.size() <= 500 &&
+                 data.status is string && 
+                 data.priority is string &&
+                 data.projectId == projectId &&
+                 data.reporterId is string;
+        }
+
+        function isTaskOwner(data) {
+          return data.reporterId == request.auth.uid || data.assigneeId == request.auth.uid;
+        }
+
+        allow read: if isProjectMember(projectId);
+        allow create: if isProjectMember(projectId) && isValidTask(incoming()) && incoming().reporterId == request.auth.uid;
+        allow update: if isProjectManager(projectId) || (isProjectMember(projectId) && isTaskOwner(existing()) && isValidTask(incoming()));
+        allow delete: if isProjectManager(projectId) || (isProjectMember(projectId) && isTaskOwner(existing()));
+
+        // --- COMMENTS ---
+        match /comments/{commentId} {
+          allow read: if isProjectMember(projectId);
+          allow create: if isProjectMember(projectId) && incoming().authorId == request.auth.uid;
+          allow update, delete: if isProjectManager(projectId) || (isSignedIn() && existing().authorId == request.auth.uid);
+        }
+      }
+
+      // --- MEETINGS ---
+      match /meetings/{meetingId} {
+        allow read: if isProjectMember(projectId);
+        allow create: if isProjectMember(projectId);
+        allow update, delete: if isProjectManager(projectId);
+
+        // --- DISCUSSION POINTS ---
+        match /discussionPoints/{pointId} {
+          function isValidPoint(data) {
+             return data.keys().hasAll(['concern', 'status', 'projectId', 'meetingId', 'authorId']) &&
+                    data.concern is string && data.concern.size() <= 2000 &&
+                    data.projectId == projectId &&
+                    data.meetingId == meetingId &&
+                    data.authorId is string;
+          }
+
+          allow read: if isProjectMember(projectId);
+          allow create: if isProjectMember(projectId) && isValidPoint(incoming()) && incoming().authorId == request.auth.uid;
+          allow update: if isProjectManager(projectId) || (isProjectMember(projectId) && existing().authorId == request.auth.uid && isValidPoint(incoming()));
+          allow delete: if isProjectManager(projectId) || (isProjectMember(projectId) && existing().authorId == request.auth.uid);
+        }
+      }
+
+      // --- SPRINT / ACTIVITY LOGS ---
+      match /sprints/{sprintId} {
+        allow read: if isProjectMember(projectId);
+        allow write: if isProjectManager(projectId);
+      }
+      match /activityLogs/{logId} {
+        allow read: if isProjectMember(projectId);
+        allow create: if isProjectMember(projectId);
+      }
+    }
+
+    // --- GLOBAL MASTER DATA ---
+    match /globalMasterData/{dataId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

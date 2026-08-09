@@ -1,0 +1,1 @@
+sed -i -e "s/app.delete(\\\"\/api\/projects\/:projectId\/tasks\/:id\\\", authenticateJWT, verifyProjectAccess(\['admin', 'manager', 'head'\]), async (req, res) => {/app.delete(\\\"\/api\/projects\/:projectId\/tasks\/:id\\\", authenticateJWT, verifyProjectAccess(['admin', 'manager', 'head', 'developer', 'member']), async (req, res) => {/g" server.ts
