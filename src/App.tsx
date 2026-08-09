@@ -33,6 +33,7 @@ import { WikiView } from "./features/wiki";
 import { NotebookLM } from "./features/notebooklm";
 import { DashboardView } from "./features/dashboard";
 import { IssueListView, TaskDetailModal } from "./features/issues";
+import { UserDetailView } from "./features/users/UserDetailView";
 import { PlanningView } from "./features/planning";
 import { BoardView } from "./features/Kanban";
 import { Sidebar } from "./features/sidebar";
@@ -2204,6 +2205,14 @@ function App() {
   const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
   const [selectedTaskForDetail, setSelectedTaskForDetail] =
     useState<Task | null>(null);
+  const [selectedUserForDetail, setSelectedUserForDetail] = useState<UserProfile | null>(null);
+
+  const handleSetIsTaskDetailModalOpen = (open: boolean) => {
+    setIsTaskDetailModalOpen(open);
+    if (open) {
+      setCurrentView('issueDetail' as any);
+    }
+  };
 
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
 
@@ -2477,7 +2486,7 @@ function App() {
       });
       
       if (data.status !== 'success') {
-         toast.error(data.message);
+         handleAuthApiResponse(401, data);
          setIsAuthLoading(false);
          return;
       }
@@ -5304,6 +5313,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         currentUser={currentUser}
         user={user}
         setIsProfileModalOpen={setIsProfileModalOpen}
+        onOpenProfile={() => {
+          setSelectedUserForDetail(currentUserProfile || currentUser || user);
+          setCurrentView('userDetail' as any);
+        }}
         handleLogout={handleLogoutRequest}
       />
 
@@ -5330,7 +5343,103 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <div className="absolute inset-0 bg-[#f8fafc]/50 backdrop-blur-3xl z-[-1]" />
 
-        {currentView === "users" ? (
+        {currentView === "issueDetail" ? (
+          <div className="flex-1 flex flex-col h-full bg-[#f8fafc] overflow-y-auto">
+            <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setCurrentView('list')}
+                  className="p-2 bg-slate-100 hover:bg-indigo-600 hover:text-white rounded-xl text-slate-700 transition-all flex items-center gap-2 text-xs font-bold cursor-pointer shadow-2xs"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Kembali ke Issue List</span>
+                </button>
+                <div className="h-5 w-px bg-slate-200" />
+                <div className="flex flex-col">
+                  <span className="text-xs font-black text-indigo-600 tracking-wider uppercase">
+                    {selectedTaskForDetail?.key || 'ISSUE-DETAIL'}
+                  </span>
+                  <h1 className="text-base font-black text-slate-800 tracking-tight truncate max-w-xl">
+                    {selectedTaskForDetail?.title || 'Detail Issue'}
+                  </h1>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 max-w-7xl mx-auto w-full flex-1">
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden p-4">
+                <TaskDetailModal
+                  projectRole={
+                    selectedProject && currentUser?.uid
+                      ? selectedProject.memberRoles?.[currentUser.uid]
+                      : undefined
+                  }
+                  isUpdatingTask={isUpdatingTask}
+                  isOpen={true}
+                  onClose={() => setCurrentView('list')}
+                  task={selectedTaskForDetail}
+                  tasks={tasks || []}
+                  projectMembers={projectMembers || []}
+                  masterData={masterData || []}
+                  userRole={effectiveRole}
+                  user={currentUser}
+                  currentUserProfile={currentUserProfile!}
+                  sprints={sprints || []}
+                  updateTaskField={updateTaskField}
+                  hasPermission={hasPermission}
+                  activityLogs={activityLogs || []}
+                  comments={comments || []}
+                  newCommentText={newCommentText}
+                  setNewCommentText={setNewCommentText}
+                  handleAddComment={handleAddComment}
+                  handleFileUpload={handleFileUpload}
+                  handleRemoveAttachment={handleRemoveAttachment}
+                  uploadProgress={uploadProgress}
+                  isLoggedIn={!!currentUser}
+                  handleQuickAddSubtask={handleQuickAddSubtask}
+                  mentionState={mentionState}
+                  handleSelectMention={handleSelectMention}
+                  handleCommentChange={handleCommentChange}
+                  removeTaskLink={removeTaskLink}
+                  handleAddLinkedTask={handleAddLinkedTask}
+                  handleRemoveLinkedTask={handleRemoveLinkedTask}
+                  taskLinkTargetId={taskLinkTargetId}
+                  setTaskLinkTargetId={setTaskLinkTargetId}
+                  taskLinkRelation={taskLinkRelation}
+                  setTaskLinkRelation={setTaskLinkRelation}
+                  isAddingTaskLink={isAddingTaskLink}
+                  setIsAddingTaskLink={setIsAddingTaskLink}
+                  isAddingExternalLink={isAddingExternalLink}
+                  setIsAddingExternalLink={setIsAddingExternalLink}
+                  newExternalLinkTitle={newExternalLinkTitle}
+                  setNewExternalLinkTitle={setNewExternalLinkTitle}
+                  newExternalLinkUrl={newExternalLinkUrl}
+                  setNewExternalLinkUrl={setNewExternalLinkUrl}
+                  handleAddExternalLink={handleAddExternalLink}
+                  removeExternalLink={removeExternalLink}
+                  toggleBlockedStatus={toggleBlockedStatus}
+                  handleSuggestStoryPoints={handleSuggestStoryPoints}
+                  handleAddLink={handleAddLink}
+                  newLinkTitle={newLinkTitle}
+                  setNewLinkTitle={setNewLinkTitle}
+                  newLinkUrl={newLinkUrl}
+                  setNewLinkUrl={setNewLinkUrl}
+                  isAddingLink={isAddingLink}
+                  setIsAddingLink={setIsAddingLink}
+                  deleteTask={deleteTask}
+                />
+              </div>
+            </div>
+          </div>
+        ) : currentView === "userDetail" ? (
+          <UserDetailView
+            user={selectedUserForDetail}
+            onBack={() => setCurrentView('users')}
+            projects={projects}
+            tasks={tasks}
+            departments={masterData.filter(m => m.type === 'department')}
+            positions={masterData.filter(m => m.type === 'position')}
+          />
+        ) : currentView === "users" ? (
           <AdminUserPanel
             projects={projects}
             tasks={tasks}
@@ -5339,6 +5448,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
             currentUserId={currentUser?.uid || user?.uid}
             onAddUser={() => {}}
             onRefreshProjects={fetchProjects}
+            onSelectUserForDetail={(u) => {
+              setSelectedUserForDetail(u);
+              setCurrentView('userDetail' as any);
+            }}
           />
         ) : currentView === "master" ? (
           <MasterDataPanel
@@ -5708,7 +5821,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   <MeetingNotes
                     projectId={selectedProject.id}
                     userRole={effectiveRole}
-                    currentUser={currentUser}
+                    currentUser={currentUserProfile || currentUser}
                     projectMembers={projectMembers}
                     masterData={masterData || []}
                     permissions={currentUserProfile?.permissions}

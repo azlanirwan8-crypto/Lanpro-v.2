@@ -833,7 +833,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           className="w-4 h-4 rounded text-indigo-650 border-slate-300 focus:ring-indigo-500 cursor-pointer"
                         />
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-6 cursor-pointer" onClick={() => { if (props.onSelectUserForDetail) props.onSelectUserForDetail(user); }}>
                         <div className="flex items-center gap-4">
                           <UserAvatar user={user} className="w-10 h-10 text-base" />
                           <div>
@@ -918,11 +918,15 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => {
-                            setActiveTab('overview');
-                            openEditModal(user);
+                            if (props.onSelectUserForDetail) {
+                              props.onSelectUserForDetail(user);
+                            } else {
+                              setActiveTab('overview');
+                              openEditModal(user);
+                            }
                           }}
                           className="p-2 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-200/80 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer font-bold flex items-center justify-center gap-1"
-                          title="Detail & Kelola Pengguna"
+                          title="Detail Pengguna"
                         >
                           <UserCog className="w-4 h-4 shrink-0" />
                         </button>

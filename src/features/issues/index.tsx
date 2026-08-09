@@ -25,7 +25,7 @@ import { styles } from './styles';
 import { ConfigureColumnsModal } from './ConfigureColumnsModal';
 
 export const IssueListView: React.FC<IssueListViewProps> = (props) => {
-  const { density } = useAppStore();
+  const { density, setCurrentView } = useAppStore();
   const isCompact = density === 'compact';
   const {
     projectRole,
@@ -364,7 +364,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                     {!!task.isBlocked && <ShieldAlert className="w-3.5 h-3.5 text-red-500 shrink-0 animate-pulse" />}
 
                     <span 
-                       onClick={() => { setSelectedTaskForDetail(task); setIsTaskDetailModalOpen(true); }}
+                       onClick={() => { setSelectedTaskForDetail(task); setCurrentView('issueDetail'); }}
                        className="text-[13px] font-bold text-slate-700 hover:text-blue-600 transition-colors cursor-pointer truncate max-w-[320px] block"
                        title="Click to view details"
                     >
@@ -665,7 +665,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedTaskForDetail(task);
-                              setIsTaskDetailModalOpen(true);
+                              setCurrentView('issueDetail');
                               setActiveContextMenuTaskId(null);
                             }}
                             className="w-full text-left px-3 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"

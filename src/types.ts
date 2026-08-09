@@ -228,8 +228,11 @@ export interface DiscussionPointComment {
   pointId: string;
   userId?: string;
   userName?: string;
+  user_name?: string;
   commentText: string;
+  comment_text?: string;
   createdAt: string;
+  created_at?: string;
 }
 
 export interface AppNotification {
@@ -258,4 +261,7 @@ export interface Meeting {
   recording_url?: string;
   file_size?: number;
   upload_status?: string;
+  fileData?: string | null;
+  fileName?: string | null;
+  fileType?: string | null;
 }

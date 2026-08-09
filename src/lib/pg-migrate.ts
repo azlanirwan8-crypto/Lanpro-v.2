@@ -347,12 +347,34 @@ export async function runMigrations(pool: Pool): Promise<void> {
     // ── DiscussionPoints ─────────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "DiscussionPoints" (
-        id          VARCHAR(36) PRIMARY KEY,
-        "meetingId" VARCHAR(36) NOT NULL,
-        content     TEXT NOT NULL,
-        "authorId"  VARCHAR(36),
-        "createdAt" TIMESTAMP DEFAULT NOW()
+        id                    VARCHAR(36) PRIMARY KEY,
+        "meetingId"           VARCHAR(36) NOT NULL,
+        content               TEXT DEFAULT '',
+        "parentPointId"       VARCHAR(36),
+        "authorId"            VARCHAR(36),
+        "assignTo"            VARCHAR(36),
+        concern               TEXT,
+        fitur                 VARCHAR(255),
+        "system"              VARCHAR(255),
+        surrounding           VARCHAR(255),
+        keterangan            TEXT,
+        "tindakanLanjut"      TEXT,
+        status                VARCHAR(50) DEFAULT 'pending',
+        "targetDate"          VARCHAR(50),
+        "tanggalUpdateStatus" VARCHAR(50),
+        "createdAt"           TIMESTAMP DEFAULT NOW()
       );
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "parentPointId" VARCHAR(36);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "assignTo" VARCHAR(36);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "concern" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "fitur" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "system" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "surrounding" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "keterangan" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "tindakanLanjut" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "status" VARCHAR(50) DEFAULT 'pending';
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "targetDate" VARCHAR(50);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "tanggalUpdateStatus" VARCHAR(50);
     `);
 
     // ── meeting_details ──────────────────────────────────────────────────────

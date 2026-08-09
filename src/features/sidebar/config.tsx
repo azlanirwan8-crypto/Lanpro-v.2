@@ -30,7 +30,7 @@ export interface SidebarSectionConfig {
 export const sidebarSections: SidebarSectionConfig[] = [
   {
     id: 'menu',
-    title: 'MENU',
+    title: 'Menu',
     items: [
       { 
         id: 'dashboard', 
@@ -41,44 +41,8 @@ export const sidebarSections: SidebarSectionConfig[] = [
     ]
   },
   {
-    id: 'projects',
-    title: 'MANAJEMEN PROYEK',
-    items: [
-      { 
-        id: 'list', 
-        label: 'Issue List', 
-        icon: <ListTodo className="w-4 h-4" />, 
-        module: 'list' 
-      },
-      { 
-        id: 'sprints', 
-        label: 'Planning & Sprints', 
-        icon: <Target className="w-4 h-4" />, 
-        module: 'sprints' 
-      },
-      { 
-        id: 'board', 
-        label: 'Kanban Board', 
-        icon: <Trello className="w-4 h-4" />, 
-        module: 'board' 
-      },
-      { 
-        id: 'qa', 
-        label: 'QA Testing', 
-        icon: <Beaker className="w-4 h-4" />, 
-        module: 'qa' 
-      },
-      { 
-        id: 'timeline', 
-        label: 'Roadmap & Timeline', 
-        icon: <Clock className="w-4 h-4" />, 
-        module: 'timeline' 
-      }
-    ]
-  },
-  {
     id: 'collaboration',
-    title: 'KOLABORASI & AI',
+    title: 'Collaboration',
     items: [
       { 
         id: 'meetingNotes', 
@@ -88,7 +52,7 @@ export const sidebarSections: SidebarSectionConfig[] = [
       },
       { 
         id: 'wiki', 
-        label: 'Dokumentasi', 
+        label: 'Documentation', 
         icon: <Book className="w-4 h-4" />, 
         module: 'wiki' 
       },
@@ -111,15 +75,51 @@ export const sidebarSections: SidebarSectionConfig[] = [
     ]
   },
   {
-    id: 'system',
-    title: 'ADMINISTRASI & SISTEM',
+    id: 'projects',
+    title: 'Management Project',
     items: [
       { 
-        id: 'access', 
-        label: 'Team & Users', 
+        id: 'list', 
+        label: 'Issue List', 
+        icon: <ListTodo className="w-4 h-4" />, 
+        module: 'list' 
+      },
+      { 
+        id: 'sprints', 
+        label: 'Planning & Sprint', 
+        icon: <Target className="w-4 h-4" />, 
+        module: 'sprints' 
+      },
+      { 
+        id: 'board', 
+        label: 'Kanban board', 
+        icon: <Trello className="w-4 h-4" />, 
+        module: 'board' 
+      },
+      { 
+        id: 'qa', 
+        label: 'Quality Assessment', 
+        icon: <Beaker className="w-4 h-4" />, 
+        module: 'qa' 
+      },
+      { 
+        id: 'timeline', 
+        label: 'Roadmap & Timeline', 
+        icon: <Clock className="w-4 h-4" />, 
+        module: 'timeline' 
+      },
+      { 
+        id: 'team', 
+        label: 'Team', 
         icon: <Users className="w-4 h-4" />, 
         module: 'access' 
-      },
+      }
+    ]
+  },
+  {
+    id: 'administration',
+    title: 'Administration',
+    items: [
       { 
         id: 'master', 
         label: 'Master Data', 
@@ -128,7 +128,7 @@ export const sidebarSections: SidebarSectionConfig[] = [
       },
       { 
         id: 'users', 
-        label: 'User Management', 
+        label: 'User management', 
         icon: <UserCog className="w-4 h-4" />, 
         module: 'userManagement' 
       },
@@ -140,17 +140,18 @@ export const sidebarSections: SidebarSectionConfig[] = [
       },
       { 
         id: 'dbExplorer', 
-        label: 'DB Explorer', 
+        label: 'DB EXplorer', 
         icon: <Database className="w-4 h-4" />, 
         module: 'dbExplorer' 
       },
       { 
         id: 'settingsIntegration', 
-        label: 'Settings Integration', 
+        label: 'Setting integration', 
         icon: <Settings2 className="w-4 h-4" />, 
         module: 'settings' 
       }
     ]
   }
 ];
+
 

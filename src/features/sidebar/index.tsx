@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  ChevronRight, ChevronLeft, ChevronDown, Kanban, Plus, LogOut 
+  ChevronRight, ChevronLeft, ChevronDown, Kanban, Plus, LogOut, User 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -27,11 +27,13 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
     currentUser,
     user,
     setIsProfileModalOpen,
+    onOpenProfile,
     handleLogout
   } = props;
 
   const { canCreateProject } = useSidebar(props);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const toggleExpand = (itemId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -263,20 +265,41 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
       </nav>
 
       {/* Velzon Bottom User Profile Footer */}
-      <div className="p-3 border-t border-[#364574] bg-[#364574]/40 mt-auto">
+      <div className="p-3 border-t border-[#364574] bg-[#364574]/40 mt-auto relative">
+        {isUserMenuOpen && (
+          <div className="absolute bottom-full left-3 right-3 mb-2 bg-[#2a3447] border border-[#364574] rounded-xl shadow-2xl py-1.5 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
+            <button
+              onClick={() => {
+                setIsUserMenuOpen(false);
+                if (onOpenProfile) onOpenProfile();
+              }}
+              className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-white/10 flex items-center gap-2.5 transition-colors text-slate-200 hover:text-white cursor-pointer"
+            >
+              <User className="w-4 h-4 text-amber-400" />
+              <span>Profil Anda</span>
+            </button>
+            <div className="h-px bg-[#364574] my-1" />
+            <button
+              onClick={() => {
+                setIsUserMenuOpen(false);
+                handleLogout();
+              }}
+              className="w-full text-left px-4 py-2.5 text-xs font-semibold hover:bg-red-500/20 flex items-center gap-2.5 transition-colors text-red-400 hover:text-red-300 cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Keluar</span>
+            </button>
+          </div>
+        )}
+
         <motion.div 
            whileHover={{ scale: 1.01 }}
-           onClick={() => {
-              if(currentUser && currentUser.uid !== 'admin') {
-                 setIsProfileModalOpen(true);
-              } else {
-                 toast.error('Akun local admin tidak memiliki profil untuk diedit.');
-              }
-           }}
+           onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
            className={cn(
              "flex items-center p-2 rounded-lg hover:bg-white/10 transition-all cursor-pointer group",
              isSidebarCollapsed ? 'justify-center' : 'gap-3'
            )}
+           title="Klik untuk opsi profil & keluar"
         >
           {user?.photoURL ? (
             <img src={user.photoURL} className="w-8 h-8 rounded-full shrink-0 border border-amber-400/50" referrerPolicy="no-referrer" />
@@ -291,15 +314,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 <div className="text-xs font-semibold text-white truncate">{user?.displayName || currentUser?.displayName || currentUser?.username || 'User'}</div>
                 <div className="text-[10px] text-[#878a99] truncate font-mono">{currentUser?.username || 'admin'}</div>
               </div>
-              <motion.button 
-                whileHover={{ scale: 1.15 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => { e.stopPropagation(); handleLogout(); }} 
-                className="text-slate-300 hover:text-red-400 transition-colors p-1" 
-                title="Logout"
-              >
-                <LogOut className="w-4 h-4" />
-              </motion.button>
+              <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform duration-200", isUserMenuOpen && "rotate-180")} />
             </>
           )}
         </motion.div>
@@ -307,11 +322,11 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
           <motion.button 
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={handleLogout} 
-            className="w-full mt-2 flex justify-center p-2 text-slate-300 hover:text-red-400 transition-colors" 
-            title="Logout"
+            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            className="w-full mt-2 flex justify-center p-2 text-slate-300 hover:text-white transition-colors" 
+            title="Opsi Profil"
           >
-            <LogOut className="w-4 h-4" />
+            <User className="w-4 h-4" />
           </motion.button>
         )}
       </div>

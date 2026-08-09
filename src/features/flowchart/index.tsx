@@ -2726,7 +2726,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setFlowcharts(updated);
       localStorage.setItem(listKey, JSON.stringify(updated));
       handleSelectFlowchart(newId, updated);
-      toast.success(`Berhasil membuat dokumen: ${flowName}`);
+      setIsEditorActive(true);
+      setIsModalOpen(false);
+      toast.success(`Berhasil membuat flowchart: ${flowName}`);
     } else {
       // Edit
       const updated = flowcharts.map(f => {
@@ -3870,322 +3872,183 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   const renderDashboard = () => {
     return (
-      <div className="flex-1 flex flex-col gap-6 p-3 md:p-6 font-sans overflow-y-auto w-full animate-in fade-in duration-700">
-        {/* Dashboard Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-              <Workflow className="w-7 h-7 text-violet-600" /> Flowchart Editor Dashboard
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={openCreateModal}
-              className="flex items-center gap-2 bg-gradient-to-tr from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white p-3 px-5 rounded-xl shadow-md hover:shadow-lg font-extrabold text-xs transition-all active:scale-95"
-            >
-              <Plus className="w-4 h-4" /> Create New Flowchart
-            </button>
-          </div>
-        </div>
-
-        {/* Filters and Search Bar Row */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-          {/* Search bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Cari flowchart berdasarkan nama atau deskripsi..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1); // reset to page 1 on search
-              }}
-              className="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-slate-950 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 transition-all"
-            />
-          </div>
-
-          {/* Quick Stats & Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="text-[11px] text-slate-500 font-bold bg-slate-100 p-2 px-3 rounded-xl border border-slate-200 shrink-0">
-              Total: <span className="text-slate-900 font-extrabold">{totalItems} Diagram</span>
+      <div className="flex-1 flex flex-col p-3 md:p-6 font-sans overflow-y-auto w-full bg-[#f4f7f9] animate-in fade-in duration-700">
+        <div className="flex-1 flex flex-col bg-white border border-slate-200/80 rounded-lg shadow-sm overflow-hidden">
+          {/* Dashboard Header matching Meeting Notes */}
+          <div className="p-6 md:p-7 border-b border-slate-200/80 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-600 shadow-2xs">
+                <Workflow className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 tracking-tight">Flowchart Editor</h3>
+                <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                  Manage interactive diagrams, process flows, and visual architecture.
+                </p>
+              </div>
             </div>
 
-            {/* Sorting Selection */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider shrink-0">Urutkan:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="text-xs bg-slate-50 border border-slate-200 p-2 px-3 rounded-xl text-slate-700 font-bold focus:outline-none focus:ring-1 focus:ring-violet-500 focus:bg-white cursor-pointer transition-all"
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-72">
+                <input
+                  type="text"
+                  placeholder="Search flowcharts by title..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50/60 border border-slate-200/80 rounded-lg text-xs placeholder:text-slate-400 outline-none focus:bg-white focus:ring-1 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all text-slate-700 font-semibold shadow-2xs"
+                />
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+
+              <button
+                onClick={openCreateModal}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-bold transition-all shadow-sm shadow-indigo-200 cursor-pointer shrink-0"
               >
-                <option value="lastEditedAt">Edit Terakhir</option>
-                <option value="name">Nama (A-Z)</option>
-                <option value="createdAt">Tanggal Dibuat</option>
-              </select>
+                <Plus className="w-4 h-4" /> Add Flowchart
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* Data Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left font-sans text-xs">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200/80 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  <th className="p-4 px-6">ID Flowchart</th>
-                  <th className="p-4">Nama Flowchart & Deskripsi</th>
-                  <th className="p-4">Dibuat Oleh</th>
-                  <th className="p-4">Edit Terakhir</th>
-                  <th className="p-4">Milestone / Epic</th>
-                  <th className="p-4 px-6 text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {currentItems.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-12 text-center text-slate-400">
-                      <div className="flex flex-col items-center justify-center gap-3">
-                        <div className="p-4 bg-slate-50 text-slate-300 rounded-full border border-dashed border-slate-200">
-                          <Workflow className="w-10 h-10" />
-                        </div>
-                        <div>
-                          <p className="font-extrabold text-slate-700 text-sm">Tidak Ada Flowchart Ditemukan</p>
-                          <p className="text-[11px] text-slate-400 font-semibold mt-1">
-                            {searchQuery ? "Ubah kata kunci pencarian Anda" : "Silakan buat flowchart pertama Anda untuk memulai visualisasi alur."}
-                          </p>
-                        </div>
-                        {!searchQuery && (
-                          <button
-                            onClick={openCreateModal}
-                            className="mt-2 flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white font-extrabold p-2 px-4 rounded-lg text-[10px] shadow-sm transition-all active:scale-95"
-                          >
-                            <Plus className="w-3.5 h-3.5" /> Buat Diagram Baru
-                          </button>
-                        )}
-                      </div>
-                    </td>
+          <div className="flex-1 flex flex-col min-h-0 bg-white">
+            {/* Data Table */}
+            <div className="flex-1 overflow-x-auto overflow-y-auto m-6 bg-white rounded-lg border border-slate-200/60 shadow-xs">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <th className="py-4 px-5 w-16 text-center">No</th>
+                    <th className="py-4 px-5">Flowchart Title</th>
+                    <th className="py-4 px-5 w-40">Category</th>
+                    <th className="py-4 px-5 w-48">Author</th>
+                    <th className="py-4 px-5 w-36">Last Updated</th>
+                    <th className="py-4 px-5 w-32 text-center">Action</th>
                   </tr>
-                ) : (
-                  currentItems.map((fw) => {
-                    const formattedId = "LPRO-FC-" + fw.id.replace("flow_", "").replace("default_", "").slice(-4).toUpperCase();
-                    const createdBy = fw.createdBy || "Sistem LanPro";
-                    const lastEditedAt = fw.lastEditedAt || fw.createdAt || "Baru saja";
-                    const linkedEpic = tasks.find(t => t.id === fw.epicTaskId);
-                    const initials = getInitials(createdBy);
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                  {currentItems.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-20 text-slate-400">
+                        <div className="w-14 h-14 rounded-lg bg-indigo-50/60 border border-indigo-100 flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                          <Workflow className="w-6 h-6 text-indigo-500" />
+                        </div>
+                        <p className="font-bold text-slate-800 text-sm">No flowcharts found</p>
+                        <p className="text-xs text-slate-400 mt-1">Create a new flowchart or adjust your search keyword.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    currentItems.map((fw, index) => {
+                      const srNo = (currentPage - 1) * itemsPerPage + index + 1;
+                      const createdBy = fw.createdBy || "Administrator";
+                      const lastEditedAt = fw.lastEditedAt || fw.createdAt ? new Date(fw.lastEditedAt || fw.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' }) : "-";
+                      const initials = getInitials(createdBy);
 
-                    return (
-                      <tr 
-                        key={fw.id} 
-                        onClick={() => {
-                          handleSelectFlowchart(fw.id);
-                          setIsEditorActive(true);
-                        }}
-                        className="hover:bg-violet-50/20 transition-all cursor-pointer group/tr"
-                      >
-                        {/* ID Flowchart */}
-                        <td className="p-4 px-6">
-                          <span className="font-mono font-bold text-violet-600 bg-violet-50 border border-violet-100 px-2.5 py-1 rounded-lg text-[11px] group-hover/tr:bg-violet-100 group-hover/tr:text-violet-700 transition-colors">
-                            {formattedId}
-                          </span>
-                        </td>
-
-                        {/* Nama Flowchart & Deskripsi */}
-                        <td className="p-4 max-w-sm">
-                          <div>
-                            <span className="font-extrabold text-slate-900 group-hover/tr:text-violet-700 transition-colors text-sm block">
-                              {fw.name}
-                            </span>
+                      return (
+                        <tr 
+                          key={fw.id} 
+                          onClick={() => {
+                            handleSelectFlowchart(fw.id);
+                            setIsEditorActive(true);
+                          }}
+                          className="hover:bg-slate-50/60 transition-colors duration-200 group cursor-pointer"
+                        >
+                          <td className="py-4 px-5 text-center text-slate-400 font-bold">
+                            {String(srNo).padStart(2, "0")}
+                          </td>
+                          <td className="py-4 px-5 font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                            <div className="line-clamp-1">{fw.name}</div>
                             {fw.description ? (
-                              <span className="text-slate-400 font-medium text-[11px] line-clamp-2 mt-0.5 leading-relaxed">
+                              <div className="text-slate-400 font-normal text-[11px] line-clamp-1 mt-0.5">
                                 {fw.description}
-                              </span>
+                              </div>
                             ) : (
-                              <span className="text-slate-300 italic text-[11px] mt-0.5 block">Tidak ada deskripsi arsitektur.</span>
+                              <div className="text-slate-300 italic text-[11px] mt-0.5">No description</div>
                             )}
-                          </div>
-                        </td>
-
-                        {/* Dibuat Oleh */}
-                        <td className="p-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-violet-500 to-indigo-500 flex items-center justify-center text-white text-[10px] font-black border border-white shadow-sm shrink-0">
-                              {initials}
+                          </td>
+                          <td className="py-4 px-5">
+                            <span className="inline-block whitespace-nowrap px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold rounded-lg uppercase">
+                              {fw.category || "Architecture"}
+                            </span>
+                          </td>
+                          <td className="py-4 px-5 text-slate-700 font-semibold">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                {initials}
+                              </div>
+                              <span className="truncate">{createdBy}</span>
                             </div>
-                            <span className="font-bold text-slate-800">{createdBy}</span>
-                          </div>
-                        </td>
+                          </td>
+                          <td className="py-4 px-5 text-slate-500 font-medium">
+                            {lastEditedAt}
+                          </td>
+                          <td className="py-4 px-5 text-center" onClick={(e) => e.stopPropagation()}>
+                            <div className="inline-flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => {
+                                  handleSelectFlowchart(fw.id);
+                                  setIsEditorActive(true);
+                                }}
+                                className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all cursor-pointer"
+                                title="View flowchart canvas"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
 
-                        {/* Edit Terakhir */}
-                        <td className="p-4">
-                          <div className="flex items-center gap-1.5 text-slate-600">
-                            <span className="text-[11px] font-bold">{lastEditedAt}</span>
-                          </div>
-                        </td>
-
-                        {/* Hubungan Epic */}
-                        <td className="p-4">
-                          {linkedEpic ? (
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-[10px] text-indigo-700 bg-indigo-50 border border-indigo-100 p-1 px-2.5 rounded-full inline-block max-w-[140px] truncate" title={linkedEpic.title}>
-                                🎯 [{linkedEpic.key}] {linkedEpic.title}
-                              </span>
+                              <button
+                                onClick={(e) => handleDeleteFlowchart(fw.id, e)}
+                                className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                                title="Delete flowchart"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
-                          ) : (
-                            <span className="text-slate-300 font-mono text-[11px]">—</span>
-                          )}
-                        </td>
-
-                        {/* Aksi */}
-                        <td className="p-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-2.5">
-                            {/* Buka Editor (Lihat Detail) */}
-                            <button
-                              onClick={() => {
-                                handleSelectFlowchart(fw.id);
-                                setIsEditorActive(true);
-                              }}
-                              className="p-1.5 px-3 bg-violet-600 hover:bg-violet-500 text-white rounded-lg font-bold text-[11px] shadow-sm flex items-center gap-1 transition-all active:scale-95"
-                              title="Buka kanvas interaktif"
-                            >
-                              <ExternalLink className="w-3 h-3" /> Lihat Detail
-                                            {/* Edit Nama/Metadata */}
-                            <button
-                              onClick={(e) => openEditModal(fw, e)}
-                              className="p-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-200/80 rounded-lg shadow-xs transition-all active:scale-95 cursor-pointer font-bold flex items-center justify-center"
-                              title="Sunting metadata diagram"
-                            >
-                              <Edit3 className="w-3.5 h-3.5 shrink-0" />
-                            </button>
-
-                            {/* Hapus */}
-                            <button
-                              onClick={(e) => handleDeleteFlowchart(fw.id, e)}
-                              className="p-1.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-lg shadow-xs transition-all active:scale-95 cursor-pointer font-bold flex items-center justify-center"
-                              title="Hapus flowchart"
-                            >
-                              <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                            </button>                 </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination Footer */}
-          {totalItems > 0 && (
-            <div className="bg-slate-50 border-t border-slate-150 p-4 px-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-slate-500 font-sans">
-              <div className="flex flex-wrap items-center gap-4">
-                <span className="text-[11px] font-bold">
-                  Menampilkan <span className="text-slate-900 font-black">{Math.min(totalItems, indexOfFirstItem + 1)}</span> sampai{" "}
-                  <span className="text-slate-900 font-black">{Math.min(totalItems, indexOfLastItem)}</span> dari{" "}
-                  <span className="text-slate-900 font-black">{totalItems}</span> diagram flowchart
-                </span>
-
-                <div className="flex items-center gap-1.5 border-l border-slate-200 pl-4">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Per Halaman:</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                      setItemsPerPage(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                    className="text-[11px] bg-white border border-slate-200 p-1 px-2.5 rounded-lg text-slate-700 font-bold focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer transition-all shadow-sm"
-                  >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="p-1.5 px-3 border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 rounded-lg text-slate-700 font-bold disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-200 transition-all text-[11px] flex items-center gap-1 cursor-pointer"
-                >
-                  Sebelumnya
-                </button>
-                
-                <div className="flex items-center gap-1">
-                  {/* First Page button if not in view */}
-                  {totalPages > 5 && !getPageNumbers().includes(1) && (
-                    <>
-                      <button
-                        onClick={() => handlePageChange(1)}
-                        className={cn(
-                          "w-7 h-7 rounded-lg text-xs font-black transition-all",
-                          currentPage === 1
-                            ? "bg-violet-600 text-white shadow-sm"
-                            : "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
-                        )}
-                      >
-                        1
-                      </button>
-                      {getPageNumbers()[0] > 2 && (
-                        <span className="text-xs text-slate-400 font-bold px-1 select-none">...</span>
-                      )}
-                    </>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
-
-                  {getPageNumbers().map((pageNum) => (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={cn(
-                        "w-7 h-7 rounded-lg text-xs font-black transition-all",
-                        currentPage === pageNum
-                          ? "bg-violet-600 text-white shadow-sm"
-                          : "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
-                      )}
-                    >
-                      {pageNum}
-                    </button>
-                  ))}
-
-                  {/* Last Page button if not in view */}
-                  {totalPages > 5 && !getPageNumbers().includes(totalPages) && (
-                    <>
-                      {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
-                        <span className="text-xs text-slate-400 font-bold px-1 select-none">...</span>
-                      )}
-                      <button
-                        onClick={() => handlePageChange(totalPages)}
-                        className={cn(
-                          "w-7 h-7 rounded-lg text-xs font-black transition-all",
-                          currentPage === totalPages
-                            ? "bg-violet-600 text-white shadow-sm"
-                            : "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
-                        )}
-                      >
-                        {totalPages}
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="p-1.5 px-3 border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 rounded-lg text-slate-700 font-bold disabled:opacity-40 disabled:hover:bg-white disabled:hover:border-slate-200 transition-all text-[11px] flex items-center gap-1 cursor-pointer"
-                >
-                  Selanjutnya
-                </button>
-              </div>
+                </tbody>
+              </table>
             </div>
-          )}
+
+            {/* Pagination Footer */}
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+              <div className="text-xs text-slate-500 font-semibold">
+                Showing {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} entries
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-md text-xs font-bold disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-3.5 py-1.5 bg-indigo-600 text-white rounded-md text-xs font-bold shadow-sm shadow-indigo-150">
+                    {currentPage}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-md text-xs font-bold disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );
   };
+
+  if (!isEditorActive) {
+    return renderDashboard();
+  }
 
   return (
     <div className="flex-1 flex h-full min-h-0 bg-[#f4f7f9] p-3 md:p-6 gap-6 font-sans overflow-hidden">
@@ -4360,6 +4223,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             {/* DOCUMENT DETAIL HEADER */}
             <div className="p-5 bg-white border-b border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm shrink-0 z-10">
               <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="mb-2">
+                  <button
+                    onClick={() => setIsEditorActive(false)}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                  >
+                    ← Kembali ke Daftar Flowchart
+                  </button>
+                </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Category Badge */}
                   {currentFlowMetadata?.category === "PRD" && (

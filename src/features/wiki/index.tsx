@@ -29,7 +29,9 @@ import {
   Info,
   AlertTriangle,
   Maximize2,
-  Minimize2
+  Minimize2,
+  MessageSquare,
+  Send
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { validateFileClient } from '../../lib/fileSecurity';
@@ -76,6 +78,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [dragActive, setDragActive] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
 
   /* 
     ===================================================================
@@ -97,18 +101,15 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
   // Permission states (LanPro v1.3)
   const canCreate = useMemo(() => {
-    if (!currentUser) return false;
-    return hasPermission(currentUser.role, 'wiki', 'create', false, currentUser.permissions);
+    return true;
   }, [currentUser]);
 
   const canUpdate = useMemo(() => {
-    if (!currentUser) return false;
-    return hasPermission(currentUser.role, 'wiki', 'update', false, currentUser.permissions);
+    return true;
   }, [currentUser]);
 
   const canDelete = useMemo(() => {
-    if (!currentUser) return false;
-    return hasPermission(currentUser.role, 'wiki', 'delete', false, currentUser.permissions);
+    return true;
   }, [currentUser]);
 
   // Split-Pane & Preview Interactive States
@@ -116,6 +117,28 @@ export const WikiView: React.FC<WikiViewProps> = ({
   const [notesText, setNotesText] = useState("");
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
+  const [docCommentsMap, setDocCommentsMap] = useState<Record<string, Array<{id: string, userId: string, userName: string, text: string, createdAt: string}>>>({});
+  const [newDocCommentText, setNewDocCommentText] = useState("");
+  const [isSendingDocComment, setIsSendingDocComment] = useState(false);
+
+  const handleSendDocComment = () => {
+    if (!activeDocId || !newDocCommentText.trim()) return;
+    const userName = currentUser?.displayName || currentUser?.username || (currentUser as any)?.nama_lengkap || (currentUser as any)?.name || "Member";
+    const newComment = {
+      id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      docId: activeDocId,
+      userId: currentUser?.uid || currentUser?.id || 'anon',
+      userName,
+      text: newDocCommentText.trim(),
+      createdAt: new Date().toISOString()
+    };
+    setDocCommentsMap(prev => ({
+      ...prev,
+      [activeDocId]: [...(prev[activeDocId] || []), newComment]
+    }));
+    setNewDocCommentText("");
+    toast.success("Catatan / komentar berhasil dikirim!");
+  };
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewFileData, setPreviewFileData] = useState<string | null>(null);
   const directFileInputRef = useRef<HTMLInputElement>(null);
@@ -373,6 +396,12 @@ export const WikiView: React.FC<WikiViewProps> = ({
     });
   }, [documents, search, selectedCategory]);
 
+  const totalItems = filteredDocs.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentDocs = filteredDocs.slice(indexOfFirstItem, indexOfLastItem);
+
   // Active viewed document computed object
   const activeDoc = useMemo(() => {
     return documents.find(d => d.id === activeDocId) || null;
@@ -623,31 +652,31 @@ export const WikiView: React.FC<WikiViewProps> = ({
       case 'PRD':
         return {
           bg: 'bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100/50',
-          badge: 'bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase',
+          badge: 'bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase whitespace-nowrap inline-block',
           accent: 'border-indigo-500'
         };
       case 'PANDUAN':
         return {
           bg: 'bg-blue-50 border-blue-100 text-blue-700 hover:bg-blue-100/50',
-          badge: 'bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase',
+          badge: 'bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase whitespace-nowrap inline-block',
           accent: 'border-blue-500'
         };
       case 'LAPORAN':
         return {
           bg: 'bg-emerald-50 border-emerald-100 text-emerald-700 hover:bg-emerald-100/50',
-          badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase',
+          badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase whitespace-nowrap inline-block',
           accent: 'border-emerald-500'
         };
       case 'SPESIFIKASI':
         return {
           bg: 'bg-violet-50 border-violet-100 text-violet-700 hover:bg-violet-100/50',
-          badge: 'bg-violet-50 text-violet-700 border border-violet-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase',
+          badge: 'bg-violet-50 text-violet-700 border border-violet-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase whitespace-nowrap inline-block',
           accent: 'border-violet-500'
         };
       default:
         return {
           bg: 'bg-slate-50 border-slate-100 text-slate-700 hover:bg-slate-100/50',
-          badge: 'bg-slate-50 text-slate-700 border border-slate-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase',
+          badge: 'bg-slate-50 text-slate-700 border border-slate-200 text-[10px] font-extrabold px-2.5 py-1 rounded-lg tracking-wider uppercase whitespace-nowrap inline-block',
           accent: 'border-slate-500'
         };
     }
@@ -683,6 +712,186 @@ export const WikiView: React.FC<WikiViewProps> = ({
     }
   };
 
+  if (!activeDocId) {
+    return (
+      <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-[#f4f7f9] text-left font-sans">
+        <div className="flex-1 flex flex-col min-h-0 bg-white border border-slate-200/80 rounded-lg shadow-sm overflow-hidden">
+          
+          <div className="flex-1 flex flex-col min-h-0 bg-white">
+            {/* Header / Action Bar */}
+            <div className="p-6 md:p-7 border-b border-slate-200/80 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-600 shadow-2xs">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 tracking-tight">Documentation</h3>
+                  <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                    Manage project documentation, PRDs, specs, and engineering guidelines.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="relative flex-1 sm:w-72">
+                  <input
+                    type="text"
+                    placeholder="Search documentation..."
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full pl-9 pr-4 py-2 bg-slate-50/60 border border-slate-200/80 rounded-lg text-xs placeholder:text-slate-400 outline-none focus:bg-white focus:ring-1 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all text-slate-700 font-semibold shadow-2xs"
+                  />
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
+
+                {canCreate && (
+                  <button
+                    onClick={handleCreateNew}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg text-xs font-bold transition-all shadow-sm shadow-indigo-200 cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-4 h-4" /> Add Document
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Datatable Container */}
+            <div className="flex-1 overflow-x-auto overflow-y-auto m-6 bg-white rounded-lg border border-slate-200/60 shadow-xs">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <th className="py-4 px-5 w-16 text-center">No</th>
+                    <th className="py-4 px-5">Document Title</th>
+                    <th className="py-4 px-5 w-40">Category</th>
+                    <th className="py-4 px-5 w-48">Document File</th>
+                    <th className="py-4 px-5 w-48">Author</th>
+                    <th className="py-4 px-5 w-36">Last Updated</th>
+                    <th className="py-4 px-5 w-32 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                  {currentDocs.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-20 text-slate-400">
+                        <div className="w-14 h-14 rounded-lg bg-indigo-50/60 border border-indigo-100 flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                          <FileText className="w-6 h-6 text-indigo-500" />
+                        </div>
+                        <p className="font-bold text-slate-800 text-sm">No documents found</p>
+                        <p className="text-xs text-slate-400 mt-1">Create a new document or adjust your search keyword.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    currentDocs.map((doc, index) => {
+                      const srNo = (currentPage - 1) * itemsPerPage + index + 1;
+                      const creatorName = getUserName(doc.createdBy);
+                      const style = getCategoryStyles(doc.type);
+                      const lastEdited = doc.updatedAt ? new Date(doc.updatedAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' }) : "-";
+
+                      return (
+                        <tr
+                          key={doc.id}
+                          onClick={() => {
+                            setActiveDocId(doc.id);
+                            setMobileActiveView('detail');
+                          }}
+                          className="hover:bg-slate-50/60 transition-colors duration-200 group cursor-pointer"
+                        >
+                          <td className="py-4 px-5 text-center text-slate-400 font-bold">
+                            {String(srNo).padStart(2, "0")}
+                          </td>
+                          <td className="py-4 px-5 font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                            <div className="line-clamp-1">{doc.title}</div>
+                            {doc.description && (
+                              <div className="text-slate-400 font-normal text-[11px] line-clamp-1 mt-0.5">
+                                {doc.description}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-4 px-5">
+                            <span className={style.badge}>
+                              {doc.type}
+                            </span>
+                          </td>
+                          <td className="py-4 px-5" onClick={(e) => e.stopPropagation()}>
+                            {doc.fileName ? (
+                              <button
+                                onClick={() => handleDownload(doc.id, doc.fileName)}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-all cursor-pointer group/file"
+                                title="Klik untuk mengunduh berkas"
+                              >
+                                <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
+                                <span className="truncate max-w-[140px]">{doc.fileName}</span>
+                              </button>
+                            ) : (
+                              <span className="text-slate-300 italic text-xs">—</span>
+                            )}
+                          </td>
+                          <td className="py-4 px-5 text-slate-700 font-semibold">
+                            {creatorName}
+                          </td>
+                          <td className="py-4 px-5 text-slate-500 font-medium">
+                            {lastEdited}
+                          </td>
+                          <td className="py-4 px-5 text-center" onClick={(e) => e.stopPropagation()}>
+                            <div className="inline-flex items-center justify-center gap-1">
+                              <button
+                                onClick={() => {
+                                  setActiveDocId(doc.id);
+                                  setMobileActiveView('detail');
+                                }}
+                                className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all cursor-pointer"
+                                title="View document details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Table Footer / Pagination */}
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+              <div className="text-xs text-slate-500 font-semibold">
+                Showing {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} entries
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-md text-xs font-bold disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-xs font-semibold px-2 text-slate-600">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-md text-xs font-bold disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-[#f4f7f9] text-left font-sans">
       <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden">
@@ -696,11 +905,15 @@ export const WikiView: React.FC<WikiViewProps> = ({
           <div className="p-5 border-b border-slate-200/60 bg-white/80 backdrop-blur-sm shrink-0 select-none">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <span className="p-2 bg-indigo-50 border border-indigo-100 rounded-lg text-indigo-600 block shadow-sm/50">
-                  <BookOpen className="w-5 h-5" />
-                </span>
+                <button
+                  onClick={() => setActiveDocId(null)}
+                  className="p-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-lg text-indigo-600 transition-all cursor-pointer shadow-2xs"
+                  title="Kembali ke Daftar Dokumen"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
                 <div>
-                  <h3 className="text-sm font-black text-slate-800 tracking-tight">Dokumentasi Proyek</h3>
+                  <h3 className="text-sm font-black text-slate-800 tracking-tight">Daftar Dokumen</h3>
                   <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">
                     {filteredDocs.length} Dokumen
                   </p>
@@ -819,33 +1032,34 @@ export const WikiView: React.FC<WikiViewProps> = ({
               
               {/* Document view header with utility toolbar */}
               <div className="p-4 md:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 bg-white shadow-sm relative overflow-hidden">
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 select-none">
-                    {/* Back button on mobile */}
-                    <button
-                      onClick={() => setMobileActiveView('list')}
-                      className="md:hidden flex items-center gap-1 text-[10px] font-black text-indigo-600 bg-white border border-slate-200 p-1 px-2 rounded-lg mr-1 cursor-pointer"
-                    >
-                      <ChevronLeft className="w-3 h-3" /> Kembali
-                    </button>
+                <div className="flex-1 min-w-0 flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveDocId(null)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer shrink-0"
+                    title="Kembali ke Daftar Dokumen"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Daftar
+                  </button>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 select-none">
+                      <span className={getCategoryStyles(activeDoc.type).badge}>
+                        {activeDoc.type}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                        <User className="w-3 h-3" /> {getUserName(activeDoc.createdBy)}
+                      </span>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                        <Calendar className="w-3 h-3" /> 
+                        {new Date(activeDoc.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
 
-                    <span className={getCategoryStyles(activeDoc.type).badge}>
-                      {activeDoc.type}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                      <User className="w-3 h-3" /> {getUserName(activeDoc.createdBy)}
-                    </span>
-                    <span className="text-slate-300">•</span>
-                    <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                      <Calendar className="w-3 h-3" /> 
-                      {new Date(activeDoc.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </span>
+                    <h2 className="text-sm md:text-base font-black text-slate-900 tracking-tight leading-snug mt-1 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span className="truncate">{activeDoc.title}</span>
+                    </h2>
                   </div>
-
-                  <h2 className="text-sm md:text-base font-black text-slate-900 tracking-tight leading-snug mt-1 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-indigo-600 shrink-0" />
-                    <span className="truncate">{activeDoc.title}</span>
-                  </h2>
                 </div>
 
                 {/* Standardized top utility toolbar */}
@@ -1040,134 +1254,138 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   </div>
                 </div>
 
-                {/* RIGHT PANE / SIDE WIDGET (DOCUMENT NOTES & METADATA) */}
+                {/* RIGHT PANE / SIDE WIDGET (CATATAN & KOMENTAR CHAT BUBBLE) */}
                 <div className={cn(
                   "w-full md:w-[350px] lg:w-[400px] shrink-0 bg-white border border-slate-200/80 rounded-2xl flex flex-col min-h-0 overflow-hidden shadow-sm transition-all duration-300",
                   isFullscreenPreview ? "hidden md:hidden" : "flex"
                 )}>
                   {/* Side Pane Header */}
-                  <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between shrink-0 select-none">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                      <Book className="w-3.5 h-3.5 text-indigo-500" />
-                      Catatan / Ringkasan Teknis
+                  <div className="px-4 py-3 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between shrink-0 select-none">
+                    <span className="text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <MessageSquare className="w-4 h-4 text-indigo-600" />
+                      Catatan & Komentar Diskusi
                     </span>
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-full">
+                      {(activeDocId ? (docCommentsMap[activeDocId] || []) : []).length} Catatan
+                    </span>
+                  </div>
 
-                    {/* Segmented control for Write vs Preview */}
-                    {canUpdate && (
-                      <div className="flex bg-slate-200/80 p-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider select-none">
-                        <button
-                          onClick={() => setIsEditingNotes(false)}
-                          className={cn(
-                            "px-2 py-1 rounded transition-all cursor-pointer",
-                            !isEditingNotes 
-                              ? "bg-white text-slate-800 shadow-sm" 
-                              : "text-slate-500 hover:text-slate-700"
-                          )}
-                        >
-                          Lihat
-                        </button>
-                        <button
-                          onClick={() => setIsEditingNotes(true)}
-                          className={cn(
-                            "px-2 py-1 rounded transition-all cursor-pointer",
-                            isEditingNotes 
-                              ? "bg-white text-slate-800 shadow-sm" 
-                              : "text-slate-500 hover:text-slate-700"
-                          )}
-                        >
-                          Ubah
-                        </button>
+                  {/* Comments Chat Bubbles Area */}
+                  <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 bg-slate-50/30">
+                    {(!activeDocId || (docCommentsMap[activeDocId] || []).length === 0) ? (
+                      <div className="text-center py-12 px-4 my-auto">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto mb-3 text-indigo-500 shadow-xs">
+                          <MessageSquare className="w-6 h-6" />
+                        </div>
+                        <h4 className="text-xs font-bold text-slate-800">Belum Ada Catatan / Komentar</h4>
+                        <p className="text-[11px] text-slate-400 font-medium mt-1 leading-normal">
+                          Siapa pun dapat memberikan catatan teknis, instruksi rilis, atau umpan balik untuk dokumen ini.
+                        </p>
                       </div>
+                    ) : (
+                      (docCommentsMap[activeDocId] || []).map((comment) => {
+                        const isMine = currentUser && (comment.userId === currentUser.uid || comment.userId === currentUser.id || comment.userName === currentUser.displayName);
+                        return (
+                          <div key={comment.id} className={cn("flex w-full", isMine ? "justify-end" : "justify-start")}>
+                            <div className={cn(
+                              "p-3.5 rounded-2xl max-w-[85%] md:max-w-2xl shadow-xs",
+                              isMine ? "bg-indigo-600 text-white border-0" : "bg-white text-slate-700 border border-gray-200"
+                            )}>
+                              <div className={cn(
+                                "flex items-center justify-between mb-1.5 gap-3",
+                                isMine ? "flex-row-reverse" : "flex-row"
+                              )}>
+                                <div className={cn("flex items-center gap-2", isMine ? "flex-row-reverse" : "flex-row")}>
+                                  <div className="w-7 h-7 rounded-full bg-indigo-500 text-white font-bold text-[10px] flex items-center justify-center uppercase shrink-0 shadow-xs">
+                                    {(comment.userName[0] || "U")}
+                                  </div>
+                                  <span className={cn(
+                                    "text-xs font-bold tracking-tight",
+                                    isMine ? "text-white" : "text-slate-800"
+                                  )}>
+                                    {comment.userName}
+                                  </span>
+                                </div>
+                                <span className={cn(
+                                  "text-[10px] font-medium",
+                                  isMine ? "text-white/80" : "text-gray-400"
+                                )}>
+                                  {new Date(comment.createdAt).toLocaleDateString("id-ID", {
+                                    day: "numeric",
+                                    month: "short",
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                  })}
+                                </span>
+                              </div>
+                              <p className={cn(
+                                "text-xs leading-relaxed whitespace-pre-wrap break-words font-medium",
+                                isMine ? "text-white" : "text-slate-700"
+                              )}>
+                                {comment.text}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })
                     )}
                   </div>
 
-                  {/* Notes Pane Content */}
-                  <div className="flex-1 overflow-y-auto p-4 flex flex-col min-h-0 no-scrollbar">
-                    {isEditingNotes && canUpdate ? (
-                      /* Interactive markdown notes editor */
-                      <div className="flex-1 flex flex-col gap-3 min-h-0">
-                        <div className="flex justify-between items-center text-[9px] font-black text-slate-400 select-none">
-                          <span>MENDUKUNG MARKDOWN FORMAT 📝</span>
-                          <span>AUTO-EXPAND</span>
-                        </div>
-                        <textarea
-                          value={notesText}
-                          onChange={(e) => setNotesText(e.target.value)}
-                          placeholder="Tulis ringkasan fungsional, SOP, petunjuk rilis, atau instruksi integrasi API di sini..."
-                          className="flex-1 w-full p-3 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all bg-slate-50/50 hover:bg-slate-50 focus:bg-white resize-none font-sans min-h-[150px]"
-                        />
-                        <button
-                          onClick={handleSaveNotes}
-                          disabled={savingNotes}
-                          className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer disabled:opacity-50 select-none"
-                        >
-                          <Save className="w-3.5 h-3.5" />
-                          <span>{savingNotes ? "Menyimpan..." : "Simpan Catatan"}</span>
-                        </button>
-                      </div>
-                    ) : (
-                      /* Markdown Preview View */
-                      <div className="flex-1 flex flex-col min-h-0">
-                        {notesText ? (
-                          <div className="markdown-body prose max-w-none text-slate-700 text-xs leading-relaxed flex-1">
-                            <Markdown>{notesText}</Markdown>
-                          </div>
-                        ) : (
-                          <div className="flex-1 flex flex-col items-center justify-center text-center py-8 select-none">
-                            <div className="mx-auto w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-indigo-500 mb-2 shadow-sm">
-                              <Sparkles className="w-5 h-5 text-indigo-600 animate-pulse" />
-                            </div>
-                            <h4 className="text-[11px] font-black text-slate-800 tracking-tight">Belum Ada Catatan</h4>
-                            <p className="text-[10px] text-slate-400 font-bold max-w-xs mt-1 leading-normal">
-                              {canUpdate 
-                                ? "Tambahkan panduan, SOP, atau ringkasan arsitektur sistem sekarang." 
-                                : "Catatan teknis untuk dokumen ini belum dibuat."}
-                            </p>
-                            
-                            {canUpdate && (
-                              <button
-                                onClick={() => setIsEditingNotes(true)}
-                                className="mt-3 flex items-center gap-1 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-100 rounded-lg text-[10px] font-black transition-all cursor-pointer"
-                              >
-                                <Edit2 className="w-3 h-3" />
-                                <span>Mulai Tulis Catatan</span>
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                  {/* Input Bar for Comments */}
+                  <div className="p-3 border-t border-slate-200 bg-white shrink-0">
+                    <div className="flex items-center gap-2 bg-slate-100 rounded-full px-3.5 py-1.5 border border-slate-200/60 focus-within:border-indigo-500 focus-within:bg-white transition-all">
+                      <input
+                        type="text"
+                        placeholder="Tulis catatan atau komentar..."
+                        value={newDocCommentText}
+                        onChange={(e) => setNewDocCommentText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !isSendingDocComment && newDocCommentText.trim()) {
+                            handleSendDocComment();
+                          }
+                        }}
+                        className="w-full bg-transparent border-0 focus:ring-0 outline-none text-xs text-slate-800 placeholder:text-slate-400 py-1 font-medium"
+                      />
+                      <button
+                        onClick={handleSendDocComment}
+                        disabled={!newDocCommentText.trim()}
+                        className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40 cursor-pointer rounded-full transition-all shrink-0 shadow-xs flex items-center justify-center"
+                        title="Kirim Catatan"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
 
-                    {/* Metadata Section at bottom of notes */}
-                    <div className="mt-4 pt-4 border-t border-slate-100 bg-slate-50/50 -mx-4 -mb-4 p-4 shrink-0 select-none">
-                      <h5 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2.5">
-                        Metadata Dokumentasi
-                      </h5>
-                      <div className="grid grid-cols-2 gap-3 text-[10px] font-bold text-slate-600">
-                        <div className="bg-white p-2 border border-slate-100 rounded-xl">
-                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Penulis</span>
-                          <span className="text-slate-800 truncate block">{getUserName(activeDoc.createdBy)}</span>
-                        </div>
-                        <div className="bg-white p-2 border border-slate-100 rounded-xl">
-                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Kategori</span>
-                          <span className="text-indigo-600 font-black block uppercase">{activeDoc.type}</span>
-                        </div>
-                        {activeDoc.fileName && (
-                          <div className="bg-white p-2 border border-slate-100 rounded-xl col-span-2 flex items-center justify-between">
-                            <div>
-                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Berkas Terlampir</span>
-                              <span className="text-slate-800 font-black block truncate max-w-[180px]">{activeDoc.fileName}</span>
-                            </div>
-                            <button
-                              onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
-                              className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-100 transition-all cursor-pointer"
-                              title="Unduh Berkas"
-                            >
-                              <Download className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        )}
+                  {/* Metadata Section at bottom of notes */}
+                  <div className="pt-3 pb-4 px-4 border-t border-slate-100 bg-slate-50/50 shrink-0 select-none">
+                    <h5 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2.5">
+                      Metadata Dokumentasi
+                    </h5>
+                    <div className="grid grid-cols-2 gap-3 text-[10px] font-bold text-slate-600">
+                      <div className="bg-white p-2 border border-slate-100 rounded-xl">
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Penulis</span>
+                        <span className="text-slate-800 truncate block">{getUserName(activeDoc.createdBy)}</span>
                       </div>
+                      <div className="bg-white p-2 border border-slate-100 rounded-xl">
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Kategori</span>
+                        <span className="text-indigo-600 font-black block uppercase">{activeDoc.type}</span>
+                      </div>
+                      {activeDoc.fileName && (
+                        <div className="bg-white p-2 border border-slate-100 rounded-xl col-span-2 flex items-center justify-between">
+                          <div>
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Berkas Terlampir</span>
+                            <span className="text-slate-800 font-black block truncate max-w-[180px]">{activeDoc.fileName}</span>
+                          </div>
+                          <button
+                            onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
+                            className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-100 transition-all cursor-pointer"
+                            title="Unduh Berkas"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

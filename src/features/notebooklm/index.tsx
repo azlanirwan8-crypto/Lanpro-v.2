@@ -396,59 +396,59 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
   };
 
   return (
-    <div id="notebooklm-container" className="flex flex-col h-[calc(100vh-4rem)] bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl transition-colors">
-      {/* Header Bar */}
-      <header id="notebooklm-header" className="flex items-center justify-between px-6 py-4 bg-slate-50/90 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800/80 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-xl shadow-md shadow-purple-500/20">
-            <Sparkles className="w-5 h-5 text-white animate-pulse" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold bg-gradient-to-r from-purple-700 via-indigo-600 to-slate-800 dark:from-purple-300 dark:via-indigo-200 dark:to-white bg-clip-text text-transparent">
-                NotebookLM
-              </h1>
-              <span className="px-2 py-0.5 text-[10px] font-semibold bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 rounded-full border border-purple-200 dark:border-purple-500/30">
-                AI Grounded Studio
-              </span>
+    <div id="notebooklm-container" className="flex flex-col h-[calc(100vh-4rem)] bg-[#f4f7f9] p-3 md:p-6 text-slate-800 font-sans">
+      <div className="flex-1 flex flex-col bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden">
+        {/* Header Bar */}
+        <header id="notebooklm-header" className="flex items-center justify-between px-6 py-5 bg-slate-50/30 border-b border-slate-200/60 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs">
+              <Sparkles className="w-5 h-5" />
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Proyek: <span className="text-purple-600 dark:text-purple-300">{project.name}</span>
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-black text-slate-800 tracking-tight">
+                  NotebookLM Studio
+                </h1>
+                <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-full">
+                  AI Grounded
+                </span>
+              </div>
+              <p className="text-[10.5px] text-slate-400 font-bold uppercase tracking-wider">
+                Proyek: <span className="text-indigo-600">{project.name}</span>
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Model Selector dropdown */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Model AI:</span>
-          <select
-            value={selectedModel}
-            onChange={(e: any) => setSelectedModel(e.target.value)}
-            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold text-purple-700 dark:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm transition-all"
-          >
-            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Penalaran & Riset Komplit)</option>
-            <option value="gemini-3.6-flash">Gemini 3.6 Flash (Super Cepat)</option>
-            <option value="gemini-1.5-pro">Gemini 1.5 Pro (Konteks Panjang)</option>
-          </select>
-        </div>
-      </header>
+          {/* Model Selector dropdown */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-600">Model AI:</span>
+            <select
+              value={selectedModel}
+              onChange={(e: any) => setSelectedModel(e.target.value)}
+              className="px-3 py-2 bg-white border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs transition-all cursor-pointer"
+            >
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+              <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+              <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+            </select>
+          </div>
+        </header>
 
       {/* Main Grid: Left Sidebar Sources + Right Work Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar: Sources Panel */}
-        <aside id="notebooklm-sources-sidebar" className="w-80 border-r border-slate-200 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-950/40 flex flex-col shrink-0">
-          <div className="p-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+        <aside id="notebooklm-sources-sidebar" className="w-80 border-r border-slate-200/60 bg-slate-50/40 flex flex-col shrink-0">
+          <div className="p-4 border-b border-slate-200/60 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Sumber Data ({sources.length})</span>
+              <BookOpen className="w-4 h-4 text-indigo-600" />
+              <span className="text-[10.5px] font-black uppercase tracking-wider text-slate-700">Sumber Data ({sources.length})</span>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="p-1.5 bg-purple-100 hover:bg-purple-200 dark:bg-purple-600/20 dark:hover:bg-purple-600/40 text-purple-700 dark:text-purple-300 rounded-lg border border-purple-200 dark:border-purple-500/30 transition-colors flex items-center gap-1 text-xs font-medium"
+              className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg border border-indigo-200 transition-colors flex items-center gap-1 text-xs font-bold"
               title="Tambah Sumber Manual"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Tambah</span>
             </button>
           </div>
 
@@ -1075,6 +1075,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
           </motion.div>
         </div>
       )}
+      </div>
     </div>
   );
 };

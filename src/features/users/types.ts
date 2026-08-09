@@ -8,6 +8,7 @@ export interface AdminUserPanelProps {
   userRole: AppRole | null;
   currentUserId?: string;
   onRefreshProjects?: () => void;
+  onSelectUserForDetail?: (user: UserProfile) => void;
 }
 
 export const DEFAULT_PERMISSIONS: UserPermissions = {

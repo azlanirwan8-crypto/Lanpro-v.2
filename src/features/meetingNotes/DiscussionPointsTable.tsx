@@ -7,7 +7,6 @@ import {
   deleteDiscussionPoint,
   getDiscussionPointComments,
   createDiscussionPointComment,
-  getMasterData,
   getUsers,
 } from "../../services/meetingService";
 import {
@@ -19,6 +18,8 @@ import {
   type MasterData,
 } from "../../types";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { AiMeetingCompanion } from "./AiMeetingCompanion";
+import { cn } from "../../lib/utils";
 import {
   Plus,
   Edit2,
@@ -30,10 +31,13 @@ import {
   CheckCircle2,
   X,
   Send,
+  Sparkles,
+  Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { hasPermission } from "../../lib/permissions";
-import { UserBadge } from "./UserBadge";
 
 interface DiscussionPointsTableProps {
   projectId: string;
@@ -58,80 +62,34 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<DiscussionPoint>>({});
-  const [isAdding, setIsAdding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [parentId, setParentId] = useState<string | null>(null);
-  const [addForm, setAddForm] = useState<Partial<DiscussionPoint>>({
-    status: "pending",
-  });
+  const [showAiCompanion, setShowAiCompanion] = useState(false);
 
-  // Quick Inline Creation Row States (Complete 100% Modal Fields)
+  // Inline Quick Add State (Live Table Row with separate uncombined fields)
   const [quickConcern, setQuickConcern] = useState("");
-  const [quickKeterangan, setQuickKeterangan] = useState("");
-  const [quickTindakanLanjut, setQuickTindakanLanjut] = useState("");
-  const [quickAssignee, setQuickAssignee] = useState("");
+  const [quickCatatan, setQuickCatatan] = useState("");
+  const [quickAssignTo, setQuickAssignTo] = useState("Unassigned");
   const [quickFitur, setQuickFitur] = useState("");
-  const [quickSystem, setQuickSystem] = useState("");
-  const [quickSurrounding, setQuickSurrounding] = useState("");
   const [quickTargetDate, setQuickTargetDate] = useState("");
-  const [inlineEditingId, setInlineEditingId] = useState<string | null>(null);
-  const [inlineConcernVal, setInlineConcernVal] = useState("");
 
   const [pointToDelete, setPointToDelete] = useState<string | null>(null);
 
-  const handleQuickAdd = async () => {
-    if (!currentUser) {
-      toast.error("Silakan login untuk menambah poin diskusi.");
-      return;
-    }
-    if (!quickConcern.trim()) {
-      toast.error("Mohon isi Concern / Topic terlebih dahulu.");
-      return;
-    }
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-    setIsSaving(true);
-    try {
-      await createDiscussionPoint(
-        projectId,
-        meetingId,
-        {
-          concern: quickConcern.trim(),
-          keterangan: quickKeterangan.trim() || undefined,
-          comment: quickKeterangan.trim() || undefined,
-          tindakanLanjut: quickTindakanLanjut.trim() || undefined,
-          next_action: quickTindakanLanjut.trim() || undefined,
-          assignTo: quickAssignee || undefined,
-          assignee_id: quickAssignee || undefined,
-          fitur: quickFitur || undefined,
-          feature_id: quickFitur || undefined,
-          system: quickSystem || undefined,
-          system_id: quickSystem || undefined,
-          surrounding: quickSurrounding || undefined,
-          surrounding_id: quickSurrounding || undefined,
-          targetDate: quickTargetDate || undefined,
-          target_date: quickTargetDate || undefined,
-          status: "pending",
-          authorId: currentUser.uid,
-        },
-        currentUser.uid
-      );
+  const filteredPoints = points.filter(p => 
+    (p.concern || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.keterangan || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.fitur || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.assignTo || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-      toast.success("Poin diskusi berhasil ditambahkan!");
-      setQuickConcern("");
-      setQuickKeterangan("");
-      setQuickTindakanLanjut("");
-      setQuickAssignee("");
-      setQuickFitur("");
-      setQuickSystem("");
-      setQuickSurrounding("");
-      setQuickTargetDate("");
-      fetchPoints();
-    } catch (error: any) {
-      toast.error("Gagal menambah poin: " + (error.message || "Unknown error"));
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const totalPages = Math.ceil(filteredPoints.length / itemsPerPage) || 1;
+  const paginatedPoints = filteredPoints.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleToggleStatus = async (point: DiscussionPoint) => {
     if (!point.id) return;
@@ -154,46 +112,6 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     }
   };
 
-  const handleInlineSaveConcern = async (pointId: string) => {
-    if (!inlineConcernVal.trim()) return;
-    try {
-      setPoints((prev) =>
-        prev.map((p) => (p.id === pointId ? { ...p, concern: inlineConcernVal.trim() } : p))
-      );
-      await updateDiscussionPoint(
-        projectId,
-        meetingId,
-        pointId,
-        { concern: inlineConcernVal.trim() },
-        currentUser?.uid
-      );
-      toast.success("Topik berhasil diperbarui.");
-      setInlineEditingId(null);
-    } catch (e: any) {
-      toast.error("Gagal memperbarui topik: " + e.message);
-      fetchPoints();
-    }
-  };
-
-  const handleInlineUpdateField = async (pointId: string, field: keyof DiscussionPoint, value: any) => {
-    try {
-      setPoints((prev) =>
-        prev.map((p) => (p.id === pointId ? { ...p, [field]: value } : p))
-      );
-      await updateDiscussionPoint(
-        projectId,
-        meetingId,
-        pointId,
-        { [field]: value },
-        currentUser?.uid
-      );
-      toast.success("Data berhasil diperbarui.");
-    } catch (e: any) {
-      toast.error("Gagal memperbarui data: " + e.message);
-      fetchPoints();
-    }
-  };
-
   useEffect(() => {
     fetchPoints();
     fetchUsers();
@@ -203,45 +121,16 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     let socket: any;
     try {
       socket = io();
-      
-      // Safe handlers to prevent unhandled rejections
       socket.on("error", (err: any) => {
-        console.warn("[SOCKET ERROR] Safe discussion socket error caught internally:", err);
+        console.warn("[SOCKET ERROR]", err);
       });
-      socket.on("connect_error", (err: any) => {
-        console.warn("[SOCKET ERROR] Safe discussion socket connect_error caught internally:", err);
-      });
-      
-      socket.onerror = (err: any) => {
-        console.warn("[SOCKET ERROR] Native-like discussion socket onerror caught internally:", err);
-      };
-      socket.onclose = () => {
-        console.log("[SOCKET] Native-like discussion socket onclose triggered.");
-      };
-
-      if (socket.io) {
-        socket.io.on("error", (err: any) => {
-          console.warn("[SOCKET IO ERROR] Discussion engine.io error suppressed:", err);
-        });
-      }
-      if (socket.io && socket.io.engine) {
-        socket.io.engine.on("error", (err: any) => {
-          console.warn("[SOCKET ENGINE ERROR] Discussion engine error suppressed:", err);
-        });
-        socket.io.engine.onerror = (err: any) => {
-          console.warn("[SOCKET ENGINE ERROR] Discussion engine onerror suppressed:", err);
-        };
-        socket.io.engine.onclose = () => {
-          console.log("[SOCKET ENGINE] Discussion engine closed.");
-        };
-      }
     } catch (err) {
-      console.error("[SOCKET FATAL] Failed to initialize discussion socket safely:", err);
+      console.error("[SOCKET FATAL]", err);
     }
 
     if (socket) {
-      socket.on("data_changed", (event) => {
-         if (event.path.includes("/discussionPoints") || event.path.includes("/meetings")) {
+      socket.on("data_changed", (event: any) => {
+         if (event.path?.includes("/discussionPoints") || event.path?.includes("/meetings")) {
             fetchPoints();
          }
       });
@@ -260,12 +149,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       setUsers(fetchedUsers);
     } catch (error: any) {
       console.error("Failed to fetch users:", error);
-      toast.error(error.message || "Failed to load users");
     }
   };
-
-  const currentUserProfile =
-    users.find((u) => u.uid === currentUser?.uid) || currentUser;
 
   const canAdd = hasPermission(
     userRole,
@@ -275,41 +160,45 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     permissions,
   );
 
-  const saveAdd = async () => {
-    if (!currentUser) return;
-
-    if (
-      !hasPermission(userRole, "meetingNotes", "create", false, permissions)
-    ) {
+  // Handle Live Inline Quick Add
+  const handleLiveQuickAdd = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!currentUser) {
+      toast.error("Silakan login terlebih dahulu.");
+      return;
+    }
+    if (!canAdd) {
       toast.error("Anda tidak memiliki izin untuk menambah poin diskusi.");
       return;
     }
-
-    if (!addForm.concern?.trim()) {
-      toast.error("'Concern' field is required.");
+    if (!quickConcern.trim()) {
+      toast.error("Concern / Topic wajib diisi.");
       return;
     }
 
     setIsSaving(true);
     try {
       const payload: any = {
-        ...addForm,
+        concern: quickConcern.trim(),
+        keterangan: quickCatatan.trim(),
+        assignTo: quickAssignTo === "Unassigned" ? "" : quickAssignTo,
+        fitur: quickFitur || "",
+        targetDate: quickTargetDate || "",
+        status: "pending",
         authorId: currentUser.uid,
       };
-      if (parentId) {
-        payload.parentPointId = parentId;
-      }
 
       await createDiscussionPoint(projectId, meetingId, payload, currentUser.uid);
-
-      toast.success("Discussion point successfully added.");
-      setIsAdding(false);
-      setParentId(null);
-      setAddForm({ status: "pending" });
+      toast.success("Poin diskusi berhasil ditambahkan!");
+      setQuickConcern("");
+      setQuickCatatan("");
+      setQuickAssignTo("Unassigned");
+      setQuickFitur("");
+      setQuickTargetDate("");
       fetchPoints();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving point:", error);
-      toast.error("Failed to add point: " + (error as Error).message);
+      toast.error("Gagal menambah poin: " + error.message);
     } finally {
       setIsSaving(false);
     }
@@ -317,35 +206,12 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const startEdit = (point: DiscussionPoint) => {
     const isOwner = point.authorId === (currentUser?.uid || "");
-    if (
-      !hasPermission(userRole, "meetingNotes", "update", isOwner, permissions)
-    ) {
+    if (!hasPermission(userRole, "meetingNotes", "update", isOwner, permissions)) {
       toast.error("Anda tidak memiliki izin untuk mengedit poin ini.");
       return;
     }
     setEditingId(point.id!);
     setEditForm(point);
-    setIsAdding(false);
-    setParentId(null);
-  };
-
-  const startAdd = (id?: string | any) => {
-    if (!currentUser) {
-      toast.error("Please login to add points.");
-      return;
-    }
-
-    if (
-      !hasPermission(userRole, "meetingNotes", "create", false, permissions)
-    ) {
-      toast.error("Anda tidak memiliki izin untuk menambah poin diskusi.");
-      return;
-    }
-
-    setIsAdding(true);
-    setEditingId(null);
-    setParentId(typeof id === "string" ? id : null);
-    setAddForm({ status: "pending" });
   };
 
   // Thread Comments Drawer State
@@ -361,7 +227,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       setCommentsMap((prev) => ({ ...prev, [pointId]: fetched }));
       return fetched;
     } catch (e) {
-      console.error("Failed to fetch comments for point:", e);
+      console.error("Failed to fetch comments:", e);
       return [];
     }
   };
@@ -384,15 +250,15 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
     setIsSendingComment(true);
     try {
-      const userName = currentUser?.displayName || currentUser?.username || "Member";
+      const userName = currentUser?.displayName || currentUser?.username || (currentUser as any)?.nama_lengkap || (currentUser as any)?.name || "Member";
       await createDiscussionPointComment(
         activeThreadPoint.id,
         {
-          userId: currentUser?.uid,
+          userId: currentUser?.uid || (currentUser as any)?.id,
           userName,
           commentText: newCommentText.trim(),
         },
-        currentUser?.uid
+        currentUser?.uid || (currentUser as any)?.id
       );
 
       toast.success("Balasan berhasil dikirim!");
@@ -415,15 +281,11 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       });
     } catch (error: any) {
       console.error("Failed to fetch discussion points:", error);
-      toast.error(error.message || "Failed to load discussion points");
     }
   };
 
   const handleDelete = async () => {
     if (!pointToDelete) return;
-    const point = points.find((p) => p.id === pointToDelete);
-    if (!point) return;
-
     setIsSaving(true);
     try {
       await deleteDiscussionPoint(projectId, meetingId, pointToDelete, currentUser?.uid);
@@ -439,20 +301,17 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const saveEdit = async () => {
     if (!editingId) return;
-
     const point = points.find((p) => p.id === editingId);
     if (!point) return;
 
     const isOwner = point.authorId === (currentUser?.uid || "");
-    if (
-      !hasPermission(userRole, "meetingNotes", "update", isOwner, permissions)
-    ) {
+    if (!hasPermission(userRole, "meetingNotes", "update", isOwner, permissions)) {
       toast.error("Anda tidak memiliki izin untuk mengedit poin ini.");
       return;
     }
 
     if (!editForm.concern?.trim()) {
-      toast.error("'Concern' column cannot be empty.");
+      toast.error("Concern / Topic cannot be empty.");
       return;
     }
 
@@ -475,65 +334,76 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     label: m?.displayName || m?.username || 'Unknown User'
   }));
 
-  const renderStatusBadge = (status: string) => {
-    if (status === "completed") {
-      return (
-        <span className="flex items-center gap-1 w-max px-2 py-1 rounded uppercase text-[11px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
-          <CheckCircle2 className="w-3 h-3" />
-          Completed
-        </span>
-      );
-    }
-    return (
-      <span className="flex items-center gap-1 w-max px-2 py-1 rounded uppercase text-[11px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
-        <Clock className="w-3 h-3" />
-        {status}
-      </span>
-    );
-  };
-
-  const fields = [
-    { name: "concern", label: "Concern / Topic", type: "textarea", width: "min-w-[14rem] w-[20%]" },
-    { name: "assignTo", label: "Assigned To", type: "user-select", width: "min-w-[9rem] w-[10%]" },
-    { name: "fitur", label: "Feature", type: "select", width: "min-w-[7rem] w-[8%]" },
-    { name: "system", label: "System", type: "select", width: "min-w-[7rem] w-[8%]" },
-    { name: "surrounding", label: "Surrounding", type: "select", width: "min-w-[7rem] w-[8%]" },
-    { name: "keterangan", label: "Comment", type: "textarea", width: "min-w-[12rem] w-[15%]" },
-    { name: "tindakanLanjut", label: "Next Action", type: "textarea", width: "min-w-[12rem] w-[15%]" },
-    { name: "targetDate", label: "Target", type: "date", width: "min-w-[8rem] w-[8%]" },
-  ] as const;
-
-  const isCurrentlyEditing = editingId !== null;
-  const showFormModal = isAdding || isCurrentlyEditing;
-  const activeFormState = isCurrentlyEditing ? editForm : addForm;
-  
-  const setActiveFormState = (updater: any) => {
-    if (isCurrentlyEditing) {
-      setEditForm(updater);
-    } else {
-      setAddForm(updater);
-    }
-  };
-
-  const topLevelPoints = points.filter(p => !p.parentPointId);
-
   return (
-    <div className="my-2 bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden flex flex-col mt-4 font-sans text-left">
-      <div className="px-6 py-5 border-b border-slate-200/60 flex items-center justify-between bg-slate-50/30">
+    <div className="bg-white flex flex-col font-sans text-left">
+      {/* Header Bar Clean Title */}
+      <div className="px-6 py-5 border-b border-slate-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/30">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-            <MessageSquare className="w-5 h-5 text-indigo-650" />
+          <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs">
+            <MessageSquare className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-sm font-black text-slate-800 tracking-tight">
               Poin Diskusi & Keputusan
             </h3>
             <p className="text-[10.5px] text-slate-400 font-bold uppercase tracking-wider">
-              Track decisions, questions, and action items here
+              Discussion points & action items
             </p>
           </div>
         </div>
+
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-64">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Cari poin diskusi..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-800 outline-none shadow-2xs"
+            />
+          </div>
+
+          <button
+            onClick={() => setShowAiCompanion(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 shadow-2xs cursor-pointer shrink-0"
+          >
+            <Sparkles className="w-4 h-4 text-indigo-600" /> AI Meeting Assistant
+          </button>
+        </div>
       </div>
+
+      {showAiCompanion && (
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 relative animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-indigo-600" /> AI Meeting Assistant
+              </h3>
+              <button
+                onClick={() => setShowAiCompanion(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <AiMeetingCompanion
+              projectId={projectId}
+              meeting={{ id: meetingId, title: "Meeting Discussion" } as any}
+              currentUser={currentUser}
+              projectMembers={projectMembers}
+              onPointsImported={() => {
+                setShowAiCompanion(false);
+                fetchPoints();
+                toast.success("AI discussion points imported successfully!");
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {pointToDelete && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
@@ -542,620 +412,434 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center">
                 <Trash2 className="w-5 h-5 text-rose-500" />
               </div>
-              <h3 className="text-lg font-bold">Delete Point</h3>
+              <h3 className="text-lg font-bold">Hapus Poin</h3>
             </div>
             <p className="text-sm text-slate-500 leading-relaxed mb-6">
-              Are you sure you want to delete this discussion point? This action cannot be undone.
+              Apakah Anda yakin ingin menghapus poin diskusi ini? Tindakan ini tidak dapat dibatalkan.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setPointToDelete(null)}
-                className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200"
+                className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200 cursor-pointer"
               >
-                Cancel
+                Batal
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isSaving}
-                className="px-5 py-2.5 bg-rose-600 text-white rounded-xl text-sm font-bold shadow-sm hover:bg-rose-700 transition-all disabled:opacity-50"
+                className="px-5 py-2.5 bg-rose-600 text-white rounded-xl text-sm font-bold shadow-sm hover:bg-rose-700 transition-all disabled:opacity-50 cursor-pointer"
               >
-                {isSaving ? "Deleting..." : "Delete"}
+                {isSaving ? "Menghapus..." : "Hapus"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Comprehensive Form Modal Popup for Add / Edit / Reply */}
-      {showFormModal && (
+      {/* Edit Modal Popup (When clicking edit icon on a row) */}
+      {editingId !== null && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200 flex flex-col max-h-[92vh] overflow-hidden">
-            {/* Modal Header */}
+          <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-indigo-100/60 flex items-center justify-center border border-indigo-100">
-                  <MessageSquare className="w-5 h-5 text-indigo-600" />
+                <div className="w-9 h-9 rounded-xl bg-indigo-100/60 flex items-center justify-center border border-indigo-100 text-indigo-600">
+                  <Edit2 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-slate-800 tracking-tight">
-                    {isCurrentlyEditing ? "Edit Discussion Point" : (parentId ? "Reply to Discussion Point" : "Add New Discussion Point")}
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium tracking-tight">
-                    {isCurrentlyEditing ? "Modify the properties and details of this discussion item" : "Create a new decision point, question, or action item"}
-                  </p>
+                  <h3 className="text-base font-black text-slate-800 tracking-tight">Edit Poin Diskusi</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Ubah detail, catatan, atau penanggung jawab</p>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  setIsAdding(false);
-                  setEditingId(null);
-                  setParentId(null);
-                  setAddForm({ status: "pending" });
-                  setEditForm({});
-                }}
+                onClick={() => { setEditingId(null); setEditForm({}); }}
                 className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Content Form Scroll */}
-            <div className="p-6 overflow-y-auto flex-1 space-y-6">
-              {parentId && !isCurrentlyEditing && (
-                <div className="p-4 bg-indigo-50/50 border border-indigo-100/60 rounded-2xl flex items-start gap-2 text-xs text-indigo-700 font-medium">
-                   <CornerDownRight className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
-                   <div>
-                     <span className="font-bold uppercase tracking-wider text-[9px] text-indigo-500 block mb-0.5">Replying To Parent Point</span>
-                     {points.find(p => p.id === parentId)?.concern}
-                   </div>
+            <div className="p-6 overflow-y-auto flex-1 space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Concern / Topic *</label>
+                <textarea
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white min-h-[80px]"
+                  value={editForm.concern || ""}
+                  onChange={(e) => setEditForm({ ...editForm, concern: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Catatan / Keterangan</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white"
+                    value={editForm.keterangan || ""}
+                    onChange={(e) => setEditForm({ ...editForm, keterangan: e.target.value })}
+                  />
                 </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                {/* Left side larger fields */}
-                <div className="md:col-span-7 space-y-5">
-                  {/* Concern / Topic */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                      Concern / Topic <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      required
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 min-h-[100px] resize-y"
-                      placeholder="What is the key topic, issue, concern or question being discussed?"
-                      value={activeFormState.concern || ""}
-                      onChange={(e) => setActiveFormState((prev: any) => ({ ...prev, concern: e.target.value }))}
-                    />
-                  </div>
-
-                  {/* Comment */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Comment / Keterangan</label>
-                    <textarea
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 min-h-[80px] resize-y"
-                      placeholder="Add additional context, comments, notes, or details..."
-                      value={activeFormState.keterangan || ""}
-                      onChange={(e) => setActiveFormState((prev: any) => ({ ...prev, keterangan: e.target.value }))}
-                    />
-                  </div>
-
-                  {/* Next Action */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Next Action / Tindakan Lanjut</label>
-                    <textarea
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 min-h-[80px] resize-y"
-                      placeholder="What are the agreed next actions or resolutions?"
-                      value={activeFormState.tindakanLanjut || ""}
-                      onChange={(e) => setActiveFormState((prev: any) => ({ ...prev, tindakanLanjut: e.target.value }))}
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Tindakan Lanjut</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:bg-white"
+                    value={editForm.tindakanLanjut || ""}
+                    onChange={(e) => setEditForm({ ...editForm, tindakanLanjut: e.target.value })}
+                  />
                 </div>
+              </div>
 
-                {/* Right side settings/fields */}
-                <div className="md:col-span-5 space-y-5 bg-slate-50 p-5 rounded-2xl border border-slate-200/60">
-                  {/* Assigned To */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Assigned To</label>
-                    <StyledDropdown
-                      value={activeFormState.assignTo || "Unassigned"}
-                      onChange={(val) => setActiveFormState((prev: any) => ({ ...prev, assignTo: val }))}
-                      options={[{ id: 'Unassigned', label: 'Unassigned' }, ...userOptions]}
-                      members={projectMembers}
-                      type="member"
-                      masterData={masterData}
-                      buttonClassName="w-full h-10 px-3 bg-white border border-slate-200/85 shadow-sm text-xs text-left text-slate-700 hover:border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
-                    />
-                  </div>
-
-                  {/* Feature */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Feature</label>
-                    <StyledDropdown
-                      value={activeFormState.fitur || ""}
-                      onChange={(val) => setActiveFormState((prev: any) => ({ ...prev, fitur: val }))}
-                      options={masterData.filter(m => m.type?.toLowerCase() === 'fitur').map(m => ({ id: m.label, label: m.label, color: m.color, icon: m.icon }))}
-                      type="fitur"
-                      masterData={masterData}
-                      buttonClassName="w-full h-10 px-3 bg-white border border-slate-200/85 shadow-sm text-xs text-left text-slate-700 hover:border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
-                    />
-                  </div>
-
-                  {/* System */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">System</label>
-                    <StyledDropdown
-                      value={activeFormState.system || ""}
-                      onChange={(val) => setActiveFormState((prev: any) => ({ ...prev, system: val }))}
-                      options={masterData.filter(m => m.type?.toLowerCase() === 'system').map(m => ({ id: m.label, label: m.label, color: m.color, icon: m.icon }))}
-                      type="system"
-                      masterData={masterData}
-                      buttonClassName="w-full h-10 px-3 bg-white border border-slate-200/85 shadow-sm text-xs text-left text-slate-700 hover:border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
-                    />
-                  </div>
-
-                  {/* Surrounding */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Surrounding</label>
-                    <StyledDropdown
-                      value={activeFormState.surrounding || ""}
-                      onChange={(val) => setActiveFormState((prev: any) => ({ ...prev, surrounding: val }))}
-                      options={masterData.filter(m => m.type?.toLowerCase() === 'surrounding').map(m => ({ id: m.label, label: m.label, color: m.color, icon: m.icon }))}
-                      type="surrounding"
-                      masterData={masterData}
-                      buttonClassName="w-full h-10 px-3 bg-white border border-slate-200/85 shadow-sm text-xs text-left text-slate-700 hover:border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
-                    />
-                  </div>
-
-                  {/* Target Date */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Target Date</label>
-                    <input
-                      type="date"
-                      value={activeFormState.targetDate || ""}
-                      onChange={(e) => setActiveFormState((prev: any) => ({ ...prev, targetDate: e.target.value }))}
-                      className="w-full h-10 px-3 bg-white border border-slate-200/85 shadow-sm text-xs text-slate-700 hover:border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/15 transition-all font-semibold outline-none focus:border-indigo-500"
-                    />
-                  </div>
-
-                  {/* Status */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Status</label>
-                    <StyledDropdown
-                      value={activeFormState.status || "pending"}
-                      onChange={(val) => setActiveFormState((prev: any) => ({ ...prev, status: val as "pending" | "completed" }))}
-                      options={masterData.filter(m => m.type?.toLowerCase() === 'status').map(m => ({ id: m.label, label: m.label, color: m.color, icon: m.icon }))}
-                      type="status"
-                      masterData={masterData}
-                      buttonClassName="w-full h-10 px-3 bg-white border border-slate-200/85 shadow-sm text-xs text-left text-slate-700 hover:border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">PIC (Assigned To)</label>
+                  <StyledDropdown
+                    value={editForm.assignTo || "Unassigned"}
+                    onChange={(val) => setEditForm({ ...editForm, assignTo: val })}
+                    options={[{ id: 'Unassigned', label: 'Unassigned' }, ...userOptions]}
+                    members={projectMembers}
+                    type="member"
+                    masterData={masterData}
+                    buttonClassName="w-full h-10 px-3 bg-white border border-slate-200 text-xs text-left text-slate-700 rounded-xl font-semibold"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Fitur</label>
+                  <StyledDropdown
+                    value={editForm.fitur || ""}
+                    onChange={(val) => setEditForm({ ...editForm, fitur: val })}
+                    options={masterData.filter(m => m.type?.toLowerCase() === 'fitur').map(m => ({ id: m.label, label: m.label, color: m.color, icon: m.icon }))}
+                    type="fitur"
+                    masterData={masterData}
+                    buttonClassName="w-full h-10 px-3 bg-white border border-slate-200 text-xs text-left text-slate-700 rounded-xl font-semibold"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Target Date</label>
+                  <input
+                    type="date"
+                    value={editForm.targetDate || ""}
+                    onChange={(e) => setEditForm({ ...editForm, targetDate: e.target.value })}
+                    className="w-full h-10 px-3 bg-white border border-slate-200 text-xs text-slate-700 rounded-xl font-semibold outline-none"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Modal Actions Footer */}
             <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50 shrink-0">
               <button
                 type="button"
-                onClick={() => {
-                  setIsAdding(false);
-                  setEditingId(null);
-                  setParentId(null);
-                  setAddForm({ status: "pending" });
-                  setEditForm({});
-                }}
-                className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 bg-white transition-all shadow-sm"
+                onClick={() => { setEditingId(null); setEditForm({}); }}
+                className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 bg-white transition-all cursor-pointer"
               >
-                Cancel
+                Batal
               </button>
               <button
                 type="button"
-                onClick={isCurrentlyEditing ? saveEdit : saveAdd}
+                onClick={saveEdit}
                 disabled={isSaving}
-                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-bold shadow-sm disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm disabled:opacity-50 cursor-pointer"
               >
-                {isSaving ? "Saving..." : (isCurrentlyEditing ? "Save Changes" : "Save Point")}
+                {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* LIVE EDITABLE DATA TABLE SECTION */}
+      {/* STREAMLINED LIVE EDITABLE DATA TABLE */}
       <div className="w-full overflow-x-auto">
         <table className="w-full border-collapse text-left text-xs">
           <thead>
-            <tr className="bg-slate-100/70 border-y border-slate-200 text-slate-500 font-extrabold uppercase text-[10px] tracking-wider">
-              <th className="py-3 px-3 w-10 text-center">No</th>
-              <th className="py-3 px-3 min-w-[170px]">Concern / Topic</th>
-              <th className="py-3 px-3 min-w-[150px]">Catatan (Comment)</th>
-              <th className="py-3 px-3 min-w-[150px]">Next Action</th>
-              <th className="py-3 px-3 min-w-[130px]">Assignee (PIC)</th>
-              <th className="py-3 px-3 min-w-[120px]">Fitur</th>
-              <th className="py-3 px-3 min-w-[120px]">System</th>
-              <th className="py-3 px-3 min-w-[120px]">Surrounding</th>
-              <th className="py-3 px-3 w-20 text-center">Thread</th>
-              <th className="py-3 px-3 w-24 text-center">Status</th>
-              <th className="py-3 px-3 w-32">Target Date</th>
-              <th className="py-3 px-3 w-20 text-center">Actions</th>
+            <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px] tracking-wider">
+              <th className="py-3.5 px-4 w-12 text-center">No</th>
+              <th className="py-3.5 px-4 min-w-[220px]">Concern</th>
+              <th className="py-3.5 px-4 min-w-[200px]">Catatan / Keterangan</th>
+              <th className="py-3.5 px-4 min-w-[150px]">Context / Tags</th>
+              <th className="py-3.5 px-4 min-w-[140px]">PIC</th>
+              <th className="py-3.5 px-4 min-w-[130px]">Target Date</th>
+              <th className="py-3.5 px-4 w-24 text-center">Thread</th>
+              <th className="py-3.5 px-4 w-28 text-center">Status</th>
+              <th className="py-3.5 px-4 w-24 text-center">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {/* INLINE QUICK CREATION ROW WITH 100% COMPLETE MODAL FIELDS */}
+          <tbody className="divide-y divide-slate-100 text-slate-700">
+            {paginatedPoints.map((p, idx) => {
+              const isOwner = p.authorId === (currentUser?.uid || "");
+              const isCompleted = p.status === "completed";
+              const assigneeName = projectMembers.find(m => (m.uid || m.id) === (p.assignTo || p.assignee_id))?.displayName || 
+                                   projectMembers.find(m => (m.uid || m.id) === (p.assignTo || p.assignee_id))?.username || 
+                                   p.assignTo || "Unassigned";
+
+              return (
+                <tr key={p.id} className="hover:bg-slate-50/80 transition-colors group">
+                  <td className="py-4 px-4 text-center font-bold text-slate-400 text-xs align-top">
+                    {(currentPage - 1) * itemsPerPage + idx + 1}
+                  </td>
+
+                  {/* Concern */}
+                  <td className="py-4 px-4 align-top">
+                    <div className={`font-bold text-slate-900 text-xs leading-snug ${isCompleted ? "line-through text-slate-400" : ""}`}>
+                      {p.concern}
+                    </div>
+                    {(p.tindakanLanjut || p.next_action) && (
+                      <div className="text-indigo-600 text-[11px] font-medium flex items-center gap-1 mt-1 pt-1 border-t border-slate-100">
+                        <span className="font-bold uppercase text-[9px] text-indigo-400">Next:</span>
+                        {p.tindakanLanjut || p.next_action}
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Catatan / Keterangan */}
+                  <td className="py-4 px-4 align-top">
+                    <div className="text-slate-600 text-xs font-normal leading-relaxed">
+                      {p.keterangan || p.comment || <span className="text-slate-300 italic">No notes</span>}
+                    </div>
+                  </td>
+
+                  {/* Context / Tags */}
+                  <td className="py-4 px-4 align-top">
+                    <div className="flex flex-wrap gap-1.5">
+                      {p.fitur && (
+                        <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100/80 rounded-md text-[10px] font-bold">
+                          {p.fitur}
+                        </span>
+                      )}
+                      {p.system && (
+                        <span className="px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-100/80 rounded-md text-[10px] font-bold">
+                          {p.system}
+                        </span>
+                      )}
+                      {p.surrounding && (
+                        <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100/80 rounded-md text-[10px] font-bold">
+                          {p.surrounding}
+                        </span>
+                      )}
+                      {!p.fitur && !p.system && !p.surrounding && (
+                        <span className="text-slate-300 text-[11px] italic">No tags</span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* PIC */}
+                  <td className="py-4 px-4 align-top">
+                    <div className="text-xs font-bold text-slate-800">
+                      {assigneeName}
+                    </div>
+                  </td>
+
+                  {/* Target Date */}
+                  <td className="py-4 px-4 align-top">
+                    {(p.targetDate || p.target_date) ? (
+                      <div className="flex items-center gap-1 text-xs text-slate-600 font-semibold">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>{p.targetDate || p.target_date}</span>
+                      </div>
+                    ) : (
+                      <span className="text-slate-300 text-xs italic">-</span>
+                    )}
+                  </td>
+
+                  {/* Thread Icon Button */}
+                  <td className="py-4 px-4 text-center align-top">
+                    {(() => {
+                      const commentsList = p.id ? (commentsMap[p.id] || []) : [];
+                      const count = commentsList.length;
+
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenThreadDrawer(p)}
+                          className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border shadow-2xs active:scale-95 ${
+                            count > 0
+                              ? "bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-indigo-200"
+                              : "bg-slate-50 hover:bg-slate-100 text-slate-400 border-slate-200/60"
+                          }`}
+                          title="Buka Thread Komentar & Balasan"
+                        >
+                          <MessageSquare className={`w-3.5 h-3.5 ${count > 0 ? "text-indigo-600 fill-indigo-100" : "text-slate-400"}`} />
+                          <span>{count}</span>
+                        </button>
+                      );
+                    })()}
+                  </td>
+
+                  {/* Status Badge */}
+                  <td className="py-4 px-4 text-center align-top">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStatus(p)}
+                      className="cursor-pointer transition-all active:scale-95 inline-block"
+                      title="Klik untuk ubah status PENDING / DONE"
+                    >
+                      {isCompleted ? (
+                        <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-2xs hover:bg-emerald-200">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          DONE
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-1 px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-300 shadow-2xs hover:bg-amber-200">
+                          <Clock className="w-3 h-3 text-amber-600" />
+                          PENDING
+                        </span>
+                      )}
+                    </button>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="py-4 px-4 text-center align-top">
+                    <div className="flex items-center justify-center gap-1.5">
+                      {hasPermission(userRole, "meetingNotes", "update", isOwner, permissions) && (
+                        <button
+                          onClick={() => startEdit(p)}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      {hasPermission(userRole, "meetingNotes", "delete", isOwner, permissions) && (
+                        <button
+                          onClick={() => setPointToDelete(p.id!)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          title="Hapus"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+
+            {/* LIVE QUICK ADD INLINE ROW (Separate columns matching headers) */}
             {canAdd && (
-              <tr className="bg-indigo-50/30 hover:bg-indigo-50/50 transition-colors">
-                <td className="py-3 px-3 text-center text-indigo-600 font-black text-xs">
-                  <Plus className="w-4 h-4 mx-auto" />
+              <tr className="bg-indigo-50/20 hover:bg-indigo-50/40 transition-colors">
+                <td className="py-3 px-4 text-center font-bold text-indigo-500 text-xs align-middle">
+                  <Plus className="w-4 h-4 mx-auto animate-bounce text-indigo-600" />
                 </td>
-                {/* 1. Concern */}
-                <td className="py-3 px-3">
+
+                {/* Concern */}
+                <td className="py-3 px-4 align-middle">
                   <input
                     type="text"
-                    placeholder="+ Topik / Concern..."
+                    placeholder="✨ Ketik concern..."
                     value={quickConcern}
                     onChange={(e) => setQuickConcern(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleQuickAdd();
-                    }}
-                    className="w-full px-2.5 py-1.5 bg-white border border-indigo-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl text-xs font-semibold text-slate-800 outline-none shadow-2xs placeholder:text-slate-400"
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleLiveQuickAdd(); }}
+                    className="w-full px-3 py-1.5 bg-white border border-indigo-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-lg text-xs font-semibold text-slate-800 outline-none shadow-2xs placeholder:text-slate-400"
                   />
                 </td>
-                {/* 2. Catatan / Keterangan */}
-                <td className="py-3 px-3">
+
+                {/* Catatan / Keterangan */}
+                <td className="py-3 px-4 align-middle">
                   <input
                     type="text"
-                    placeholder="Catatan / rincian..."
-                    value={quickKeterangan}
-                    onChange={(e) => setQuickKeterangan(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleQuickAdd();
-                    }}
-                    className="w-full px-2.5 py-1.5 bg-white border border-indigo-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-800 outline-none shadow-2xs placeholder:text-slate-400"
+                    placeholder="Catatan / Keterangan..."
+                    value={quickCatatan}
+                    onChange={(e) => setQuickCatatan(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleLiveQuickAdd(); }}
+                    className="w-full px-3 py-1.5 bg-white border border-slate-200 focus:border-indigo-500 rounded-lg text-xs font-normal text-slate-700 outline-none placeholder:text-slate-400"
                   />
                 </td>
-                {/* 3. Next Action */}
-                <td className="py-3 px-3">
-                  <input
-                    type="text"
-                    placeholder="Tindakan lanjut..."
-                    value={quickTindakanLanjut}
-                    onChange={(e) => setQuickTindakanLanjut(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleQuickAdd();
-                    }}
-                    className="w-full px-2.5 py-1.5 bg-white border border-indigo-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-800 outline-none shadow-2xs placeholder:text-slate-400"
-                  />
-                </td>
-                {/* 4. Assignee PIC */}
-                <td className="py-3 px-3">
-                  <select
-                    value={quickAssignee}
-                    onChange={(e) => setQuickAssignee(e.target.value)}
-                    className="w-full px-2 py-1.5 bg-white border border-indigo-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 outline-none shadow-2xs"
-                  >
-                    <option value="">-- PIC --</option>
-                    {(projectMembers.length > 0 ? projectMembers : users).map((u) => (
-                      <option key={u.uid || u.id} value={u.uid || u.id}>
-                        {u.displayName || u.username}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                {/* 5. Fitur */}
-                <td className="py-3 px-3">
-                  <select
+
+                {/* Context / Tags */}
+                <td className="py-3 px-4 align-middle">
+                  <StyledDropdown
                     value={quickFitur}
-                    onChange={(e) => setQuickFitur(e.target.value)}
-                    className="w-full px-2 py-1.5 bg-white border border-indigo-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 outline-none shadow-2xs"
-                  >
-                    <option value="">-- Fitur --</option>
-                    {masterData.filter(m => m.type?.toLowerCase() === 'fitur').map((m) => (
-                      <option key={m.id || m.label} value={m.label}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setQuickFitur(val)}
+                    options={masterData.filter(m => m.type?.toLowerCase() === 'fitur').map(m => ({ id: m.label, label: m.label, color: m.color, icon: m.icon }))}
+                    type="fitur"
+                    masterData={masterData}
+                    buttonClassName="w-full h-8 px-2.5 bg-white border border-slate-200 text-xs text-left text-slate-700 rounded-lg font-semibold shadow-2xs"
+                  />
                 </td>
-                {/* 6. System */}
-                <td className="py-3 px-3">
-                  <select
-                    value={quickSystem}
-                    onChange={(e) => setQuickSystem(e.target.value)}
-                    className="w-full px-2 py-1.5 bg-white border border-indigo-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 outline-none shadow-2xs"
-                  >
-                    <option value="">-- System --</option>
-                    {masterData.filter(m => m.type?.toLowerCase() === 'system').map((m) => (
-                      <option key={m.id || m.label} value={m.label}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
+
+                {/* PIC */}
+                <td className="py-3 px-4 align-middle">
+                  <StyledDropdown
+                    value={quickAssignTo}
+                    onChange={(val) => setQuickAssignTo(val)}
+                    options={[{ id: 'Unassigned', label: 'Assign PIC' }, ...userOptions]}
+                    members={projectMembers}
+                    type="member"
+                    masterData={masterData}
+                    buttonClassName="w-full h-8 px-2.5 bg-white border border-slate-200 text-xs text-left text-slate-700 rounded-lg font-semibold shadow-2xs"
+                  />
                 </td>
-                {/* 7. Surrounding */}
-                <td className="py-3 px-3">
-                  <select
-                    value={quickSurrounding}
-                    onChange={(e) => setQuickSurrounding(e.target.value)}
-                    className="w-full px-2 py-1.5 bg-white border border-indigo-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 outline-none shadow-2xs"
-                  >
-                    <option value="">-- Surrounding --</option>
-                    {masterData.filter(m => m.type?.toLowerCase() === 'surrounding').map((m) => (
-                      <option key={m.id || m.label} value={m.label}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                {/* Thread */}
-                <td className="py-3 px-3 text-center text-slate-400 text-[11px] font-bold">
-                  💬 0
-                </td>
-                {/* Status */}
-                <td className="py-3 px-3 text-center">
-                  <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200 shadow-2xs">
-                    PENDING
-                  </span>
-                </td>
-                {/* 8. Target Date */}
-                <td className="py-3 px-3">
+
+                {/* Target Date */}
+                <td className="py-3 px-4 align-middle">
                   <input
                     type="date"
                     value={quickTargetDate}
                     onChange={(e) => setQuickTargetDate(e.target.value)}
-                    className="w-full px-2 py-1 bg-white border border-indigo-200 focus:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 outline-none shadow-2xs"
+                    className="w-full h-8 px-2 bg-white border border-slate-200 text-xs text-slate-700 rounded-lg font-semibold outline-none"
                   />
                 </td>
+
+                {/* Thread */}
+                <td className="py-3 px-4 text-center align-middle text-slate-300 text-xs">
+                  -
+                </td>
+
+                {/* Status */}
+                <td className="py-3 px-4 text-center align-middle">
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-300">
+                    PENDING
+                  </span>
+                </td>
+
                 {/* Action */}
-                <td className="py-3 px-3 text-center">
+                <td className="py-3 px-4 text-center align-middle">
                   <button
-                    onClick={handleQuickAdd}
+                    type="button"
+                    onClick={() => handleLiveQuickAdd()}
                     disabled={isSaving || !quickConcern.trim()}
-                    className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer active:scale-95"
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-40 text-white rounded-lg text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                    title="Tambah Poin"
                   >
-                    + Tambah
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add</span>
                   </button>
                 </td>
               </tr>
-            )}
-
-            {/* DISCUSSION POINTS DATA ROWS */}
-            {points.length === 0 ? (
-              <tr>
-                <td colSpan={12} className="py-12 text-center text-slate-400 font-medium">
-                  Belum ada poin diskusi. Gunakan baris di atas untuk menambah poin baru secara langsung.
-                </td>
-              </tr>
-            ) : (
-              points.map((p, idx) => {
-                const isOwner = p.authorId === (currentUser?.uid || "");
-                const isEditingTopic = inlineEditingId === p.id;
-                const isCompleted = p.status === "completed";
-
-                return (
-                  <tr key={p.id} className="hover:bg-slate-50/80 transition-colors group">
-                    {/* Index */}
-                    <td className="py-3 px-3 text-center font-bold text-slate-400 text-xs">
-                      {idx + 1}
-                    </td>
-
-                    {/* 1. Concern / Topic */}
-                    <td className="py-3 px-3 font-semibold text-slate-800">
-                      {isEditingTopic ? (
-                        <div className="flex items-center gap-1.5">
-                          <input
-                            type="text"
-                            autoFocus
-                            value={inlineConcernVal}
-                            onChange={(e) => setInlineConcernVal(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") handleInlineSaveConcern(p.id!);
-                              if (e.key === "Escape") setInlineEditingId(null);
-                            }}
-                            className="flex-1 px-2.5 py-1 bg-white border border-indigo-500 rounded-xl text-xs font-bold text-slate-900 outline-none shadow-sm"
-                          />
-                          <button
-                            onClick={() => handleInlineSaveConcern(p.id!)}
-                            className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-lg hover:bg-emerald-700 transition-colors"
-                          >
-                            OK
-                          </button>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={() => {
-                            setInlineEditingId(p.id!);
-                            setInlineConcernVal(p.concern);
-                          }}
-                          className="cursor-pointer hover:text-indigo-600 transition-colors flex items-center justify-between group/cell"
-                          title="Klik untuk edit cepat"
-                        >
-                          <span className={isCompleted ? "line-through text-slate-400 font-normal" : ""}>
-                            {p.concern}
-                          </span>
-                          <Edit2 className="w-3 h-3 text-slate-300 opacity-0 group-hover/cell:opacity-100 transition-opacity ml-1.5 shrink-0" />
-                        </div>
-                      )}
-                    </td>
-
-                    {/* 2. Catatan (Comment) */}
-                    <td className="py-3 px-3">
-                      <input
-                        type="text"
-                        defaultValue={p.keterangan || p.comment || ""}
-                        onBlur={(e) => handleInlineUpdateField(p.id!, "keterangan", e.target.value)}
-                        placeholder="--"
-                        className="border-0 bg-transparent hover:bg-slate-100 focus:bg-white focus:border focus:border-indigo-400 rounded-lg py-1 px-1.5 text-xs text-slate-600 cursor-pointer outline-none transition-all w-full truncate"
-                      />
-                    </td>
-
-                    {/* 3. Next Action */}
-                    <td className="py-3 px-3">
-                      <input
-                        type="text"
-                        defaultValue={p.tindakanLanjut || p.next_action || ""}
-                        onBlur={(e) => handleInlineUpdateField(p.id!, "tindakanLanjut", e.target.value)}
-                        placeholder="--"
-                        className="border-0 bg-transparent hover:bg-slate-100 focus:bg-white focus:border focus:border-indigo-400 rounded-lg py-1 px-1.5 text-xs text-slate-600 cursor-pointer outline-none transition-all w-full truncate"
-                      />
-                    </td>
-
-                    {/* 4. Assignee (PIC Avatar & Live Dropdown) */}
-                    <td className="py-3 px-3">
-                      <select
-                        value={p.assignTo || p.assignee_id || ""}
-                        onChange={(e) => handleInlineUpdateField(p.id!, "assignTo", e.target.value)}
-                        className="w-full border-0 bg-transparent hover:bg-slate-100 focus:bg-white focus:border focus:border-indigo-400 rounded-lg py-1 px-1 text-xs font-bold text-slate-700 cursor-pointer outline-none transition-all"
-                      >
-                        <option value="">Unassigned</option>
-                        {(projectMembers.length > 0 ? projectMembers : users).map((u) => (
-                          <option key={u.uid || u.id} value={u.uid || u.id}>
-                            {u.displayName || u.username}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-
-                    {/* 5. Fitur */}
-                    <td className="py-3 px-3">
-                      <select
-                        value={p.fitur || p.feature_id || ""}
-                        onChange={(e) => handleInlineUpdateField(p.id!, "fitur", e.target.value)}
-                        className="w-full border-0 bg-transparent hover:bg-slate-100 focus:bg-white focus:border focus:border-indigo-400 rounded-lg py-1 px-1 text-xs font-semibold text-slate-700 cursor-pointer outline-none transition-all"
-                      >
-                        <option value="">--</option>
-                        {masterData.filter(m => m.type?.toLowerCase() === 'fitur').map((m) => (
-                          <option key={m.id || m.label} value={m.label}>
-                            {m.label}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-
-                    {/* 6. System */}
-                    <td className="py-3 px-3">
-                      <select
-                        value={p.system || p.system_id || ""}
-                        onChange={(e) => handleInlineUpdateField(p.id!, "system", e.target.value)}
-                        className="w-full border-0 bg-transparent hover:bg-slate-100 focus:bg-white focus:border focus:border-indigo-400 rounded-lg py-1 px-1 text-xs font-semibold text-slate-700 cursor-pointer outline-none transition-all"
-                      >
-                        <option value="">--</option>
-                        {masterData.filter(m => m.type?.toLowerCase() === 'system').map((m) => (
-                          <option key={m.id || m.label} value={m.label}>
-                            {m.label}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-
-                    {/* 7. Surrounding */}
-                    <td className="py-3 px-3">
-                      <select
-                        value={p.surrounding || p.surrounding_id || ""}
-                        onChange={(e) => handleInlineUpdateField(p.id!, "surrounding", e.target.value)}
-                        className="w-full border-0 bg-transparent hover:bg-slate-100 focus:bg-white focus:border focus:border-indigo-400 rounded-lg py-1 px-1 text-xs font-semibold text-slate-700 cursor-pointer outline-none transition-all"
-                      >
-                        <option value="">--</option>
-                        {masterData.filter(m => m.type?.toLowerCase() === 'surrounding').map((m) => (
-                          <option key={m.id || m.label} value={m.label}>
-                            {m.label}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-
-                    {/* Thread Icon Button */}
-                    <td className="py-3 px-3 text-center">
-                      {(() => {
-                        const commentsList = p.id ? (commentsMap[p.id] || []) : [];
-                        const count = commentsList.length;
-
-                        return (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenThreadDrawer(p)}
-                            className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer border shadow-2xs active:scale-95 ${
-                              count > 0
-                                ? "bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-indigo-200"
-                                : "bg-slate-50 hover:bg-slate-100 text-slate-400 border-slate-200/60"
-                            }`}
-                            title="Buka Thread Komentar & Balasan"
-                          >
-                            <MessageSquare className={`w-3.5 h-3.5 ${count > 0 ? "text-indigo-600 fill-indigo-100" : "text-slate-400"}`} />
-                            <span>💬 {count}</span>
-                          </button>
-                        );
-                      })()}
-                    </td>
-
-                    {/* Status Badge */}
-                    <td className="py-3 px-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleStatus(p)}
-                        className="cursor-pointer transition-all active:scale-95 inline-block"
-                        title="Klik untuk ubah status PENDING / DONE"
-                      >
-                        {isCompleted ? (
-                          <span className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-2xs hover:bg-emerald-200">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                            DONE
-                          </span>
-                        ) : (
-                          <span className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-300 shadow-2xs hover:bg-amber-200">
-                            <Clock className="w-3 h-3 text-amber-600" />
-                            PENDING
-                          </span>
-                        )}
-                      </button>
-                    </td>
-
-                    {/* Target Date */}
-                    <td className="py-3 px-3">
-                      <input
-                        type="date"
-                        value={p.targetDate || p.target_date || ""}
-                        onChange={(e) => handleInlineUpdateField(p.id!, "targetDate", e.target.value)}
-                        className="border-0 bg-transparent hover:bg-slate-100 focus:bg-white focus:border focus:border-indigo-400 rounded-lg py-1 px-1 text-xs font-semibold text-slate-700 cursor-pointer outline-none transition-all w-full"
-                      />
-                    </td>
-
-                    {/* Actions */}
-                    <td className="py-3 px-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        {hasPermission(userRole, "meetingNotes", "update", isOwner, permissions) && (
-                          <button
-                            onClick={() => startEdit(p)}
-                            className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
-                            title="Detail Edit Modal"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        {hasPermission(userRole, "meetingNotes", "delete", isOwner, permissions) && (
-                          <button
-                            onClick={() => setPointToDelete(p.id!)}
-                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                            title="Hapus"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
             )}
           </tbody>
         </table>
       </div>
 
-      {/* THREAD DISCUSSIONS SLIDE-OVER SHEET / POPOVER */}
+      {/* Pagination Footer */}
+      <div className="px-6 py-3.5 bg-slate-50/60 border-t border-slate-200 flex items-center justify-between text-xs font-semibold text-slate-600">
+        <div>
+          Menampilkan {paginatedPoints.length} dari {filteredPoints.length} poin (Total: {points.length})
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" /> Prev
+          </button>
+          <span className="px-3 py-1 font-bold bg-white border border-slate-200 rounded-lg text-indigo-600 shadow-2xs">
+            {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage >= totalPages}
+            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer"
+          >
+            Next <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* THREAD DISCUSSIONS SLIDE-OVER SHEET */}
       {activeThreadPoint && (
         <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-[9999] flex justify-end animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-lg h-full shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-250 text-left">
-            {/* Drawer Header */}
             <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
               <div className="flex items-center gap-3 pr-4">
                 <div className="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200 shrink-0">
@@ -1179,8 +863,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               </button>
             </div>
 
-            {/* Drawer Comment List (Scrollable) */}
-            <div className="flex-1 p-5 overflow-y-auto space-y-4 bg-slate-50/30">
+            <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-4 bg-slate-50/30">
               {threadComments.length === 0 ? (
                 <div className="text-center py-16 px-4">
                   <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto mb-3 text-indigo-400">
@@ -1192,58 +875,86 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   </p>
                 </div>
               ) : (
-                threadComments.map((comment) => (
-                  <div key={comment.id} className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white font-bold text-xs flex items-center justify-center uppercase shadow-2xs">
-                          {(comment.userName || "U")[0]}
+                threadComments.map((comment) => {
+                  const authorName = comment.userName || comment.user_name || (comment as any).authorName || (comment as any).name || "Member";
+                  const commentBody = comment.commentText || comment.comment_text || (comment as any).content || (comment as any).text || "";
+                  const commentDate = comment.createdAt || comment.created_at || new Date();
+                  const c = comment as any;
+                  const commentUserId = c.userId || c.user_id || c.authorId || c.author_id;
+                  const isMine = (commentUserId && currentUser && (commentUserId === currentUser.uid || commentUserId === currentUser.id)) ||
+                                 (authorName && currentUser && (authorName === currentUser.displayName || authorName === currentUser.username));
+
+                  return (
+                    <div key={comment.id || Math.random()} className={cn("flex w-full", isMine ? "justify-end" : "justify-start")}>
+                      <div className={cn(
+                        "p-4 rounded-2xl max-w-[85%] md:max-w-2xl shadow-xs",
+                        isMine ? "bg-indigo-600 text-white border-0" : "bg-white text-slate-700 border border-gray-200"
+                      )}>
+                        {/* Header Baris Atas */}
+                        <div className={cn(
+                          "flex items-center justify-between mb-2 gap-3",
+                          isMine ? "flex-row-reverse" : "flex-row"
+                        )}>
+                          <div className={cn("flex items-center gap-2", isMine ? "flex-row-reverse" : "flex-row")}>
+                            <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold text-xs flex items-center justify-center uppercase shrink-0 object-cover shadow-2xs">
+                              {(authorName[0] || "U")}
+                            </div>
+                            <span className={cn(
+                              "text-sm font-semibold tracking-tight",
+                              isMine ? "text-white" : "text-slate-700"
+                            )}>
+                              {authorName}
+                            </span>
+                          </div>
+                          <span className={cn(
+                            "text-xs font-medium",
+                            isMine ? "text-white/80" : "text-gray-400"
+                          )}>
+                            {new Date(commentDate).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
                         </div>
-                        <span className="text-xs font-bold text-slate-800">
-                          {comment.userName || "Member"}
-                        </span>
+
+                        {/* Isi Teks */}
+                        <p className={cn(
+                          "text-sm leading-relaxed whitespace-pre-wrap break-words",
+                          isMine ? "text-white" : "text-slate-700"
+                        )}>
+                          {commentBody}
+                        </p>
                       </div>
-                      <span className="text-[10px] font-semibold text-slate-400">
-                        {new Date(comment.createdAt).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
                     </div>
-                    <p className="text-xs text-slate-700 font-semibold leading-relaxed whitespace-pre-wrap pl-9">
-                      {comment.commentText}
-                    </p>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
-            {/* Drawer Reply Input Box */}
-            <div className="p-4 border-t border-slate-200 bg-white shrink-0 space-y-3">
-              <textarea
-                rows={3}
-                placeholder="Tulis balasan atau instruksi untuk PIC..."
-                value={newCommentText}
-                onChange={(e) => setNewCommentText(e.target.value)}
-                className="w-full p-3 bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-2xl text-xs font-semibold text-slate-800 outline-none transition-all resize-none placeholder:text-slate-400"
-              />
-              <div className="flex justify-end">
+            <div className="p-4 border-t border-slate-200 bg-white shrink-0">
+              <div className="flex items-center gap-2 bg-slate-100 rounded-full px-4 py-2">
+                <input
+                  type="text"
+                  placeholder="Tulis balasan atau instruksi untuk PIC..."
+                  value={newCommentText}
+                  onChange={(e) => setNewCommentText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isSendingComment && newCommentText.trim()) {
+                      handleSendThreadComment();
+                    }
+                  }}
+                  className="w-full bg-transparent border-0 focus:ring-0 outline-none text-xs text-slate-800 placeholder:text-slate-400 py-1"
+                />
                 <button
                   onClick={handleSendThreadComment}
                   disabled={isSendingComment || !newCommentText.trim()}
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                  className="p-2 text-indigo-600 hover:text-indigo-700 disabled:opacity-40 cursor-pointer rounded-full transition-colors shrink-0"
+                  title="Kirim Balasan"
                 >
-                  {isSendingComment ? (
-                    <span>Mengirim...</span>
-                  ) : (
-                    <>
-                      <span>Kirim Balasan</span>
-                      <Send className="w-3.5 h-3.5" />
-                    </>
-                  )}
+                  <Send className="w-4 h-4" />
                 </button>
               </div>
             </div>

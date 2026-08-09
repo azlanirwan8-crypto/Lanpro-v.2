@@ -578,6 +578,9 @@ async function startServer() {
       await addCol("Meetings", "file_size", "BIGINT");
       await addCol("Meetings", "upload_status", "VARCHAR(50)");
       await addCol("Meetings", "analysis_result", "LONGTEXT");
+      await addCol("Meetings", "fileData", "LONGTEXT");
+      await addCol("Meetings", "fileName", "VARCHAR(255)");
+      await addCol("Meetings", "fileType", "VARCHAR(100)");
 
       // 3. Database Integrity Healing
       // 3. Database Integrity Healing: Resolve mismatch between Firebase UIDs and internal database IDs
@@ -8108,16 +8111,16 @@ Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack ata
   app.post("/api/projects/:projectId/meetings", async (req, res) => {
     try {
       const { projectId } = req.params;
-      const { title, description, meetingLink, authorId } = req.body;
+      const { title, description, meetingLink, authorId, fileData, fileName, fileType } = req.body;
       const effectiveAuthorId = authorId || req.headers["x-user-id"] || "guest";
       const connection = await mysqlPool.getConnection();
       const newId = crypto.randomUUID();
       await connection.query(
-        "INSERT INTO Meetings (id, projectId, title, description, meetingLink, authorId) VALUES (?, ?, ?, ?, ?, ?)",
-        [newId, projectId, title, description || null, meetingLink || null, effectiveAuthorId]
+        "INSERT INTO Meetings (id, projectId, title, description, meetingLink, authorId, fileData, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [newId, projectId, title, description || null, meetingLink || null, effectiveAuthorId, fileData || null, fileName || null, fileType || null]
       );
       connection.release();
-      res.json({ status: "success", data: { id: newId, projectId, title, description, meetingLink, authorId: effectiveAuthorId } });
+      res.json({ status: "success", data: { id: newId, projectId, title, description, meetingLink, authorId: effectiveAuthorId, fileName, fileType } });
     } catch (error: any) {
       console.error(error);
       res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
@@ -8127,13 +8130,16 @@ Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack ata
   app.put("/api/projects/:projectId/meetings/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const { title, description, meetingLink, transcript, aiSummary } = req.body;
+      const { title, description, meetingLink, transcript, aiSummary, fileData, fileName, fileType } = req.body;
       const updates = [];
       const values = [];
       if (title !== undefined) { updates.push('title = ?'); values.push(title); }
       if (description !== undefined) { updates.push('description = ?'); values.push(description); }
       if (meetingLink !== undefined) { updates.push('meetingLink = ?'); values.push(meetingLink); }
       if (transcript !== undefined) { updates.push('transcript = ?'); values.push(transcript); }
+      if (fileData !== undefined) { updates.push('fileData = ?'); values.push(fileData); }
+      if (fileName !== undefined) { updates.push('fileName = ?'); values.push(fileName); }
+      if (fileType !== undefined) { updates.push('fileType = ?'); values.push(fileType); }
       if (aiSummary !== undefined) {
         updates.push('aiSummary = ?');
         values.push(aiSummary ? (typeof aiSummary === 'string' ? aiSummary : JSON.stringify(aiSummary)) : null);
@@ -8149,6 +8155,24 @@ Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack ata
     } catch (error: any) {
       console.error(error);
       res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
+    }
+  });
+
+  app.get("/api/projects/:projectId/meetings/:id/download", async (req, res) => {
+    let connection;
+    try {
+      const { id } = req.params;
+      connection = await mysqlPool.getConnection();
+      const [rows] = await connection.query("SELECT fileData, fileName, fileType FROM Meetings WHERE id = ?", [id]);
+      if ((rows as any[]).length > 0) {
+         res.json({ status: "success", data: (rows as any[])[0] });
+      } else {
+         res.status(404).json({ status: "error", message: "Meeting atau berkas tidak ditemukan" });
+      }
+    } catch (error: any) {
+      res.status(500).json({ status: "error", message: error.message });
+    } finally {
+      if (connection) connection.release();
     }
   });
 
@@ -8186,16 +8210,15 @@ Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack ata
       const effectiveAuthorId = authorId || req.headers["x-user-id"] || "guest";
       const connection = await mysqlPool.getConnection();
       const newId = crypto.randomUUID();
+      const contentVal = concern || keterangan || "Poin Diskusi";
       try {
         await connection.query(
-          "INSERT INTO DiscussionPoints (id, meetingId, parentPointId, parentpointid, authorId, assignTo, assignto, concern, fitur, `system`, surrounding, keterangan, tindakanLanjut, status, targetDate, tanggalUpdateStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "INSERT INTO DiscussionPoints (id, meetingId, \"parentPointId\", \"authorId\", \"assignTo\", concern, fitur, \"system\", surrounding, keterangan, \"tindakanLanjut\", status, \"targetDate\", \"tanggalUpdateStatus\", content) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           [
             newId,
             id,
             parentPointId || null,
-            parentPointId || null,
             effectiveAuthorId,
-            assignTo || null,
             assignTo || null,
             concern || null,
             fitur || null,
@@ -8205,14 +8228,15 @@ Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack ata
             tindakanLanjut || null,
             status || 'pending',
             targetDate || null,
-            tanggalUpdateStatus || null
+            tanggalUpdateStatus || null,
+            contentVal
           ]
         );
       } catch (insertErr: any) {
         console.warn("[POST DiscussionPoint Resilient Retry]:", insertErr?.message);
         await connection.query(
-          "INSERT INTO DiscussionPoints (id, meetingId, authorId, concern, status) VALUES (?, ?, ?, ?, ?)",
-          [newId, id, effectiveAuthorId, concern || "Poin Diskusi", status || 'pending']
+          "INSERT INTO DiscussionPoints (id, meetingId, \"authorId\", concern, status, content) VALUES (?, ?, ?, ?, ?, ?)",
+          [newId, id, effectiveAuthorId, concern || "Poin Diskusi", status || 'pending', contentVal]
         );
       }
       connection.release();
