@@ -28,14 +28,14 @@ import { registrationSchema, evaluatePasswordStrength } from "./lib/registration
 import { useAppStore } from "./store/useAppStore";
 import { CacheManager } from "./lib/cache";
 import { useMasterData } from "./hooks/useMasterData";
-import { MeetingNotes } from "./features/meetingNotes/MeetingNotes";
+import { MeetingNotes } from "./features/meeting-notes/MeetingNotes";
 import { WikiView } from "./features/wiki";
-import { NotebookLM } from "./features/notebooklm";
+import { NotebookLM } from "./features/notebook-lm";
 import { DashboardView } from "./features/dashboard";
 import { IssueListView, TaskDetailModal } from "./features/issues";
 import { UserDetailView } from "./features/users/UserDetailView";
 import { PlanningView } from "./features/planning";
-import { BoardView } from "./features/Kanban";
+import { BoardView } from "./features/kanban";
 import { Sidebar } from "./features/sidebar";
 import { TimelinePanel } from "./features/timeline/index";
 import { AdminUserPanel } from "./features/users";

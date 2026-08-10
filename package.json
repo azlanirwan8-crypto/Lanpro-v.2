@@ -9,9 +9,10 @@
     "start": "node dist/server.cjs",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit && tsx scripts/validate-permissions.ts",
-    "test:reporter": "tsx scripts/test-reporter-assignment.ts",
-    "validate:permissions": "tsx scripts/validate-permissions.ts"
+    "lint": "tsc --noEmit && tsx scripts/validate/validate-permissions.ts",
+    "test:reporter": "tsx scripts/test/test-reporter-assignment.ts",
+    "validate:permissions": "tsx scripts/validate/validate-permissions.ts",
+    "db:migrate": "tsx server/migrations/runner.ts"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",

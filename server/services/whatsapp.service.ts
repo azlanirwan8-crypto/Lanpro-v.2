@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import dbPool from './db'; 
+import dbPool from '../../src/lib/db'; 
 
 // Konfigurasi WhatsApp (Gunakan environment variable untuk token)
 const WA_API_URL = 'https://api.fonnte.com/send';
