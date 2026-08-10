@@ -279,9 +279,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#f8fafc] dark:bg-slate-950 overflow-y-auto">
-      {/* Velzon Sticky Header Bar */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+    <div className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-y-auto p-3 md:p-6">
+      <div className="flex flex-col space-y-5 min-h-full animate-in fade-in duration-700">
+        {/* Velzon Sticky Header Bar */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-6 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -312,7 +313,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       </div>
 
       {/* Main Content Area */}
-      <div className="p-6 w-full space-y-5 flex-1">
+      <div className="w-full space-y-5 flex-1">
         {/* Profile Card Header */}
         <div className="bg-white dark:bg-slate-900 p-5 rounded-lg shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center md:items-start gap-5 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50 dark:bg-indigo-950/20 rounded-bl-full pointer-events-none opacity-60" />
@@ -813,6 +814,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         </div>
       </div>
     </div>
+  </div>
   );
 };
 

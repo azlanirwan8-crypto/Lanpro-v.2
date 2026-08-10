@@ -399,46 +399,55 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
   };
 
   return (
-    <div id="notebooklm-container" className="flex flex-col h-[calc(100vh-4rem)] bg-[#f4f7f9] p-3 md:p-6 text-slate-800 font-sans">
-      <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-lg shadow-sm overflow-hidden">
-        {/* Header Bar */}
-        <header id="notebooklm-header" className="flex items-center justify-between px-6 py-5 bg-slate-50/30 border-b border-slate-200/60 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm font-black text-slate-800 tracking-tight">
-                  NotebookLM Studio
-                </h1>
-                <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-full">
-                  AI Grounded
-                </span>
-              </div>
-              <p className="text-[10.5px] text-slate-400 font-bold uppercase tracking-wider">
-                Proyek: <span className="text-indigo-600">{project.name}</span>
-              </p>
-            </div>
+    <div id="notebooklm-container" className="flex flex-col min-h-[calc(100vh-4rem)] bg-slate-50 p-4 md:p-6 text-slate-800 font-sans space-y-4 animate-in fade-in duration-500">
+      
+      {/* Panel 1: Top Actions */}
+      <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between shadow-sm shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm">
+            <Sparkles className="w-5 h-5" />
           </div>
+          <h1 className="text-sm font-black text-slate-800 tracking-tight">NotebookLM Studio</h1>
+        </div>
 
-          {/* Model Selector dropdown */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-600">Model AI:</span>
-            <select
-              value={selectedModel}
-              onChange={(e: any) => setSelectedModel(e.target.value)}
-              className="px-3 py-2 bg-white border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs transition-all cursor-pointer"
-            >
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-              <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
-              <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-            </select>
-          </div>
-        </header>
+        {/* Model Selector dropdown */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-slate-600">Model AI:</span>
+          <select
+            value={selectedModel}
+            onChange={(e: any) => setSelectedModel(e.target.value)}
+            className="px-3 py-2 bg-white border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all cursor-pointer"
+          >
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+            <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+          </select>
+        </div>
+      </div>
 
-      {/* Main Grid: Left Sidebar Sources + Right Work Area */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* Panel 2: Meta Context */}
+      <div className="bg-white border border-slate-200 rounded-lg p-5 md:p-6 shadow-sm shrink-0">
+        <div className="flex flex-wrap items-center gap-2 select-none mb-2">
+          <span className="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-full">
+            AI Grounded Workspace
+          </span>
+          <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+            <User className="w-3 h-3" /> {currentUser?.displayName || 'Tim AI'}
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+            <Layers className="w-3 h-3" /> {sources.length} Sumber Konteks Aktif
+          </span>
+        </div>
+
+        <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-snug flex items-center gap-2">
+          <BookOpen className="w-6 h-6 text-indigo-600 shrink-0" />
+          <span className="truncate">Konteks Proyek: {project.name}</span>
+        </h2>
+      </div>
+
+      {/* Panel 3: Main Grid (Left Sidebar Sources + Right Work Area) */}
+      <div className="bg-white border border-slate-200 rounded-lg shadow-sm flex-1 flex min-h-[600px] overflow-hidden">
         {/* Left Sidebar: Sources Panel */}
         <aside id="notebooklm-sources-sidebar" className="w-80 border-r border-slate-200/60 bg-slate-50/40 flex flex-col shrink-0">
           <div className="p-4 border-b border-slate-200/60 flex items-center justify-between">
@@ -1148,7 +1157,6 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
           </motion.div>
         </div>
       )}
-      </div>
     </div>
   );
 };

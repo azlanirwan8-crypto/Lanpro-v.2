@@ -917,17 +917,13 @@ export const WikiView: React.FC<WikiViewProps> = ({
         </div>
       </div>
       ) : (
-        <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-[#f4f7f9] text-left font-sans">
-      <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-white border border-slate-200/80 rounded-lg shadow-sm overflow-hidden">
-        
-        {/* MAIN VIEWPORT: ACTIVE DOCUMENT VIEW */}
-        <div className="flex-1 bg-[#f8fafc] flex flex-col h-full overflow-hidden transition-all">
-          {activeDoc ? (
-            <div className="flex-1 flex flex-col h-full min-h-0">
-              
-              {/* Document view header with utility toolbar */}
-              <div className="p-4 md:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 bg-white shadow-sm relative overflow-hidden">
-                <div className="flex-1 min-w-0 flex items-center gap-3">
+        <div className="w-full flex-1 flex flex-col min-h-0 bg-slate-50 text-left font-sans">
+          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4 animate-in fade-in duration-500">
+            {activeDoc ? (
+              <>
+                
+                {/* Panel 1: Top Actions */}
+                <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between shadow-sm shrink-0">
                   <button
                     onClick={() => setActiveDocId(null)}
                     className="flex items-center gap-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0"
@@ -935,86 +931,86 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   >
                     <ChevronLeft className="w-4 h-4" /> Daftar
                   </button>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 select-none">
-                      <span className={getCategoryStyles(activeDoc.type).badge}>
-                        {activeDoc.type}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                        <User className="w-3 h-3" /> {getUserName(activeDoc.createdBy)}
-                      </span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                        <Calendar className="w-3 h-3" /> 
-                        {new Date(activeDoc.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </span>
-                    </div>
 
-                    <h2 className="text-sm md:text-base font-black text-slate-900 tracking-tight leading-snug mt-1 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-indigo-600 shrink-0" />
-                      <span className="truncate">{activeDoc.title}</span>
-                    </h2>
+                  <div className="flex items-center gap-2 shrink-0 z-10 select-none">
+                    {/* Download button if document has a file */}
+                    {activeDoc.fileName && (
+                      <button
+                        onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-black text-[10px] border border-emerald-100 rounded-lg transition-all cursor-pointer whitespace-nowrap"
+                        title="Unduh Lampiran Berkas"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Unduh</span>
+                      </button>
+                    )}
+
+                    {/* Fullscreen Toggle */}
+                    {(activeDoc.fileName || activeDoc.link) && (
+                      <button
+                        onClick={() => setIsFullscreenPreview(!isFullscreenPreview)}
+                        className={cn(
+                          "flex items-center gap-1 px-3 py-1.5 font-black text-[10px] border rounded-lg transition-all cursor-pointer whitespace-nowrap",
+                          isFullscreenPreview 
+                            ? "bg-slate-900 border-slate-900 text-white hover:bg-slate-800" 
+                            : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                        )}
+                        title={isFullscreenPreview ? "Keluar Layar Penuh" : "Pratinjau Layar Penuh"}
+                      >
+                        {isFullscreenPreview ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                        <span className="hidden sm:inline">{isFullscreenPreview ? "Normal" : "Layar Penuh"}</span>
+                      </button>
+                    )}
+
+                    {/* Edit & Delete Action Row (Hidden if user has only read-only permission) */}
+                    {canUpdate && (
+                      <button
+                        onClick={(e) => handleEditClick(activeDoc, e)}
+                        className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all cursor-pointer border border-slate-200 bg-white"
+                        title="Ubah Judul & Kategori"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={(e) => handleDeleteClick(activeDoc, e)}
+                        className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer border border-slate-200 bg-white"
+                        title="Hapus Dokumentasi"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* Standardized top utility toolbar */}
-                <div className="flex items-center gap-2 shrink-0 z-10 select-none bg-slate-50 md:bg-transparent p-1.5 md:p-0 rounded-xl">
-                  {/* Download button if document has a file */}
-                  {activeDoc.fileName && (
-                    <button
-                      onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-black text-[10px] border border-emerald-100 rounded-lg transition-all cursor-pointer whitespace-nowrap"
-                      title="Unduh Lampiran Berkas"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Unduh</span>
-                    </button>
-                  )}
+                {/* Panel 2: Meta Context & Title */}
+                <div className="bg-white border border-slate-200 rounded-lg p-5 md:p-6 shadow-sm shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 select-none mb-3">
+                    <span className={getCategoryStyles(activeDoc.type).badge}>
+                      {activeDoc.type}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                      <User className="w-3 h-3" /> {getUserName(activeDoc.createdBy)}
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                      <Calendar className="w-3 h-3" /> 
+                      {new Date(activeDoc.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
 
-                  {/* Fullscreen Toggle */}
-                  {(activeDoc.fileName || activeDoc.link) && (
-                    <button
-                      onClick={() => setIsFullscreenPreview(!isFullscreenPreview)}
-                      className={cn(
-                        "flex items-center gap-1 px-3 py-1.5 font-black text-[10px] border rounded-lg transition-all cursor-pointer whitespace-nowrap",
-                        isFullscreenPreview 
-                          ? "bg-slate-900 border-slate-900 text-white hover:bg-slate-800" 
-                          : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                      )}
-                      title={isFullscreenPreview ? "Keluar Layar Penuh" : "Pratinjau Layar Penuh"}
-                    >
-                      {isFullscreenPreview ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-                      <span className="hidden sm:inline">{isFullscreenPreview ? "Normal" : "Layar Penuh"}</span>
-                    </button>
-                  )}
-
-                  {/* Edit & Delete Action Row (Hidden if user has only read-only permission) */}
-                  {canUpdate && (
-                    <button
-                      onClick={(e) => handleEditClick(activeDoc, e)}
-                      className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all cursor-pointer border border-slate-200 bg-white"
-                      title="Ubah Judul & Kategori"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                  {canDelete && (
-                    <button
-                      onClick={(e) => handleDeleteClick(activeDoc, e)}
-                      className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer border border-slate-200 bg-white"
-                      title="Hapus Dokumentasi"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                  <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-snug flex items-center gap-2">
+                    <FileText className="w-6 h-6 text-indigo-600 shrink-0" />
+                    <span className="truncate">{activeDoc.title}</span>
+                  </h2>
                 </div>
-              </div>
 
-              {/* Split-Pane Dual Workspace Layout */}
-              <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden p-3 gap-3">
-                
-                {/* LEFT PANE / MAIN VIEW (DOCUMENT VIEWER) */}
-                <div className="flex-1 bg-white border border-slate-200/80 rounded-lg flex flex-col min-h-0 overflow-hidden relative shadow-sm">
+                {/* Panel 3: Split-Pane Dual Workspace Layout */}
+                <div className="bg-white border border-slate-200 rounded-lg shadow-sm flex-1 flex flex-col md:flex-row min-h-[600px] overflow-hidden p-3 gap-3">
+                  
+                  {/* LEFT PANE / MAIN VIEW (DOCUMENT VIEWER) */}
+                  <div className="flex-1 bg-white border border-slate-200/80 rounded-lg flex flex-col min-h-0 overflow-hidden relative shadow-sm">
                   {/* Title Bar Left Pane */}
                   <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between shrink-0 select-none">
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -1253,34 +1249,32 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   </div>
                 </div>
               </div>
-
-            </div>
-          ) : (
-            /* Immersive Workspace Empty State */
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50/10 hover:bg-slate-50/20 transition-all duration-300 select-none">
-              <div className="w-16 h-16 rounded-lg bg-indigo-50/70 border border-indigo-100/60 flex items-center justify-center mb-5 shadow-xs">
-                <BookOpen className="w-9 h-9 text-indigo-500 animate-pulse" />
+            </>
+            ) : (
+              /* Immersive Workspace Empty State */
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50/20 transition-all duration-300 select-none">
+                <div className="w-16 h-16 rounded-lg bg-indigo-50/70 border border-indigo-100/60 flex items-center justify-center mb-5 shadow-xs">
+                  <BookOpen className="w-9 h-9 text-indigo-500 animate-pulse" />
+                </div>
+                <h2 className="text-base font-black text-slate-800 tracking-tight">
+                  Pilih atau Buat Dokumentasi
+                </h2>
+                <p className="text-xs font-semibold text-slate-400 mt-2 max-w-sm leading-relaxed mx-auto">
+                  Pilih salah satu dokumen di panel kiri atau klik tombol tambah di sidebar untuk mengunggah spesifikasi atau membuat catatan proyek baru.
+                </p>
+                {canCreate && (
+                  <button
+                    onClick={handleCreateNew}
+                    className="mt-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" /> TAMBAH DOKUMEN BARU
+                  </button>
+                )}
               </div>
-              <h2 className="text-base font-black text-slate-800 tracking-tight">
-                Pilih atau Buat Dokumentasi
-              </h2>
-              <p className="text-xs font-semibold text-slate-400 mt-2 max-w-sm leading-relaxed mx-auto">
-                Pilih salah satu dokumen di panel kiri atau klik tombol tambah di sidebar untuk mengunggah spesifikasi atau membuat catatan proyek baru.
-              </p>
-              {canCreate && (
-                <button
-                  onClick={handleCreateNew}
-                  className="mt-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-sm transition-all flex items-center gap-2 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" /> TAMBAH DOKUMEN BARU
-                </button>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </div>
-  )}
+      )}
 
       {/* OVERLAY PORT (MODALS) */}
       <AnimatePresence>

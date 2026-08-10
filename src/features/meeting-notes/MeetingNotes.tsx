@@ -552,55 +552,54 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           </div>
         ) : (
           /* DETAIL VIEW */
-          <div className="flex-1 flex flex-col min-h-0 bg-white">
+          <div className="flex-1 flex flex-col min-h-0 bg-slate-50 w-full">
             {activeMeeting ? (
-              <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
+              <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4 animate-in fade-in duration-500">
                 
-                {/* Detail Header */}
-                <div className="p-6 md:p-8 border-b border-slate-200 bg-[#fbfcfd]/50 shrink-0">
-                  <div className="flex items-center justify-between mb-4">
-                    <button
-                      onClick={() => setActiveMeetingId(null)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-bold text-slate-700 transition-all cursor-pointer shadow-2xs"
-                    >
-                      <ChevronLeft className="w-4 h-4" /> Back to Meeting List
-                    </button>
+                {/* Panel 1: Top Actions */}
+                <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between shadow-sm shrink-0">
+                  <button
+                    onClick={() => setActiveMeetingId(null)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-bold text-slate-700 transition-all cursor-pointer shadow-2xs"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Back to Meeting List
+                  </button>
 
-                    <div className="flex items-center gap-2">
-                      {activeMeeting.meetingLink && (
-                        <a
-                          href={activeMeeting.meetingLink.startsWith("http") ? activeMeeting.meetingLink : `https://${activeMeeting.meetingLink}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer"
-                        >
-                          <Video className="w-3.5 h-3.5" /> Join Meeting <ExternalLink className="w-3 h-3 opacity-80" />
-                        </a>
-                      )}
-                      {hasPermission(userRole, "meetingNotes", "update", activeMeeting.authorId === (currentUser?.uid || ""), permissions) && (
-                        <button
-                          onClick={() => startEdit(activeMeeting)}
-                          className="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
-                        >
-                          <Edit2 className="w-3.5 h-3.5 text-indigo-600" /> Edit
-                        </button>
-                      )}
-                      {hasPermission(userRole, "meetingNotes", "delete", activeMeeting.authorId === (currentUser?.uid || ""), permissions) && (
-                        <button
-                          onClick={() => setMeetingToDelete(activeMeeting.id!)}
-                          className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-all cursor-pointer border border-rose-100 flex items-center gap-1.5"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> Delete
-                        </button>
-                      )}
-                    </div>
+                  <div className="flex items-center gap-2">
+                    {activeMeeting.meetingLink && (
+                      <a
+                        href={activeMeeting.meetingLink.startsWith("http") ? activeMeeting.meetingLink : `https://${activeMeeting.meetingLink}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer"
+                      >
+                        <Video className="w-3.5 h-3.5" /> Join Meeting <ExternalLink className="w-3 h-3 opacity-80" />
+                      </a>
+                    )}
+                    {hasPermission(userRole, "meetingNotes", "update", activeMeeting.authorId === (currentUser?.uid || ""), permissions) && (
+                      <button
+                        onClick={() => startEdit(activeMeeting)}
+                        className="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 text-indigo-600" /> Edit
+                      </button>
+                    )}
+                    {hasPermission(userRole, "meetingNotes", "delete", activeMeeting.authorId === (currentUser?.uid || ""), permissions) && (
+                      <button
+                        onClick={() => setMeetingToDelete(activeMeeting.id!)}
+                        className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-all cursor-pointer border border-rose-100 flex items-center gap-1.5"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </button>
+                    )}
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
-                      {activeMeeting.title}
-                    </h2>
-                  </div>
+                {/* Panel 2: Meeting Context & Agenda */}
+                <div className="bg-white border border-slate-200 rounded-lg p-5 md:p-6 shadow-sm shrink-0">
+                  <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+                    {activeMeeting.title}
+                  </h2>
 
                   {activeMeeting.description && (
                     <div className="mt-4 p-4 border border-indigo-100/60 bg-indigo-50/20 rounded-lg border-l-4 border-l-indigo-600 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -633,8 +632,8 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   )}
                 </div>
 
-                {/* Discussion Points Table */}
-                <div className="p-4 md:p-8 bg-[#fafbfc]">
+                {/* Panel 3: Discussion Points Table */}
+                <div className="bg-white border border-slate-200 rounded-lg p-5 md:p-6 shadow-sm flex-1 flex flex-col min-h-0">
                   <DiscussionPointsTable
                     projectId={projectId}
                     meetingId={activeMeeting.id!}

@@ -4213,12 +4213,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       {!isEditorActive ? (
         renderDashboard()
       ) : (
-        <div className="flex-1 flex h-full min-h-0 bg-[#f4f7f9] p-3 md:p-6 gap-6 font-sans overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-slate-50 p-4 md:p-6 space-y-4 animate-in fade-in duration-500 font-sans">
       
       {/* VIEW-PORT UTAMA (DASHBOARD DENGAN EMBED VIEWER & TOGGLE KANVAS) */}
-      <div className="flex-1 flex flex-col min-h-0 bg-white border border-slate-200/80 rounded-xl shadow-sm overflow-hidden relative">
+      <div className="flex-1 flex flex-col min-h-[600px] bg-transparent relative">
         {!selectedFlowId ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50/30">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white border border-slate-200 rounded-lg shadow-sm">
             <div className="w-16 h-16 bg-white border border-slate-100 shadow-sm rounded-xl flex items-center justify-center mb-4 text-violet-600">
               <FileText className="w-6 h-6 animate-pulse" />
             </div>
@@ -4232,83 +4232,23 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             </button>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col min-h-0 h-full relative overflow-hidden bg-slate-50/30">
+          <div className="flex-1 flex flex-col min-h-0 h-full relative overflow-hidden space-y-4">
             
-            {/* DOCUMENT DETAIL HEADER */}
-            <div className="p-5 bg-white border-b border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm shrink-0 z-10">
-              <div className="space-y-1.5 flex-1 min-w-0">
-                <div className="mb-2">
-                  <button
-                    onClick={() => {
-                      setIsEditorActive(false);
-                      setSelectedFlowId(null);
-                      setCurrentPage(1);
-                    }}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
-                  >
-                    ← Kembali ke Daftar Flowchart
-                  </button>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Category Badge */}
-                  {currentFlowMetadata?.category === "PRD" && (
-                    <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200/80 rounded-full">
-                      📄 PRD
-                    </span>
-                  )}
-                  {currentFlowMetadata?.category === "Panduan" && (
-                    <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/80 rounded-full">
-                      📖 Panduan
-                    </span>
-                  )}
-                  {currentFlowMetadata?.category === "Laporan" && (
-                    <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-full">
-                      📊 Laporan
-                    </span>
-                  )}
-                  {!currentFlowMetadata?.category && (
-                    <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200/80 rounded-full">
-                      ⚙️ Umum
-                    </span>
-                  )}
-
-                  {/* Creator Info */}
-                  <span className="text-xs text-slate-500 font-semibold">
-                    Oleh <strong className="text-slate-800">{currentFlowMetadata?.createdBy || "Azlan Irwan"}</strong>
-                  </span>
-
-                  <span className="text-slate-300">•</span>
-
-                  {/* Date */}
-                  <span className="text-xs text-slate-500 font-medium">
-                    Diperbarui {currentFlowMetadata?.lastEditedAt || currentFlowMetadata?.createdAt}
-                  </span>
-                  
-                  {linkedEpic && (
-                    <>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-[10px] font-bold text-indigo-750 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full truncate max-w-[180px]" title={linkedEpic.title}>
-                        🎯 Epic: {linkedEpic.title}
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                {/* Main Title */}
-                <h2 className="text-lg md:text-xl font-black text-slate-900 tracking-tight leading-snug">
-                  {currentFlowMetadata?.name}
-                </h2>
-                
-                {currentFlowMetadata?.description && (
-                  <p className="text-xs text-slate-500 font-medium max-w-3xl leading-relaxed">
-                    {currentFlowMetadata.description}
-                  </p>
-                )}
-              </div>
+            {/* Panel 1: Top Actions */}
+            <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between shadow-sm shrink-0">
+              <button
+                onClick={() => {
+                  setIsEditorActive(false);
+                  setSelectedFlowId(null);
+                  setCurrentPage(1);
+                }}
+                className="flex items-center gap-1.5 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0"
+              >
+                ← Kembali ke Daftar Flowchart
+              </button>
 
               {/* Action Buttons & View Mode Toggle */}
               <div className="flex items-center flex-wrap gap-3 shrink-0">
-                
                 {/* View Mode Segmented Control Toggle */}
                 <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200/60 shadow-inner">
                   <button
@@ -4352,12 +4292,70 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-
               </div>
             </div>
 
-            {/* BODY VIEWPORT CONTENT */}
-            <div className="flex-1 min-h-0 relative flex flex-col h-full bg-slate-50/50">
+            {/* Panel 2: Meta Context & Title */}
+            <div className="bg-white border border-slate-200 rounded-lg p-5 md:p-6 shadow-sm shrink-0">
+              <div className="flex flex-wrap items-center gap-2 select-none mb-3">
+                {/* Category Badge */}
+                {currentFlowMetadata?.category === "PRD" && (
+                  <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-200/80 rounded-full">
+                    📄 PRD
+                  </span>
+                )}
+                {currentFlowMetadata?.category === "Panduan" && (
+                  <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/80 rounded-full">
+                    📖 Panduan
+                  </span>
+                )}
+                {currentFlowMetadata?.category === "Laporan" && (
+                  <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-full">
+                    📊 Laporan
+                  </span>
+                )}
+                {!currentFlowMetadata?.category && (
+                  <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200/80 rounded-full">
+                    ⚙️ Umum
+                  </span>
+                )}
+
+                {/* Creator Info */}
+                <span className="text-xs text-slate-500 font-semibold flex items-center gap-1">
+                  <User className="w-3 h-3" /> Oleh <strong className="text-slate-800">{currentFlowMetadata?.createdBy || "Azlan Irwan"}</strong>
+                </span>
+
+                <span className="text-slate-300">•</span>
+
+                {/* Date */}
+                <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                  Diperbarui {currentFlowMetadata?.lastEditedAt || currentFlowMetadata?.createdAt}
+                </span>
+                
+                {linkedEpic && (
+                  <>
+                    <span className="text-slate-300">•</span>
+                    <span className="text-[10px] font-bold text-indigo-750 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full truncate max-w-[180px]" title={linkedEpic.title}>
+                      🎯 Epic: {linkedEpic.title}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-snug flex items-center gap-2">
+                <Workflow className="w-6 h-6 text-violet-600 shrink-0" />
+                <span className="truncate">{currentFlowMetadata?.name}</span>
+              </h2>
+              
+              {currentFlowMetadata?.description && (
+                <p className="text-xs text-slate-500 font-medium max-w-3xl leading-relaxed mt-2">
+                  {currentFlowMetadata.description}
+                </p>
+              )}
+            </div>
+
+            {/* Panel 3: Main Viewport (Canvas / Viewer) */}
+            <div className="bg-white border border-slate-200 rounded-lg shadow-sm flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
               
               {rightViewMode === "embed" ? (
                 /* 1. EMBED VIEWER */
@@ -6405,7 +6403,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <div className="text-[10px] text-slate-400 italic font-semibold">Silakan tarik / pilih diagram di atas</div>
               )}
             </div>
-
           </div>
         </div>
       )}
