@@ -2,7 +2,7 @@ import React from "react";
 import { DashboardView } from "../features/dashboard";
 import { IssueListView } from "../features/issues";
 import { PlanningView } from "../features/planning";
-import { BoardView } from "../features/kanban";
+import { BoardView } from "../features/kanban/index";
 import { TestQAPanel } from "../features/qa/TestQAPanel";
 import { WikiView } from "../features/wiki";
 import { MeetingNotes } from "../features/meeting-notes/MeetingNotes";
