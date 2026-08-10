@@ -8,7 +8,11 @@ import {
   AlignCenter, AlignRight, ZoomIn, ZoomOut,
   Cloud, ChevronDown, Search, BookOpen, Edit3, X, FileText, HelpCircle, Info,
   Folder, User, Undo, Redo, Play, Download, RefreshCw, Upload, Image as ImageIcon,
-  LayoutGrid, Undo2, Redo2, Database, Activity, Minus
+  LayoutGrid, Undo2, Redo2, Database, Activity, Minus, LayoutTemplate,
+  Users,
+  Clock,
+  CheckCircle,
+  FileSpreadsheet
 } from "lucide-react";
 import { toJpeg } from "html-to-image";
 import { Task, Project } from "../../types";
@@ -46,11 +50,23 @@ interface FlowEdge {
   label?: string;
 }
 
+interface FlowchartDocument {
+  id: string;
+  name: string;
+  fileData?: string;
+  fileName?: string;
+  fileType?: string;
+  fileSize?: number;
+  createdAt: string;
+  createdBy: string;
+}
+
 interface FlowchartData {
   id: string;
   name: string;
   category?: string;
   externalUrl?: string;
+  documents?: FlowchartDocument[];
   epicTaskId?: string;
   description: string;
   nodes: FlowNode[];
@@ -1167,7 +1183,7 @@ function renderMiniPreviewIcon(type: string) {
           <rect x="20" y="20" width="60" height="60" rx="6" {...elementProps} fill="rgba(0, 120, 212, 0.05)" stroke="#0078d4" strokeWidth={3} />
           <ellipse cx="50" cy="34" rx="14" ry="4.5" fill="none" stroke="#0078d4" strokeWidth={2.5} />
           <path d="M36,34 L36,60 A14,4.5 0 0,0 64,60 L64,34" fill="none" stroke="#0078d4" strokeWidth="2.5" />
-          <path d="M36,44 A14,4.5 0 0,0 64,44 M36,52 A14,4.5 0 0,0 64,52" fill="none" stroke="#0078d4" strokeWidth="1.5" />
+          <path d="M36,44 A14,4.5 0 0,0 64,44 M36,52 A14,4.5 0 0,0 64,52" fill="none" stroke="#0078d4" strokeWidth={1.5} />
         </svg>
       );
     case "azureFunctions":
@@ -1219,7 +1235,7 @@ function renderMiniPreviewIcon(type: string) {
       return (
         <svg {...commonProps}>
           <rect x="20" y="20" width="60" height="60" rx="6" {...elementProps} fill="rgba(13, 148, 136, 0.05)" stroke="#0d9488" strokeWidth={3} />
-          <rect x="33" y="33" width="34" height="34" rx="2" fill="none" stroke="#0d9488" strokeWidth="2.5" />
+          <rect x="33" y="33" width="34" height="34" rx="2" fill="none" stroke="#0d9488" strokeWidth={2.5} />
           <line x1="33" y1="50" x2="67" y2="50" stroke="#0d9488" strokeWidth="2" />
           <circle cx="41" cy="41" r="2" fill="#2dd4bf" />
           <circle cx="59" cy="41" r="2" fill="#2dd4bf" />
@@ -1251,7 +1267,7 @@ function renderMiniPreviewIcon(type: string) {
         <svg {...commonProps}>
           <ellipse cx="50" cy="27" rx="20" ry="7" {...elementProps} fill="none" stroke="#475569" strokeWidth={3} />
           <path d="M30,27 L30,73 A20,7 0 0,0 70,73 L70,27" fill="none" stroke="#475569" strokeWidth={3} />
-          <path d="M30,42 A20,7 0 0,0 70,42 M30,57 A20,7 0 0,0 70,57" fill="none" stroke="#475569" strokeWidth="2" />
+          <path d="M30,42 A20,7 0 0,0 70,42 M30,57 A20,7 0 0,0 70,57" fill="none" stroke="#475569" strokeWidth={2} />
         </svg>
       );
     case "bpmnDataObject":
@@ -1392,6 +1408,7 @@ interface FlowchartViewProps {
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (isOpen: boolean) => void;
   currentUserProfile?: any;
+  onSaveFlowcharts?: (data: any) => Promise<void>;
 }
 
 export const FlowchartView: React.FC<FlowchartViewProps> = ({
@@ -1400,7 +1417,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   projectMembers,
   setSelectedTaskForDetail,
   setIsTaskDetailModalOpen,
-  currentUserProfile
+  currentUserProfile,
+  onSaveFlowcharts
 }) => {
   // Get active logged in user author name dynamically
   const getResolvedAuthor = () => {
@@ -1458,6 +1476,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const [flowCategory, setFlowCategory] = useState<string>("Panduan");
   const [flowCreator, setFlowCreator] = useState<string>("");
   const [flowExternalUrl, setFlowExternalUrl] = useState<string>("");
+
+  // Upload Document States
+  const [isUploadDocModalOpen, setIsUploadDocModalOpen] = useState(false);
+  const [uploadDocName, setUploadDocName] = useState("");
+  const [uploadDocFile, setUploadDocFile] = useState<File | null>(null);
+  const [uploadDocBase64, setUploadDocBase64] = useState("");
+  const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
 
   // Right Side View mode ('embed' | 'canvas')
   const [rightViewMode, setRightViewMode] = useState<'embed' | 'canvas'>('embed');
@@ -1970,7 +1995,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (selectedFlowId) {
-        handleSaveWorkspace();
+        handleSaveWorkspace(true);
       }
     }, 1500);
     return () => clearTimeout(timer);
@@ -2695,6 +2720,100 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setIsModalOpen(true);
   };
 
+  // Upload Document Modal Handlers
+  const openUploadDocumentModal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setUploadDocName("");
+    setUploadDocFile(null);
+    setUploadDocBase64("");
+    setIsUploadDocModalOpen(true);
+  };
+
+  const closeUploadDocumentModal = () => {
+    setIsUploadDocModalOpen(false);
+    setUploadDocName("");
+    setUploadDocFile(null);
+    setUploadDocBase64("");
+  };
+
+  const handleDocumentFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      
+      // Validasi Tipe File (Excel, Word, PDF)
+      const allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      
+      if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+        toast.error("Format dokumen tidak sesuai! Harap unggah format Excel, Word, atau PDF.");
+        return;
+      }
+
+      // Validasi max 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Ukuran dokumen tidak boleh melebihi 5 MB");
+        return;
+      }
+      setUploadDocFile(file);
+      if (!uploadDocName) {
+        setUploadDocName(file.name);
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadDocBase64(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveDocument = () => {
+    if (!uploadDocName.trim() || !uploadDocFile || !uploadDocBase64) {
+      toast.error("Nama dokumen dan file dokumen wajib diisi!");
+      return;
+    }
+
+    if (!selectedFlowId) {
+      toast.error("Pilih flowchart terlebih dahulu!");
+      return;
+    }
+
+    const projId = selectedProject?.id || selectedProject?.key || 'default';
+    
+    const newDoc: FlowchartDocument = {
+      id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: uploadDocName.trim(),
+      fileName: uploadDocFile.name,
+      fileType: uploadDocFile.type,
+      fileSize: uploadDocFile.size,
+      fileData: uploadDocBase64,
+      createdAt: new Date().toLocaleString("id-ID"),
+      createdBy: getResolvedAuthor()
+    };
+
+    setFlowcharts(currentFlowcharts => {
+      const updatedList = currentFlowcharts.map(f => {
+        if (f.id === selectedFlowId) {
+          return {
+            ...f,
+            documents: [...(f.documents || []), newDoc],
+            lastEditedAt: new Date().toLocaleString("id-ID")
+          };
+        }
+        return f;
+      });
+      try {
+        localStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(updatedList));
+      } catch (err) {
+        console.warn("Storage quota exceeded, could not save locally:", err);
+      }
+      return updatedList;
+    });
+
+    toast.success("Dokumen berhasil diunggah!");
+    closeUploadDocumentModal();
+  };
+
   // Open edit description modal
   const openEditModal = (flow: FlowchartData, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -2710,15 +2829,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   // Save Flowchart list & current items to LocalStorage & Backend API
-  const handleSaveWorkspace = async () => {
+  const handleSaveWorkspace = async (isAutoSave = false) => {
     if (!selectedFlowId) return;
 
     const projId = selectedProject?.id || selectedProject?.key || 'default';
-    let targetFlowName = "";
     setFlowcharts(currentFlowcharts => {
       const updatedList = currentFlowcharts.map(f => {
         if (f.id === selectedFlowId) {
-          targetFlowName = f.name;
           return {
             ...f,
             nodes,
@@ -2729,25 +2846,29 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         }
         return f;
       });
-      localStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(updatedList));
+      try {
+        localStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(updatedList));
+      } catch (err) {
+        console.warn("Storage quota exceeded, could not save locally:", err);
+      }
       return updatedList;
     });
 
-    if (selectedProject?.id && !selectedFlowId.startsWith("flow_")) {
-      try {
-        const payload = JSON.stringify({ nodes, edges });
-        await apiRequest(`/api/projects/${selectedProject.id}/documents/${selectedFlowId}`, {
-          method: "PUT",
-          body: {
-            description: payload
-          }
-        });
-      } catch (err) {
-        console.warn("Could not sync flowchart workspace to API:", err);
+    if (!isAutoSave) {
+      if (onSaveFlowcharts) {
+        try {
+          const workspaceData = {
+            projectId: projId,
+            flowcharts: JSON.parse(localStorage.getItem(`lanpro_flowcharts_${projId}`) || "[]")
+          };
+          await onSaveFlowcharts(workspaceData);
+        } catch (err) {
+          console.warn("Could not sync flowchart workspace to API:", err);
+        }
       }
-    }
 
-    toast.success("Berhasil menyimpan seluruh skema alur flowchart Anda!");
+      toast.success("Berhasil menyimpan seluruh skema alur flowchart Anda!");
+    }
   };
 
   // Delete an entire flowchart diagram
@@ -4216,7 +4337,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-slate-50 p-4 md:p-6 space-y-4 animate-in fade-in duration-500 font-sans">
       
       {/* VIEW-PORT UTAMA (DASHBOARD DENGAN EMBED VIEWER & TOGGLE KANVAS) */}
-      <div className="flex-1 flex flex-col min-h-[600px] bg-transparent relative">
+      <div className="flex-1 flex flex-col min-h-[600px] bg-transparent relative mb-8">
         {!selectedFlowId ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white border border-slate-200 rounded-lg shadow-sm">
             <div className="w-16 h-16 bg-white border border-slate-100 shadow-sm rounded-xl flex items-center justify-center mb-4 text-violet-600">
@@ -4260,7 +4381,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         : "text-slate-500 hover:text-slate-800"
                     )}
                   >
-                    <Eye className="w-3.5 h-3.5" /> Preview Dokumen
+                    <BookOpen className="w-3.5 h-3.5" /> Daftar Dokumen
                   </button>
                   <button
                     onClick={() => setRightViewMode("canvas")}
@@ -4350,7 +4471,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               {currentFlowMetadata?.description && (
                 <p className="text-xs text-slate-500 font-medium max-w-3xl leading-relaxed mt-2">
                   {currentFlowMetadata.description}
-                </p>
+</p>
               )}
             </div>
 
@@ -4359,89 +4480,69 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               
               {rightViewMode === "embed" ? (
                 /* 1. EMBED VIEWER (SPLIT PANE) */
-                <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-white">
+                <div className="flex-1 flex flex-col min-h-0 bg-white">
                   
                   {/* LEFT PANE: Daftar Dokumen */}
-                  <div className="w-full md:w-64 lg:w-72 border-b md:border-b-0 md:border-r border-slate-200 bg-slate-50/50 flex flex-col shrink-0">
+                  <div className="w-full flex-1 bg-slate-50/50 flex flex-col">
                     {/* Header Left Pane */}
                     <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
-                      <h4 className="text-xs font-bold text-slate-800 flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-violet-600" />
+                      <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-violet-600" />
                         Daftar Dokumen
                       </h4>
                       <button
-                        onClick={(e) => currentFlowMetadata && openEditModal(currentFlowMetadata, e)}
-                        className="p-1.5 bg-violet-50 hover:bg-violet-100 text-violet-700 rounded-lg transition-colors border border-violet-100 cursor-pointer shadow-sm"
-                        title="Tautkan Dokumen Baru"
+                        onClick={openUploadDocumentModal}
+                        className="p-2 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded text-xs transition-colors cursor-pointer shadow-sm active:scale-95 flex items-center gap-2"
+                        title="Upload Dokumen Baru"
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Plus className="w-4 h-4" /> Tambah Dokumen
                       </button>
                     </div>
                     {/* List Items */}
-                    <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                      {currentFlowMetadata?.externalUrl ? (
-                        <div className="bg-white border border-violet-200 shadow-sm rounded-lg p-3 cursor-pointer relative overflow-hidden group hover:border-violet-300 transition-colors">
-                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-500"></div>
-                          <div className="flex justify-between items-start mb-1">
-                            <h5 className="text-xs font-bold text-slate-800 line-clamp-1">Tautan Utama</h5>
-                            <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-violet-500" />
-                          </div>
-                          <p className="text-[10px] font-mono text-slate-500 truncate mt-1">{currentFlowMetadata.externalUrl}</p>
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3">
+                      {currentFlowMetadata?.documents && currentFlowMetadata.documents.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {currentFlowMetadata.documents.map((doc, idx) => (
+                            <div 
+                              key={doc.id}
+                              className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col gap-4 shadow-sm hover:shadow hover:border-violet-300 transition-all group"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+                                  <FileText className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col flex-1 min-w-0">
+                                  <span className="text-sm font-bold text-slate-800 truncate">{doc.name}</span>
+                                  <span className="text-xs text-slate-500 font-medium truncate mt-0.5">{doc.fileName}</span>
+                                  {doc.fileSize && (
+                                    <span className="text-[10px] text-slate-400 mt-1">{(doc.fileSize / 1024 / 1024).toFixed(2)} MB</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="pt-3 border-t border-slate-100 flex items-center justify-end">
+                                <a 
+                                  href={doc.fileData} 
+                                  download={doc.fileName}
+                                  className="flex items-center gap-2 text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                                >
+                                  <Download className="w-3.5 h-3.5" /> Download
+                                </a>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       ) : (
-                        <div className="text-center p-6 text-slate-400 flex flex-col items-center">
-                          <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mb-2">
-                            <FileText className="w-4 h-4 text-slate-400 opacity-50" />
+                        <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+                          <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mb-4">
+                            <FileText className="w-8 h-8 text-slate-400 opacity-50" />
                           </div>
-                          <p className="text-[11px] font-medium text-slate-500">Belum ada dokumen</p>
+                          <h3 className="text-sm font-bold text-slate-700 mb-2">Belum Ada Dokumen</h3>
+                          <span className="text-xs text-slate-500 font-medium max-w-sm">
+                            Anda belum menambahkan dokumen apapun ke dalam flowchart ini. Silakan klik tombol "Tambah Dokumen" untuk mulai mengunggah file.
+                          </span>
                         </div>
                       )}
                     </div>
-                  </div>
-
-                  {/* RIGHT PANE: Preview / Download */}
-                  <div className="flex-1 flex flex-col bg-slate-100/30 min-w-0">
-                     <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
-                        <h4 className="text-xs font-bold text-slate-800">Preview Dokumen</h4>
-                        {currentFlowMetadata?.externalUrl && (
-                          <a
-                            href={currentFlowMetadata.externalUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm transition-all active:scale-95"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" /> Buka Tab Baru
-                          </a>
-                        )}
-                     </div>
-                     
-                     <div className="flex-1 relative bg-white m-4 border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-                        {currentFlowMetadata?.externalUrl ? (
-                          <iframe
-                            src={getEmbedUrl(currentFlowMetadata.externalUrl)}
-                            className="w-full h-full border-none flex-1 bg-slate-50"
-                            title={currentFlowMetadata.name}
-                            referrerPolicy="no-referrer"
-                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                          />
-                        ) : (
-                          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50/20 text-center">
-                            <div className="w-14 h-14 bg-slate-100 border border-slate-200 text-slate-400 rounded-full flex items-center justify-center mb-3 shadow-sm">
-                              <Eye className="w-6 h-6" />
-                            </div>
-                            <h4 className="text-xs font-bold text-slate-800">Tidak Ada Live Preview</h4>
-                            <p className="text-[11px] text-slate-500 font-medium max-w-xs mt-2 leading-relaxed">
-                              Pilih dokumen di daftar sebelah kiri, atau tambahkan tautan baru menggunakan ikon (+).
-                            </p>
-                            <button
-                              onClick={(e) => currentFlowMetadata && openEditModal(currentFlowMetadata, e)}
-                              className="mt-5 text-[11px] font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 px-5 py-2.5 rounded-xl transition-all shadow-sm border border-violet-100 cursor-pointer active:scale-95"
-                            >
-                              Tautkan Dokumen Sekarang
-                            </button>
-                          </div>
-                        )}
-                     </div>
                   </div>
                 </div>
               ) : (
@@ -6581,6 +6682,82 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           canUndo={historyIndex > 0}
           canRedo={historyIndex < historyStack.length - 1}
         />
+      )}
+
+      {/* Upload Document Modal */}
+      {isUploadDocModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-slate-200 animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                Upload Dokumen Baru
+              </h3>
+              <button
+                onClick={closeUploadDocumentModal}
+                className="p-1.5 hover:bg-slate-200 rounded text-slate-500 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 flex-1 overflow-y-auto space-y-5">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Nama Dokumen</label>
+                <input
+                  type="text"
+                  value={uploadDocName}
+                  onChange={(e) => setUploadDocName(e.target.value)}
+                  placeholder="Contoh: Spesifikasi Teknis v1.2"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Upload File (Max 5MB)</label>
+                <div className="border border-dashed border-slate-300 rounded p-6 flex flex-col items-center justify-center bg-slate-50/50 relative overflow-hidden group hover:border-indigo-400 transition-colors">
+                  <input 
+                    type="file" 
+                    onChange={handleDocumentFileChange}
+                    accept=".pdf,.doc,.docx,.xls,.xlsx"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  <div className="w-12 h-12 bg-white shadow-sm border border-slate-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 group-hover:shadow-md transition-all">
+                    <Upload className="w-5 h-5 text-indigo-500" />
+                  </div>
+                  <p className="text-sm font-bold text-slate-700 mb-1">Pilih atau Seret File Kesini</p>
+                  <p className="text-xs text-slate-500 font-medium">Mendukung PDF, Word, Excel (Max. 5MB)</p>
+                  
+                  {uploadDocFile && (
+                    <div className="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded w-full flex items-center justify-between">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-bold text-indigo-900 truncate">{uploadDocFile.name}</span>
+                        <span className="text-xs text-indigo-600 font-medium">{(uploadDocFile.size / 1024 / 1024).toFixed(2)} MB</span>
+                      </div>
+                      <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+              <button
+                onClick={closeUploadDocumentModal}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSaveDocument}
+                disabled={!uploadDocName || !uploadDocFile}
+                className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium rounded transition-all shadow-sm active:scale-95"
+              >
+                Upload & Simpan
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <ConfirmationModal
