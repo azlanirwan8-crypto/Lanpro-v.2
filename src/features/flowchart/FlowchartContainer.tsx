@@ -4358,76 +4358,91 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             <div className="bg-white border border-slate-200 rounded-lg shadow-sm flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
               
               {rightViewMode === "embed" ? (
-                /* 1. EMBED VIEWER */
-                <div className="flex-1 flex flex-col p-4 md:p-6 gap-6 overflow-y-auto min-h-0">
+                /* 1. EMBED VIEWER (SPLIT PANE) */
+                <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-white">
                   
-                  {/* Tautan Eksternal Fallback Card */}
-                  <div className="bg-white border border-slate-200/80 rounded-xl p-4 md:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  {/* LEFT PANE: Daftar Dokumen */}
+                  <div className="w-full md:w-64 lg:w-72 border-b md:border-b-0 md:border-r border-slate-200 bg-slate-50/50 flex flex-col shrink-0">
+                    {/* Header Left Pane */}
+                    <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
+                      <h4 className="text-xs font-bold text-slate-800 flex items-center gap-2">
                         <FileText className="w-4 h-4 text-violet-600" />
-                        Tautan Dokumen Eksternal
+                        Daftar Dokumen
                       </h4>
-                      <p className="text-[11px] text-slate-500 font-medium leading-normal max-w-xl">
-                        {currentFlowMetadata?.externalUrl 
-                          ? `Dokumen terhubung ke tautan eksternal. Gunakan tombol di kanan untuk membuka atau gunakan viewer interaktif di bawah.`
-                          : `Belum ada tautan eksternal terhubung. Sunting metadata dokumen dengan tombol pensil di atas untuk menambahkan link Google Docs, Sheets, atau Slides.`}
-                      </p>
-                      {currentFlowMetadata?.externalUrl && (
-                        <div className="text-[11px] font-mono text-violet-600 font-bold truncate max-w-lg bg-violet-50/50 p-1.5 px-3 rounded-lg border border-violet-100 mt-2">
-                          {currentFlowMetadata.externalUrl}
+                      <button
+                        onClick={(e) => currentFlowMetadata && openEditModal(currentFlowMetadata, e)}
+                        className="p-1.5 bg-violet-50 hover:bg-violet-100 text-violet-700 rounded-lg transition-colors border border-violet-100 cursor-pointer shadow-sm"
+                        title="Tautkan Dokumen Baru"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    {/* List Items */}
+                    <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                      {currentFlowMetadata?.externalUrl ? (
+                        <div className="bg-white border border-violet-200 shadow-sm rounded-lg p-3 cursor-pointer relative overflow-hidden group hover:border-violet-300 transition-colors">
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-500"></div>
+                          <div className="flex justify-between items-start mb-1">
+                            <h5 className="text-xs font-bold text-slate-800 line-clamp-1">Tautan Utama</h5>
+                            <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-violet-500" />
+                          </div>
+                          <p className="text-[10px] font-mono text-slate-500 truncate mt-1">{currentFlowMetadata.externalUrl}</p>
+                        </div>
+                      ) : (
+                        <div className="text-center p-6 text-slate-400 flex flex-col items-center">
+                          <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center mb-2">
+                            <FileText className="w-4 h-4 text-slate-400 opacity-50" />
+                          </div>
+                          <p className="text-[11px] font-medium text-slate-500">Belum ada dokumen</p>
                         </div>
                       )}
                     </div>
-
-                    {currentFlowMetadata?.externalUrl ? (
-                      <a
-                        href={currentFlowMetadata.externalUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white font-black p-2.5 px-5 rounded-xl text-xs shadow-md transition-all active:scale-95 shrink-0"
-                      >
-                        Buka di Tab Baru <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    ) : (
-                      <button
-                        onClick={(e) => currentFlowMetadata && openEditModal(currentFlowMetadata, e)}
-                        className="flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold p-2.5 px-4 rounded-xl text-xs border border-slate-300 transition-all shrink-0 cursor-pointer"
-                      >
-                        + Tautkan Dokumen
-                      </button>
-                    )}
                   </div>
 
-                  {/* Dynamic Interactive Preview Box */}
-                  <div className="flex-1 min-h-[380px] bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col relative">
-                    {currentFlowMetadata?.externalUrl ? (
-                      <iframe
-                        src={getEmbedUrl(currentFlowMetadata.externalUrl)}
-                        className="w-full h-full border-none flex-1"
-                        title={currentFlowMetadata.name}
-                        referrerPolicy="no-referrer"
-                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                      />
-                    ) : (
-                      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50/20 text-center">
-                        <div className="w-14 h-14 bg-slate-100 border border-slate-200 text-slate-400 rounded-full flex items-center justify-center mb-3">
-                          <Eye className="w-6 h-6" />
-                        </div>
-                        <h4 className="text-xs font-bold text-slate-850">Tidak Ada Live Preview</h4>
-                        <p className="text-[11px] text-slate-500 font-medium max-w-sm mt-1">
-                          Sistem tidak menemukan tautan eksternal untuk dokumen ini. Silakan sunting dokumen untuk menambahkan link Google Docs, Sheets, atau Slides Anda.
-                        </p>
-                        <button
-                          onClick={(e) => currentFlowMetadata && openEditModal(currentFlowMetadata, e)}
-                          className="mt-3 text-[11px] font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 px-4 py-2 rounded-lg transition-colors border border-violet-100 cursor-pointer"
-                        >
-                          Tautkan Dokumen Sekarang
-                        </button>
-                      </div>
-                    )}
+                  {/* RIGHT PANE: Preview / Download */}
+                  <div className="flex-1 flex flex-col bg-slate-100/30 min-w-0">
+                     <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
+                        <h4 className="text-xs font-bold text-slate-800">Preview Dokumen</h4>
+                        {currentFlowMetadata?.externalUrl && (
+                          <a
+                            href={currentFlowMetadata.externalUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm transition-all active:scale-95"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" /> Buka Tab Baru
+                          </a>
+                        )}
+                     </div>
+                     
+                     <div className="flex-1 relative bg-white m-4 border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                        {currentFlowMetadata?.externalUrl ? (
+                          <iframe
+                            src={getEmbedUrl(currentFlowMetadata.externalUrl)}
+                            className="w-full h-full border-none flex-1 bg-slate-50"
+                            title={currentFlowMetadata.name}
+                            referrerPolicy="no-referrer"
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                          />
+                        ) : (
+                          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50/20 text-center">
+                            <div className="w-14 h-14 bg-slate-100 border border-slate-200 text-slate-400 rounded-full flex items-center justify-center mb-3 shadow-sm">
+                              <Eye className="w-6 h-6" />
+                            </div>
+                            <h4 className="text-xs font-bold text-slate-800">Tidak Ada Live Preview</h4>
+                            <p className="text-[11px] text-slate-500 font-medium max-w-xs mt-2 leading-relaxed">
+                              Pilih dokumen di daftar sebelah kiri, atau tambahkan tautan baru menggunakan ikon (+).
+                            </p>
+                            <button
+                              onClick={(e) => currentFlowMetadata && openEditModal(currentFlowMetadata, e)}
+                              className="mt-5 text-[11px] font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 px-5 py-2.5 rounded-xl transition-all shadow-sm border border-violet-100 cursor-pointer active:scale-95"
+                            >
+                              Tautkan Dokumen Sekarang
+                            </button>
+                          </div>
+                        )}
+                     </div>
                   </div>
-
                 </div>
               ) : (
                 /* 2. HIGH-FIDELITY MIRO CANVAS WORKSPACE (DIAGRAM ALUR) */
