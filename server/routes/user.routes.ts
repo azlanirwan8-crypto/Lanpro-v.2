@@ -176,7 +176,7 @@ const router = express.Router();
 
   router.get("/api/users", async (req, res) => {
     try {
-      const rows = await query("SELECT * FROM Users");
+      const rows = await query("SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, avatar, createdAt, lastSeen FROM Users");
       res.json({ status: "success", data: rows });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: GET /api/users error:", error);
@@ -188,7 +188,7 @@ const router = express.Router();
     try {
       const { id } = req.params;
       const connection = await mysqlPool.getConnection();
-      const [rows] = await connection.query("SELECT * FROM Users WHERE id = ?", [id]);
+      const [rows] = await connection.query("SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, avatar, createdAt, lastSeen FROM Users WHERE id = ?", [id]);
       connection.release();
       if ((rows as any[]).length > 0) {
         let user = (rows as any[])[0];

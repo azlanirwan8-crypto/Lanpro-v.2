@@ -6,6 +6,8 @@ import { z } from "zod";
 import { GoogleGenAI, Type } from "@google/genai";
 import express from "express";
 import { errorHandler, notFoundHandler } from './server/middleware/errorHandler.ts';
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import path from "path";
 import multer from 'multer';
 const isServerless = !!process.env.VERCEL || !!process.env.AWS_EXECUTION_ENV || process.cwd() === '/var/task' || process.cwd().includes('/var/task');
@@ -290,6 +292,23 @@ async function startServer() {
   // ==========================================
 // WILAYAH II: Keamanan (Middleware Global, authenticateJWT, verifyProjectAccess)
 // ==========================================
+
+  // 1. Basic Security Headers (Helmet)
+  app.use(helmet({
+    contentSecurityPolicy: false, // Nonaktifkan CSP karena berpotensi merusak HMR Vite di lokal
+    crossOriginEmbedderPolicy: false
+  }));
+
+  // 2. Global Rate Limiting (DDoS Protection)
+  const globalLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 menit
+    max: 1000, // Maks 1000 request per IP
+    message: "Terlalu banyak request dari IP ini, silakan coba lagi setelah 5 menit",
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use(globalLimiter);
+
   app.use(express.json({ limit: '100mb' }));
   app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
