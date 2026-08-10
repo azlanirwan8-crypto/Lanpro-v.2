@@ -8,7 +8,7 @@
 
 const fallbackSecrets: Record<string, string> = {
   JWT_SECRET: '1231231231492340234wewefsfsdfsfwe534534tf5654654',
-  DATABASE_URL: 'postgresql://neondb_owner:npg_GkyS5zMv7XmC@ep-dawn-shape-aulnhaw2.pooler.region.postgres.neon.tech/neondb?sslmode=require',
+  DATABASE_URL: 'postgresql://neondb_owner:npg_CVZvaYbF8W2s@ep-dawn-shape-aulnhaw2-pooler.c-10.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require',
   GEMINI_API_KEY: 'AIzaSyCLtjweG46C63xPMb4aL41ovCzAoGpvGRg',
   DB_PASSWORD: ''
 };
