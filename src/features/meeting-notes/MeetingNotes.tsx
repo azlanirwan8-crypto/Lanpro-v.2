@@ -607,11 +607,9 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         <span className="text-[10px] font-black text-indigo-700 tracking-wider uppercase block mb-1">
                           Meeting Description / Agenda
                         </span>
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium mb-2">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium mb-2 not-italic">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{formatDate(activeMeeting.createdAt)}</span>
-                          <span>•</span>
-                          <span>Created by <UserBadge authorId={activeMeeting.authorId} users={users} /></span>
+                          <span className="font-semibold text-slate-600">{formatDate(activeMeeting.createdAt)}</span>
                         </div>
                         <p className="text-xs text-slate-700 leading-relaxed font-semibold whitespace-pre-wrap">
                           {activeMeeting.description}

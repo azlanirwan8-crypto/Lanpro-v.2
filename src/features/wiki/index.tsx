@@ -1177,44 +1177,31 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       (docCommentsMap[activeDocId] || []).map((comment) => {
                         const isMine = currentUser && (comment.userId === currentUser.uid || comment.userId === currentUser.id || comment.userName === currentUser.displayName);
                         return (
-                          <div key={comment.id} className={cn("flex w-full", isMine ? "justify-end" : "justify-start")}>
+                          <div key={comment.id} className={cn("flex w-full mb-2", isMine ? "justify-end" : "justify-start")}>
                             <div className={cn(
-                              "p-3.5 rounded-xl max-w-[85%] md:max-w-2xl shadow-xs",
-                              isMine ? "bg-indigo-600 text-white border-0" : "bg-white text-slate-700 border border-gray-200"
+                              "flex flex-col max-w-[85%] md:max-w-xl",
+                              isMine ? "items-end" : "items-start"
                             )}>
+                              {!isMine && (
+                                <span className="text-[10px] font-bold text-slate-500 mb-0.5 ml-1">{comment.userName}</span>
+                              )}
                               <div className={cn(
-                                "flex items-center justify-between mb-1.5 gap-3",
-                                isMine ? "flex-row-reverse" : "flex-row"
+                                "px-3.5 py-2 rounded-2xl relative shadow-sm group",
+                                isMine ? "bg-indigo-600 text-white rounded-br-sm" : "bg-white text-slate-800 border border-slate-200 rounded-bl-sm"
                               )}>
-                                <div className={cn("flex items-center gap-2", isMine ? "flex-row-reverse" : "flex-row")}>
-                                  <div className="w-7 h-7 rounded-full bg-indigo-500 text-white font-bold text-[10px] flex items-center justify-center uppercase shrink-0 shadow-xs">
-                                    {(comment.userName[0] || "U")}
-                                  </div>
-                                  <span className={cn(
-                                    "text-xs font-bold tracking-tight",
-                                    isMine ? "text-white" : "text-slate-800"
-                                  )}>
-                                    {comment.userName}
-                                  </span>
-                                </div>
+                                <p className="text-[13px] leading-relaxed whitespace-pre-wrap break-words min-w-[50px] pb-3.5">
+                                  {comment.text}
+                                </p>
                                 <span className={cn(
-                                  "text-[10px] font-medium",
-                                  isMine ? "text-white/80" : "text-gray-400"
+                                  "absolute bottom-1 right-3 text-[9px] font-semibold tracking-tight",
+                                  isMine ? "text-indigo-200" : "text-slate-400"
                                 )}>
-                                  {new Date(comment.createdAt).toLocaleDateString("id-ID", {
-                                    day: "numeric",
-                                    month: "short",
+                                  {new Date(comment.createdAt).toLocaleTimeString("id-ID", {
                                     hour: "2-digit",
                                     minute: "2-digit"
                                   })}
                                 </span>
                               </div>
-                              <p className={cn(
-                                "text-xs leading-relaxed whitespace-pre-wrap break-words font-medium",
-                                isMine ? "text-white" : "text-slate-700"
-                              )}>
-                                {comment.text}
-                              </p>
                             </div>
                           </div>
                         );

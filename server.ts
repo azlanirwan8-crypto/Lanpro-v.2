@@ -4089,7 +4089,10 @@ Buat dialog yang alami, informatif, dan menarik sebanyak 6-10 giliran bicara.`;
     try {
       const { projectId } = req.params;
       const connection = await mysqlPool.getConnection();
-      const [rows] = await connection.query("SELECT * FROM Meetings WHERE projectId = ? ORDER BY createdAt DESC", [projectId]);
+      const [rows] = await connection.query(
+        "SELECT id, projectId, title, description, meetingLink, authorId, createdAt, updatedAt, fileName, fileType, file_size FROM Meetings WHERE projectId = ? ORDER BY createdAt DESC",
+        [projectId]
+      );
       connection.release();
       res.json({ status: "success", data: rows });
     } catch (error: any) {

@@ -716,7 +716,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             {canAdd && (
               <tr className="bg-indigo-50/20 hover:bg-indigo-50/40 transition-colors">
                 <td className="py-3 px-4 text-center font-bold text-indigo-500 text-xs align-middle">
-                  <Plus className="w-4 h-4 mx-auto animate-bounce text-indigo-600" />
+                  -
                 </td>
 
                 {/* Concern */}
@@ -884,48 +884,31 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                                  (authorName && currentUser && (authorName === currentUser.displayName || authorName === currentUser.username));
 
                   return (
-                    <div key={comment.id || Math.random()} className={cn("flex w-full", isMine ? "justify-end" : "justify-start")}>
+                    <div key={comment.id || Math.random()} className={cn("flex w-full mb-2", isMine ? "justify-end" : "justify-start")}>
                       <div className={cn(
-                        "p-4 rounded-xl max-w-[85%] md:max-w-2xl shadow-xs",
-                        isMine ? "bg-indigo-600 text-white border-0" : "bg-white text-slate-700 border border-gray-200"
+                        "flex flex-col max-w-[85%] md:max-w-xl",
+                        isMine ? "items-end" : "items-start"
                       )}>
-                        {/* Header Baris Atas */}
+                        {!isMine && (
+                          <span className="text-[10px] font-bold text-slate-500 mb-0.5 ml-1">{authorName}</span>
+                        )}
                         <div className={cn(
-                          "flex items-center justify-between mb-2 gap-3",
-                          isMine ? "flex-row-reverse" : "flex-row"
+                          "px-3.5 py-2 rounded-2xl relative shadow-sm group",
+                          isMine ? "bg-indigo-600 text-white rounded-br-sm" : "bg-white text-slate-800 border border-slate-200 rounded-bl-sm"
                         )}>
-                          <div className={cn("flex items-center gap-2", isMine ? "flex-row-reverse" : "flex-row")}>
-                            <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold text-xs flex items-center justify-center uppercase shrink-0 object-cover shadow-2xs">
-                              {(authorName[0] || "U")}
-                            </div>
-                            <span className={cn(
-                              "text-sm font-semibold tracking-tight",
-                              isMine ? "text-white" : "text-slate-700"
-                            )}>
-                              {authorName}
-                            </span>
-                          </div>
+                          <p className="text-[13px] leading-relaxed whitespace-pre-wrap break-words min-w-[50px] pb-3.5">
+                            {commentBody}
+                          </p>
                           <span className={cn(
-                            "text-xs font-medium",
-                            isMine ? "text-white/80" : "text-gray-400"
+                            "absolute bottom-1 right-3 text-[9px] font-semibold tracking-tight",
+                            isMine ? "text-indigo-200" : "text-slate-400"
                           )}>
-                            {new Date(commentDate).toLocaleDateString("id-ID", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
+                            {new Date(commentDate).toLocaleTimeString("id-ID", {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
                           </span>
                         </div>
-
-                        {/* Isi Teks */}
-                        <p className={cn(
-                          "text-sm leading-relaxed whitespace-pre-wrap break-words",
-                          isMine ? "text-white" : "text-slate-700"
-                        )}>
-                          {commentBody}
-                        </p>
                       </div>
                     </div>
                   );
