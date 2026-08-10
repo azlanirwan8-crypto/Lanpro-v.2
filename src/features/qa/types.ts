@@ -26,10 +26,26 @@ export interface QATestCase {
   evidenceName?: string;
   linkedBugKey?: string; 
   assignedTo?: string; 
-  priority?: "High" | "Medium" | "Low"; 
+  priority?: "High" | "Medium" | "Low" | "Critical"; 
   tags?: string[]; 
   comments?: QAComment[];
+  commentsList?: QAComment[];
   evidences?: QAEvidence[];
+  history?: any[];
+  activeTesterId?: string;
+}
+
+export interface TestQAPanelProps {
+  tasks: any[];
+  projectMembers: any[];
+  selectedProject: any;
+  user: any;
+  initialStatusFilter?: "ALL" | "Passed" | "Failed" | "Blocked" | "Retest" | "Pending";
+  setSelectedTaskForDetail?: (task: any) => void;
+  setIsTaskDetailModalOpen?: (open: boolean) => void;
+  updateTaskField?: (id: string, field: string, value: any) => any;
+  updateTaskStatus?: (id: string, status: string) => void;
+  socket?: any;
 }
 
 export interface QATestSuite {

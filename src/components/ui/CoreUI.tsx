@@ -1,6 +1,9 @@
-import React, { useRef, useEffect } from "react";
-import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
+import { format, differenceInDays } from "date-fns";
+import { Loader2, Calendar, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+type Task = any;
 
 // --- Utils ---
 export const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");

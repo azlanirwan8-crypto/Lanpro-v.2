@@ -21,7 +21,7 @@ const apiFetch = async (url: string, options: any = {}) => {
 
 
 // Types matching functional requirements
-import { QAComment, QAEvidence, QATestCase, QATestSuite } from "./types";
+import { QAComment, QAEvidence, QATestCase, QATestSuite, TestQAPanelProps } from "./types";
 export function TestQAPanel({
   tasks,
   projectMembers,

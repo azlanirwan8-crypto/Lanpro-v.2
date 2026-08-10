@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { User, Mail, Phone, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { User, Mail, Phone, Lock, Eye, EyeOff, Loader2, Save } from "lucide-react";
 import { Button, Input } from "../../components/ui/CoreUI";
 import { apiRequest } from "../../lib/api";
 import { Modal } from "../../components/ui/Modal";
-import { UserProfile } from "../../lib/types";
+import { UserProfile } from "../../types/user";
+import { toast } from "sonner";
 
 export const ProfileEditModal = ({
   isOpen,

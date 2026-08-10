@@ -306,6 +306,11 @@ async function startServer() {
     message: "Terlalu banyak request dari IP ini, silakan coba lagi setelah 5 menit",
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => {
+      // Bebaskan limitasi untuk localhost/Vite saat development
+      const ip = req.ip || req.connection.remoteAddress;
+      return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+    }
   });
   app.use(globalLimiter);
 

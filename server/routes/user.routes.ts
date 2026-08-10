@@ -6,6 +6,22 @@ import { verifyProjectAccess } from "../middleware/rbac";
 import { hashPassword, verifyPassword } from "../helpers/hash";
 import { createAuditLog } from "../services/audit.service";
 import { broadcastProjectNotification, sendProjectActivityNotification, checkUpcomingDueDates } from "../services/notification.service";
+import jwt from "jsonwebtoken";
+import { getJwtSecret } from "../middleware/auth";
+
+const isRedisConnected = false;
+const pubClient: any = null;
+const globalPresence = new Map<string, any>();
+
+const query = async (sql: string, params?: any[]) => {
+  const connection = await mysqlPool.getConnection();
+  try {
+    const [rows] = await connection.query(sql, params);
+    return rows;
+  } finally {
+    connection.release();
+  }
+};
 
 const router = express.Router();
 

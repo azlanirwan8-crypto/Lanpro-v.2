@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { LogIn, Lock, Activity, Users, FileText, Bot, ArrowRight, UserPlus, Fingerprint, RefreshCcw, Eye, EyeOff, Building, MapPin, Building2, User, Phone, Briefcase, Mail } from "lucide-react";
-import { Button, Input, VelzonFloatingParticles, GoogleIcon,  } from "../../components/ui/CoreUI";
-import api from "../../lib/api";
+import React, { useState, useEffect, useMemo } from "react";
+import { LogIn, Lock, Activity, Users, FileText, Bot, ArrowRight, UserPlus, Fingerprint, RefreshCcw, Eye, EyeOff, Building, MapPin, Building2, User, Phone, Briefcase, Mail, AlertCircle, X } from "lucide-react";
+import { Button, Input, VelzonFloatingParticles, GoogleIcon, cn } from "../../components/ui/CoreUI";
+import { motion, AnimatePresence } from "framer-motion";
+import { apiRequest, setAuthToken } from "../../lib/api";
+import { googleSignIn } from "../../lib/firebase";
+import { registrationSchema, evaluatePasswordStrength } from "../../lib/registrationSchema";
+import { toast } from "sonner";
+import { VelzonSuccessIcon } from "../../components/AuthToastContainer";
 
 export const AuthHeroPanel = () => (
   <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-[#364574] via-[#405189] to-[#212529] items-center justify-center p-8 xl:p-12 select-none min-h-screen z-10 overflow-hidden">
