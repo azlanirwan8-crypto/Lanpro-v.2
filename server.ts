@@ -5,6 +5,7 @@ import 'dotenv/config';
 import { z } from "zod";
 import { GoogleGenAI, Type } from "@google/genai";
 import express from "express";
+import { errorHandler, notFoundHandler } from './server/middleware/errorHandler.ts';
 import path from "path";
 import multer from 'multer';
 const isServerless = !!process.env.VERCEL || !!process.env.AWS_EXECUTION_ENV || process.cwd() === '/var/task' || process.cwd().includes('/var/task');
@@ -4490,30 +4491,14 @@ const sendAlert = async (message: string, severity: 'warn' | 'error' | 'critical
   }
 };
 
-// Global Error Handler Terintegrasi Alert
-app.use((err: any, req: any, res: any, next: any) => {
-  console.error('Unhandled Server Error:', err);
-  
-  // Alert jika error 500 terjadi berulang (simulasi sederhana)
-  sendAlert(`Terjadi Unhandled Error di rute ${req.url}: ${err.message}`, 'error');
-
-  res.status(500).json({
-    status: "error",
-    message: "Terjadi kesalahan internal pada server LanPro.",
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
+// Global Error Handler Terintegrasi
+app.use(errorHandler);
 
   // ==========================================
   // WILAYAH III (End): Catch-all API Fallback
   // ==========================================
   // Catch-all untuk rute API yang tidak cocok
-  app.all('/api/*', (req, res) => {
-    res.status(404).json({
-      status: "error",
-      message: `Rute API backend tidak ditemukan atau tidak tersedia (Endpoint: ${req.method} ${req.originalUrl}).`
-    });
-  });
+  app.all('/api/*', notFoundHandler);
 
   // ==========================================
   // WILAYAH IV: Static Assets (Menyajikan SPA Vite)
