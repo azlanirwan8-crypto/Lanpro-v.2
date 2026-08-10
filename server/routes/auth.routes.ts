@@ -6,6 +6,8 @@ import { authenticateJWT, activeUserSessions, generateToken } from "../middlewar
 import { hashPassword, verifyPassword } from "../helpers/hash";
 import { createAuditLog } from "../services/audit.service";
 import { GoogleGenAI, Type } from "@google/genai";
+import { z } from "zod";
+import admin from 'firebase-admin';
 
 const router = express.Router();
 
@@ -79,10 +81,14 @@ const router = express.Router();
 
 
   router.post("/api/auth/google-verify", async (req, res) => {
-      ensureAdminInitialized();
+      if (!admin.apps.length) {
+          admin.initializeApp({
+              credential: admin.credential.applicationDefault()
+          });
+      }
       const { idToken } = req.body;
       try {
-          const decodedToken = await (admin as any).auth().verifyIdToken(idToken);
+          const decodedToken = await admin.auth().verifyIdToken(idToken);
           const email = decodedToken.email;
           
           if (!email) {
