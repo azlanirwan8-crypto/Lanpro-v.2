@@ -13,9 +13,9 @@ export const Button = ({ children, onClick, variant = 'primary', className = '',
   if (variant === 'ghost') variantStyle = "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:scale-95";
   
   let sizeStyle = "";
-  if (size === 'sm') sizeStyle = "px-3 py-1.5 text-xs rounded-lg";
-  if (size === 'md') sizeStyle = "px-4 py-2 text-sm rounded-xl";
-  if (size === 'lg') sizeStyle = "px-6 py-3 text-base rounded-2xl";
+  if (size === 'sm') sizeStyle = "px-3 py-1 text-xs rounded-md";
+  if (size === 'md') sizeStyle = "px-3.5 py-1.5 text-xs font-medium rounded-md";
+  if (size === 'lg') sizeStyle = "px-4 py-2 text-sm font-medium rounded-md";
 
   return (
     <button onClick={onClick} disabled={disabled} className={`${baseStyle} ${variantStyle} ${sizeStyle} ${className}`}>
@@ -28,20 +28,20 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' 
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={onClose} />
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className={`bg-white rounded-3xl shadow-2xl relative z-10 w-full ${maxWidth} max-h-[90vh] flex flex-col overflow-hidden border border-slate-200/50`}
+        exit={{ opacity: 0, scale: 0.95, y: 15 }}
+        className={`bg-white dark:bg-slate-900 rounded-lg shadow-xl relative z-10 w-full ${maxWidth} max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-          <h3 className="font-black text-lg text-slate-800 tracking-tight">{title}</h3>
-          <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full text-slate-500 transition-colors">
-            <X className="w-5 h-5" />
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+          <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-100 tracking-tight">{title}</h3>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md text-slate-500 transition-colors">
+            <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar relative">
+        <div className="p-5 overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar relative">
           {children}
         </div>
       </motion.div>

@@ -55,7 +55,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
               type="button"
               onClick={() => setActiveWaterfallTab(phase.id)}
               className={cn(
-                "flex flex-col p-4 rounded-2xl border text-left transition-all h-full relative focus:outline-none cursor-pointer",
+                "flex flex-col p-4 rounded-xl border text-left transition-all h-full relative focus:outline-none cursor-pointer",
                 isActive
                   ? "bg-slate-800/90 border-amber-400/80 shadow-[0_0_15px_rgba(251,191,36,0.15)]"
                   : "bg-slate-800/30 border-slate-850 hover:bg-slate-800/60"
@@ -170,7 +170,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
         const phaseGateStatus = waterfallGates[activeWaterfallTab];
 
         return (
-          <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-5 md:p-6 relative z-10 select-none">
+          <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-5 md:p-6 relative z-10 select-none">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-4 border-b border-white/5">
               <div>
                 <h4 className="text-base font-bold text-white flex items-center gap-2">

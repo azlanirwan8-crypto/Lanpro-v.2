@@ -41,7 +41,7 @@ const Button = ({ children, onClick, variant = 'primary', className = '', disabl
       onClick={onClick} 
       disabled={disabled}
       className={cn(
-        "inline-flex items-center justify-center font-bold rounded-xl border transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none",
+        "inline-flex items-center justify-center font-semibold rounded-md border transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none",
         variants[variant as keyof typeof variants],
         sizes[size as keyof typeof sizes],
         className
@@ -59,7 +59,7 @@ const Textarea = ({ value, onChange, placeholder, rows = 3, className = "" }: an
     placeholder={placeholder}
     rows={rows}
     className={cn(
-      "w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none font-medium text-slate-700",
+      "w-full bg-white border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none font-medium text-slate-700",
       className
     )}
   />
@@ -312,7 +312,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 h-full">
               
               {/* Left Column (Main Info) */}
-              <div className="lg:col-span-8 p-8 lg:p-10 space-y-10 border-r border-slate-100">
+              <div className="lg:col-span-8 p-5 md:p-6 lg:p-7 space-y-6 border-r border-slate-200/80 bg-white">
                 {(() => {
                   const parentEpic = task?.parentId ? (tasks || []).find(t => t.id === task.parentId) : null;
                   const isEpicExceeded = parentEpic && (
@@ -323,20 +323,20 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   );
                   if (!isEpicExceeded) return null;
                   return (
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 shadow-sm">
-                      <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                      <div className="text-xs text-amber-900 space-y-1">
-                        <p className="font-black uppercase tracking-wider text-amber-800">Peringatan Jadwal Epic Timeline:</p>
-                        <p className="font-medium">Rentang tanggal Task berada di luar jadwal Epic induk "{parentEpic?.title}" ({parentEpic?.startDate ? format(ensureDate(parentEpic.startDate), 'yyyy-MM-dd') : '∞'} - {parentEpic?.endDate ? format(ensureDate(parentEpic.endDate), 'yyyy-MM-dd') : '∞'}). Penyimpanan akan ditolak oleh server jika melewati batas Epic.</p>
+                    <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-lg flex items-start gap-2.5 shadow-2xs">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="text-xs text-amber-900 space-y-0.5">
+                        <p className="font-semibold uppercase tracking-wider text-amber-800 text-[11px]">Peringatan Jadwal Epic Timeline:</p>
+                        <p className="font-normal text-slate-700">Rentang tanggal Task berada di luar jadwal Epic induk "{parentEpic?.title}" ({parentEpic?.startDate ? format(ensureDate(parentEpic.startDate), 'yyyy-MM-dd') : '∞'} - {parentEpic?.endDate ? format(ensureDate(parentEpic.endDate), 'yyyy-MM-dd') : '∞'}). Penyimpanan akan ditolak oleh server jika melewati batas Epic.</p>
                       </div>
                     </div>
                   );
                 })()}
 
-                {/* Title */}
-                <div className={cn("space-y-4 transition-opacity", isUpdatingTask?.[task.id] && "opacity-50 pointer-events-none")}>
+                {/* Title & Key Header */}
+                <div className={cn("space-y-3 transition-opacity", isUpdatingTask?.[task.id] && "opacity-50 pointer-events-none")}>
                   <UncontrolledInput 
-                    className="text-3xl font-black text-slate-900 bg-transparent hover:bg-slate-50 focus:bg-white border-none rounded-2xl px-3 py-2 w-full transition-all outline-none focus:ring-2 focus:ring-indigo-500/10 placeholder:text-slate-200"
+                    className="text-2xl font-bold text-slate-800 bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent hover:border-slate-200/80 focus:border-indigo-400 rounded-lg px-3 py-1.5 w-full transition-all outline-none focus:ring-2 focus:ring-indigo-500/10 placeholder:text-slate-300 tracking-tight"
                     placeholder="Issue Title"
                     initialValue={task.title || (task as any).summary || (task as any).name || ''}
                     onSave={(val: string) => updateTaskField(task.id, 'title', val)}
@@ -345,34 +345,39 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   />
                   
                   {/* Actions Bar */}
-                  <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <div className="flex flex-wrap items-center gap-2.5 pt-1 border-b border-slate-100 pb-3">
                     <Button 
                       variant="secondary" 
                       size="sm" 
-                      className="bg-slate-50 border-slate-100"
+                      className="h-8 text-xs font-semibold px-3 py-1 rounded-md border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
                       onClick={wrapSubmit("addSubtask", () => handleQuickAddSubtask(task.id, task.type === "epic" ? "task" : "subtask"))}
                       disabled={isSubmitting["addSubtask"]}
                     >
-                      <Plus className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
+                      <Plus className="w-3.5 h-3.5 mr-1 text-indigo-500" />
                       Add Child
                     </Button>
-                    <Button variant="secondary" size="sm" className="bg-slate-50 border-slate-100" onClick={() => setIsAddingTaskLinkLocal(!isAddingTaskLinkLocal)}>
-                      <Link2Icon className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      className="h-8 text-xs font-semibold px-3 py-1 rounded-md border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs" 
+                      onClick={() => setIsAddingTaskLinkLocal(!isAddingTaskLinkLocal)}
+                    >
+                      <Link2Icon className="w-3.5 h-3.5 mr-1 text-slate-400" />
                       Link Issue
                     </Button>
                     <div className="ml-auto flex items-center gap-2">
-                       <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100 uppercase tracking-widest">
-                          <Clock className="w-3 h-3" />
+                       <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 bg-slate-50/80 px-2.5 py-1 rounded-md border border-slate-200/60">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
                           Updated {task.updatedAt ? formatDistanceToNow(ensureDate(task.updatedAt), { addSuffix: true }) : 'Never'}
                        </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Description */}
-                <div className="space-y-4">
+                {/* Description Card */}
+                <div className="bg-white border border-slate-200/80 rounded-lg p-4 md:p-5 shadow-2xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                    <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
                       <ListTodo className="w-4 h-4 text-indigo-500" />
                       Description
                     </h3>
@@ -388,25 +393,25 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       />
                     ) : (
                       <div 
-                        className="min-h-[160px] border border-slate-100 hover:border-indigo-200 rounded-3xl p-8 bg-slate-50/30 hover:bg-white transition-all cursor-text shadow-sm hover:shadow-md"
+                        className="min-h-[110px] border border-slate-200/70 hover:border-indigo-300 rounded-md p-4 bg-slate-50/30 hover:bg-white transition-all cursor-text shadow-2xs"
                         onClick={() => isEditable && setIsEditingDescription(true)}
                       >
                         {task.description ? (
-                          <div className="markdown-body prose-sm max-w-none text-slate-700 leading-relaxed font-medium">
+                          <div className="markdown-body prose-sm max-w-none text-slate-700 leading-relaxed font-normal">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>{task.description}</ReactMarkdown>
                           </div>
                         ) : (
-                          <span className="text-slate-300 text-sm italic font-medium">No description. Click to add.</span>
+                          <span className="text-slate-400 text-xs italic font-normal">No description provided. Click here to add detailed context...</span>
                         )}
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Acceptance Criteria */}
-                <div className="space-y-4 pt-4">
+                {/* Acceptance Criteria Card */}
+                <div className="bg-white border border-slate-200/80 rounded-lg p-4 md:p-5 shadow-2xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                    <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                       Acceptance Criteria
                     </h3>
@@ -414,7 +419,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   
                   <div className={cn("group relative", isUpdatingTask?.[task.id] && "opacity-50 pointer-events-none")}>
                     {task.acceptanceCriteria !== undefined && isEditingAcceptanceCriteria ? (
-                      <div className="border border-emerald-500 rounded-2xl overflow-hidden bg-white shadow-lg ring-4 ring-emerald-500/10 transition-all">
+                      <div className="border border-emerald-500/80 rounded-md overflow-hidden bg-white shadow-sm ring-2 ring-emerald-500/10 transition-all">
                         <UncontrolledTextarea
                           initialValue={task.acceptanceCriteria || ''}
                           onSave={(val: string) => {
@@ -424,24 +429,24 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                           onAutoSave={(val: string) => updateTaskField(task.id, 'acceptanceCriteria', val)}
                           onCancel={() => setIsEditingAcceptanceCriteria(false)}
                           placeholder="Define the acceptance criteria here... (Markdown supported)"
-                          rows={6}
-                          className="w-full p-6 text-sm focus:outline-none resize-y leading-relaxed font-medium text-slate-700"
+                          rows={4}
+                          className="w-full p-4 text-xs focus:outline-none resize-y leading-relaxed font-normal text-slate-700"
                         />
-                        <div className="bg-slate-50 border-t border-slate-100 px-4 py-3 flex justify-between items-center text-[10px] font-bold text-slate-400">
+                        <div className="bg-slate-50 border-t border-slate-100 px-3 py-2 flex justify-between items-center text-[11px] font-medium text-slate-400">
                           <span>Markdown fully supported. Press Ctrl+Enter to save, or Escape to cancel.</span>
                         </div>
                       </div>
                     ) : (
                       <div 
-                        className="min-h-[120px] border border-slate-100 hover:border-emerald-200 rounded-3xl p-8 bg-slate-50/30 hover:bg-white transition-all cursor-text shadow-sm hover:shadow-md"
+                        className="min-h-[90px] border border-slate-200/70 hover:border-emerald-300 rounded-md p-4 bg-slate-50/30 hover:bg-white transition-all cursor-text shadow-2xs"
                         onClick={() => isEditable && setIsEditingAcceptanceCriteria(true)}
                       >
                         {task.acceptanceCriteria ? (
-                          <div className="markdown-body prose-sm max-w-none text-slate-700 leading-relaxed font-medium">
+                          <div className="markdown-body prose-sm max-w-none text-slate-700 leading-relaxed font-normal text-xs">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>{task.acceptanceCriteria}</ReactMarkdown>
                           </div>
                         ) : (
-                          <span className="text-slate-300 text-sm italic font-medium">No acceptance criteria. Click to add.</span>
+                          <span className="text-slate-400 text-xs italic font-normal">No acceptance criteria defined. Click here to add...</span>
                         )}
                       </div>
                     )}
@@ -463,7 +468,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         Open Original
                       </a>
                     </div>
-                    <div className="rounded-3xl border border-slate-200 overflow-hidden shadow-xl h-[480px] bg-slate-100 relative group">
+                    <div className="rounded-lg border border-slate-200 overflow-hidden shadow-md h-[480px] bg-slate-100 relative group">
                       <iframe
                         width="100%"
                         height="100%"
@@ -491,7 +496,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   
                   <div className="space-y-2">
                      {task.attachments?.map((att, attIdx) => (
-                       <div key={att.id ? `${att.id}-${attIdx}` : `att-${attIdx}`} className="flex items-center gap-3 p-3 bg-white hover:bg-slate-50 border border-slate-100 rounded-2xl group transition-all shadow-sm">
+                       <div key={att.id ? `${att.id}-${attIdx}` : `att-${attIdx}`} className="flex items-center gap-3 p-3 bg-white hover:bg-slate-50 border border-slate-100 rounded-xl group transition-all shadow-sm">
                          <a 
                            href={att.url} 
                            target="_blank" 
@@ -529,7 +534,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="p-4 bg-indigo-50/30 rounded-2xl border border-indigo-100/50 space-y-3"
+                      className="p-4 bg-indigo-50/30 rounded-xl border border-indigo-100/50 space-y-3"
                     >
                        <input 
                          placeholder="Resource Title"
@@ -567,7 +572,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         const target = (tasks || []).find(t => t.id === link.targetTaskId);
                         if (!target) return null;
                         return (
-                          <div key={link.id ? `${link.id}-${linkIdx}` : `link-${linkIdx}`} className="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-2 group/link relative">
+                          <div key={link.id ? `${link.id}-${linkIdx}` : `link-${linkIdx}`} className="p-3 bg-white rounded-xl border border-slate-100 shadow-sm space-y-2 group/link relative">
                              <div className="flex items-center justify-between">
                                 <span className="text-[9px] font-black uppercase text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded tracking-widest">
                                    {link.relationType.replace(/_/g, ' ')}
@@ -592,7 +597,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="p-4 bg-indigo-50/30 rounded-2xl border border-indigo-100/50 space-y-3"
+                      className="p-4 bg-indigo-50/30 rounded-xl border border-indigo-100/50 space-y-3"
                     >
                        <StyledDropdown 
                          value={taskLinkRelation}
@@ -636,9 +641,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       Subtask List
                     </h3>
                   </div>
-                  <div className="space-y-3 p-6 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200 shadow-inner">
+                  <div className="space-y-3 p-4 bg-slate-50/50 rounded-lg border border-dashed border-slate-200 shadow-xs">
                     {tasks.filter(t => t.parentId === task.id).map((st, stIdx) => (
-                      <div key={st.id ? `${st.id}-${stIdx}` : `sub-${stIdx}`} className={cn("flex items-center gap-4 p-3 bg-white hover:bg-indigo-50/30 rounded-2xl group border border-slate-100 transition-all shadow-sm", isUpdatingTask?.[st.id] ? "opacity-50 pointer-events-none" : "hover:border-indigo-100")}>
+                      <div key={st.id ? `${st.id}-${stIdx}` : `sub-${stIdx}`} className={cn("flex items-center gap-4 p-3 bg-white hover:bg-indigo-50/30 rounded-xl group border border-slate-100 transition-all shadow-sm", isUpdatingTask?.[st.id] ? "opacity-50 pointer-events-none" : "hover:border-indigo-100")}>
                         <input 
                           type="checkbox" 
                           className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer shadow-sm" 
@@ -755,7 +760,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             </div>
                             
                             {mentionState.active && (
-                              <div className="absolute z-50 w-72 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-200 overflow-hidden transform bottom-[110%] left-0 animate-in fade-in slide-in-from-bottom-2">
+                              <div className="absolute z-50 w-72 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-200 overflow-hidden transform bottom-[110%] left-0 animate-in fade-in slide-in-from-bottom-2">
                                 <div className="p-3 bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">Suggested People</div>
                                 <div className="max-h-60 overflow-y-auto py-1">
                                   {projectMembers
@@ -781,11 +786,11 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                  Save
                                </Button>
                             </div>
-                          </div>
+                         </div>
                        </div>
 
                        {/* Comment List */}
-                       <div className="space-y-10">
+                       <div className="space-y-4">
                           {comments.map((comment, i) => {
                             const author = (projectMembers || []).find(m => m.uid === comment.authorId);
                             return (
@@ -794,20 +799,20 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                  animate={{ opacity: 1, x: 0 }}
                                  transition={{ delay: i * 0.05 }}
                                  key={comment.id ? `${comment.id}-${i}` : `comm-${i}`} 
-                                 className="flex gap-4 group"
+                                 className="flex gap-3 group"
                                >
-                                  <UserAvatar uid={comment.authorId} members={projectMembers} className="w-9 h-9 border-2 border-white shadow-md shrink-0" />
+                                  <UserAvatar uid={comment.authorId} members={projectMembers} className="w-8 h-8 border border-white shadow-2xs shrink-0" />
                                   <div className="flex-1 space-y-1">
                                      <div className="flex items-center gap-2">
-                                        <span className="text-sm font-black text-slate-900 tracking-tight">{author?.displayName || 'Unknown User'}</span>
+                                        <span className="text-xs font-bold text-slate-800 tracking-tight">{author?.displayName || 'Unknown User'}</span>
                                         <div className="w-1 h-1 bg-slate-300 rounded-full" />
-                                        <span className="text-[11px] font-black text-slate-400">
+                                        <span className="text-[10px] font-medium text-slate-400">
                                           {safeFormat(comment.createdAt, 'MMM d, h:mm a', 'Just now')}
                                         </span>
                                      </div>
-                                     <div className="text-[13px] text-slate-700 bg-slate-50/50 p-4 rounded-2xl rounded-tl-none border border-slate-100 leading-relaxed font-medium">
+                                     <div className="text-xs text-slate-700 bg-slate-50/70 p-3 rounded-lg border border-slate-200/60 leading-relaxed font-normal">
                                         {comment.text?.split(/(@\w+)/g).map((part: string, i: number) => 
-                                          part.startsWith('@') ? <span key={i} className="text-indigo-600 font-bold bg-indigo-50 px-1 rounded shadow-sm border border-indigo-100">{part}</span> : part
+                                          part.startsWith('@') ? <span key={i} className="text-indigo-600 font-semibold bg-indigo-50 px-1 rounded shadow-2xs border border-indigo-100">{part}</span> : part
                                         )}
                                      </div>
                                   </div>
@@ -815,9 +820,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             );
                           })}
                           {comments.length === 0 && (
-                            <div className="py-20 text-center space-y-3 opacity-30">
-                               <MessageSquare className="w-12 h-12 mx-auto text-slate-300" />
-                               <p className="text-sm font-black uppercase tracking-widest text-slate-500">No discussion yet</p>
+                            <div className="py-6 px-4 text-center space-y-1.5 bg-slate-50/50 rounded-lg border border-dashed border-slate-200/80">
+                               <MessageSquare className="w-6 h-6 mx-auto text-slate-300" />
+                               <p className="text-xs font-medium text-slate-400">Belum ada diskusi / komentar. Ketik komentar di atas untuk memulai.</p>
                             </div>
                           )}
                        </div>
@@ -825,23 +830,23 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   )}
 
                   {activeTab === 'history' && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-top-2">
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
                        {filteredLogs.map((log, i) => {
                           const actor = (projectMembers || []).find(m => m?.uid === log.userId) || { displayName: 'System' };
                           return (
-                            <div key={log.id ? `${log.id}-${i}` : `log-${i}`} className="flex gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-all border border-transparent hover:border-slate-100 group">
+                            <div key={log.id ? `${log.id}-${i}` : `log-${i}`} className="flex gap-3 p-2.5 hover:bg-slate-50 rounded-lg transition-all border border-transparent hover:border-slate-200/60 group">
                                <div className="relative">
-                                  <UserAvatar uid={log.userId} members={projectMembers} className="w-9 h-9 shrink-0 shadow-sm border-2 border-white relative z-10" />
-                                  {i < filteredLogs.length - 1 && <div className="absolute top-9 left-1/2 -content-x-1/2 w-0.5 h-full bg-slate-100 z-0" />}
+                                  <UserAvatar uid={log.userId} members={projectMembers} className="w-7 h-7 shrink-0 shadow-2xs border border-white relative z-10" />
+                                  {i < filteredLogs.length - 1 && <div className="absolute top-7 left-1/2 -content-x-1/2 w-0.5 h-full bg-slate-200/60 z-0" />}
                                </div>
-                               <div className="space-y-1 py-1">
+                               <div className="space-y-0.5 py-0.5">
                                   <div className="flex items-center gap-2">
-                                     <span className="text-sm font-black text-slate-900">{actor?.displayName}</span>
-                                     <span className="text-[11px] font-black text-slate-400 bg-white border border-slate-100 px-2 py-0.5 rounded shadow-xs uppercase tracking-tighter">
+                                     <span className="text-xs font-bold text-slate-800">{actor?.displayName}</span>
+                                     <span className="text-[10px] font-medium text-slate-400 bg-white border border-slate-200/60 px-1.5 py-0.2 rounded uppercase tracking-tight">
                                         {safeFormat(log.createdAt, 'MMM d, HH:mm')}
                                      </span>
                                   </div>
-                                  <p className="text-[13px] text-slate-500 font-medium leading-relaxed group-hover:text-slate-900 transition-colors">
+                                  <p className="text-xs text-slate-600 font-normal leading-relaxed group-hover:text-slate-900 transition-colors">
                                      {log.details || log.action}
                                   </p>
                                </div>
@@ -849,9 +854,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                           );
                        })}
                        {filteredLogs.length === 0 && (
-                          <div className="py-20 text-center space-y-3 opacity-30">
-                             <History className="w-12 h-12 mx-auto text-slate-300" />
-                             <p className="text-sm font-black uppercase tracking-widest text-slate-500">No activity history found</p>
+                          <div className="py-6 px-4 text-center space-y-1.5 bg-slate-50/50 rounded-lg border border-dashed border-slate-200/80">
+                             <History className="w-6 h-6 mx-auto text-slate-300" />
+                             <p className="text-xs font-medium text-slate-400">Belum ada riwayat aktivitas yang terekam.</p>
                           </div>
                        )}
                     </div>
@@ -859,13 +864,24 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Right Column (Metdata/Sidebar) - STICKY */}
-              <div className={cn("lg:col-span-4 bg-slate-50/50 p-8 space-y-8 border-l border-slate-100 lg:sticky lg:top-0 h-fit transition-opacity", isUpdatingTask?.[task.id] && "opacity-50 pointer-events-none")}>
+              {/* Right Column (Metadata/Sidebar) - STICKY VELZON THEME */}
+              <div className={cn("lg:col-span-4 bg-slate-50/70 dark:bg-slate-900/40 p-4 md:p-5 space-y-4 border-l border-slate-200/80 min-h-full transition-opacity text-left", isUpdatingTask?.[task.id] && "opacity-50 pointer-events-none")}>
                 
-                {/* Main Status Select */}
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                    <Activity className="w-3.5 h-3.5" />
+                {/* Header Title */}
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
+                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                    <Activity className="w-3.5 h-3.5 text-indigo-500" />
+                    Issue Attributes
+                  </h4>
+                  <span className="text-[10px] font-semibold text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded-md">
+                    {task.key || 'ATTR'}
+                  </span>
+                </div>
+
+                {/* Main Lifecycle Status Select */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Activity className="w-3 h-3 text-slate-400" />
                     Lifecycle Status
                   </label>
                   <StyledDropdown 
@@ -876,61 +892,57 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     onChange={(val) => updateTaskField(task.id, 'status', val)}
                     disabled={!isEditable}
                     className="w-full"
+                    buttonClassName="h-[38px] bg-white rounded-md border border-slate-200/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-semibold"
                   />
                 </div>
 
-                {/* Divider */}
-                <div className="h-px bg-slate-100" />
+                <div className="h-px bg-slate-200/70 my-2" />
 
-                {/* Metadata Grid */}
-                <div className="space-y-6">
+                {/* Metadata Controls List */}
+                <div className="space-y-3.5">
                   {/* Assignee */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <User className="w-3.5 h-3.5" />
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <User className="w-3 h-3 text-slate-400" />
                       Assignee
                     </label>
-                    <div className="flex items-center gap-3 w-full">
-                       <StyledDropdown 
-                        value={task.assigneeId || ''}
-                        onChange={(val) => updateTaskField(task.id, 'assigneeId', val)}
-                        options={[{ id: '', label: 'Unassigned' }, ...(projectMembers || []).map(m => ({ id: m?.uid || '', label: m?.displayName || m?.email || 'Unknown' }))]}
-                        members={projectMembers}
-                        type="member"
-                        masterData={[]}
-                        className={cn("w-full", isProjectMember && "pointer-events-none opacity-80")}
-                        buttonClassName="h-[52px] bg-white rounded-2xl border-slate-200 shadow-sm px-4"
-                        disabled={!isEditable || isProjectMember}
-                      />
-                    </div>
+                    <StyledDropdown 
+                      value={task.assigneeId || ''}
+                      onChange={(val) => updateTaskField(task.id, 'assigneeId', val)}
+                      options={[{ id: '', label: 'Unassigned' }, ...(projectMembers || []).map(m => ({ id: m?.uid || '', label: m?.displayName || m?.email || 'Unknown' }))]}
+                      members={projectMembers}
+                      type="member"
+                      masterData={[]}
+                      className={cn("w-full", isProjectMember && "pointer-events-none opacity-80")}
+                      buttonClassName="h-[38px] bg-white rounded-md border border-slate-200/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium text-slate-700"
+                      disabled={!isEditable || isProjectMember}
+                    />
                   </div>
 
                   {/* Reporter */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <User className="w-3.5 h-3.5" />
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <User className="w-3 h-3 text-slate-400" />
                       Reporter
                     </label>
-                    <div className="flex items-center gap-3 w-full">
-                       <StyledDropdown 
-                        value={task.reporterId || ''}
-                        onChange={(val) => updateTaskField(task.id, 'reporterId', val)}
-                        options={[{ id: '', label: 'None' }, ...(projectMembers || []).map(m => ({ id: m?.uid || '', label: m?.displayName || m?.email || 'Unknown' }))]}
-                        members={projectMembers}
-                        type="member"
-                        masterData={[]}
-                        className={cn("w-full", isProjectMember && "pointer-events-none opacity-80")}
-                        buttonClassName="h-[52px] bg-white rounded-2xl border-slate-200 shadow-sm px-4"
-                        disabled={!isEditable || isProjectMember}
-                      />
-                    </div>
+                    <StyledDropdown 
+                      value={task.reporterId || ''}
+                      onChange={(val) => updateTaskField(task.id, 'reporterId', val)}
+                      options={[{ id: '', label: 'None' }, ...(projectMembers || []).map(m => ({ id: m?.uid || '', label: m?.displayName || m?.email || 'Unknown' }))]}
+                      members={projectMembers}
+                      type="member"
+                      masterData={[]}
+                      className={cn("w-full", isProjectMember && "pointer-events-none opacity-80")}
+                      buttonClassName="h-[38px] bg-white rounded-md border border-slate-200/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium text-slate-700"
+                      disabled={!isEditable || isProjectMember}
+                    />
                   </div>
 
-                  {/* Priority & Points */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Zap className="w-3.5 h-3.5" />
+                  {/* Priority & Points Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Zap className="w-3 h-3 text-slate-400" />
                         Priority
                       </label>
                       <StyledDropdown 
@@ -941,15 +953,16 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         onChange={(val) => updateTaskField(task.id, 'priority', val)}
                         disabled={!isEditable || isProjectMember}
                         className={cn("w-full", isProjectMember && "pointer-events-none opacity-80")}
+                        buttonClassName="h-[38px] bg-white rounded-md border border-slate-200/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium"
                       />
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center justify-between mb-0.5">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Points</label>
+                        <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Points</label>
                         {isEditable && !isProjectMember && (
                            <button 
                              onClick={() => handleSuggestStoryPoints(task)}
-                             className="text-[9px] font-black text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                             className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5"
                            >
                              <Sparkles className="w-3 h-3" /> AI
                            </button>
@@ -959,41 +972,42 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         type="number"
                         initialValue={task.storyPoints || ''}
                         onSave={(val: any) => updateTaskField(task.id, 'storyPoints', parseInt(val) || 0)}
-                        className="w-full text-sm font-bold bg-white border border-slate-200 rounded-2xl px-4 py-2.5 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm outline-none"
+                        className="h-[38px] w-full text-xs font-semibold bg-white border border-slate-200/80 hover:border-slate-300 rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all shadow-2xs outline-none text-slate-700"
                         disabled={!isEditable || isProjectMember}
+                        placeholder="0"
                       />
                     </div>
                   </div>
 
                   {/* Blocked Status */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <ShieldAlert className="w-3.5 h-3.5" />
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <ShieldAlert className="w-3 h-3 text-slate-400" />
                       Blocked Status
                     </label>
                     <button
                       onClick={() => toggleBlockedStatus(task.id)}
                       disabled={!isEditable || isProjectMember}
                       className={cn(
-                        "w-full flex items-center justify-between p-3 rounded-2xl border transition-all duration-300 font-bold text-xs uppercase tracking-wider",
+                        "h-[38px] w-full flex items-center justify-between px-3 rounded-md border transition-all text-xs font-semibold uppercase tracking-wider shadow-2xs",
                         task.isBlocked 
-                          ? "bg-red-50 border-red-200 text-red-600 shadow-lg shadow-red-500/10 scale-[1.02]" 
-                          : "bg-white border-slate-200 text-slate-400 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 hover:border-red-200 hover:text-red-400 shadow-sm",
+                          ? "bg-red-50 border-red-200 text-red-600 shadow-xs" 
+                          : "bg-white border-slate-200/80 text-slate-500 hover:border-red-200 hover:text-red-500",
                         isProjectMember && "pointer-events-none opacity-80"
                       )}
                     >
                       <div className="flex items-center gap-2">
-                        <ShieldAlert className={cn("w-4 h-4", task.isBlocked && "animate-pulse")} />
+                        <ShieldAlert className={cn("w-3.5 h-3.5", task.isBlocked && "animate-pulse")} />
                         {task.isBlocked ? 'Blocked' : 'Clear'}
                       </div>
-                      <div className={cn("w-2 h-2 rounded-full", task.isBlocked ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-slate-300")} />
+                      <div className={cn("w-2 h-2 rounded-full", task.isBlocked ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" : "bg-slate-300")} />
                     </button>
                   </div>
 
-                  {/* Sprint */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <Layers className="w-3.5 h-3.5" />
+                  {/* Current Sprint */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <Layers className="w-3 h-3 text-slate-400" />
                       Current Sprint
                     </label>
                     <StyledDropdown 
@@ -1011,13 +1025,16 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       masterData={masterData}
                       disabled={!isEditable || isProjectMember}
                       className={cn("w-full", isProjectMember && "pointer-events-none opacity-80")}
-                      buttonClassName="text-[13px] font-bold bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm h-[52px]"
+                      buttonClassName="h-[38px] bg-white rounded-md border border-slate-200/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium text-slate-700"
                     />
                   </div>
 
-                  {/* Release */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Release / Milestone</label>
+                  {/* Release / Milestone */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <Tag className="w-3 h-3 text-slate-400" />
+                      Release / Milestone
+                    </label>
                     <StyledDropdown 
                       value={task.release || ''}
                       onChange={(val) => updateTaskField(task.id, 'release', val)}
@@ -1033,75 +1050,74 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       masterData={masterData}
                       disabled={!isEditable || isProjectMember}
                       className={cn("w-full", isProjectMember && "pointer-events-none opacity-80")}
-                      buttonClassName="text-[13px] font-bold bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm h-[52px]"
+                      buttonClassName="h-[38px] bg-white rounded-md border border-slate-200/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium text-slate-700"
                     />
                   </div>
 
-                  {/* Dates */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5" />
+                  {/* Dates Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Calendar className="w-3 h-3 text-slate-400" />
                         Start Date
                       </label>
                       <UncontrolledInput 
                         type="date"
                         initialValue={task.startDate ? format(ensureDate(task.startDate), 'yyyy-MM-dd') : ''}
                         onSave={(val: any) => updateTaskField(task.id, 'startDate', val)}
-                        className={cn("w-full text-[11px] font-black bg-white border border-slate-200 rounded-2xl px-3 py-2.5 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 shadow-sm outline-none text-slate-500 uppercase tracking-tighter", isProjectMember && "opacity-70 cursor-not-allowed")}
+                        className={cn("h-[38px] w-full text-xs font-medium bg-white border border-slate-200/80 hover:border-slate-300 rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-slate-700", isProjectMember && "opacity-70 cursor-not-allowed")}
                         disabled={!isEditable || isProjectMember}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5" />
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Calendar className="w-3 h-3 text-slate-400" />
                         End Date
                       </label>
                       <UncontrolledInput 
                         type="date"
                         initialValue={task.endDate ? format(ensureDate(task.endDate), 'yyyy-MM-dd') : ''}
                         onSave={(val: any) => updateTaskField(task.id, 'endDate', val)}
-                        className={cn("w-full text-[11px] font-black bg-white border border-slate-200 rounded-2xl px-3 py-2.5 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 shadow-sm outline-none text-slate-500 uppercase tracking-tighter", isProjectMember && "opacity-70 cursor-not-allowed")}
+                        className={cn("h-[38px] w-full text-xs font-medium bg-white border border-slate-200/80 hover:border-slate-300 rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-slate-700", isProjectMember && "opacity-70 cursor-not-allowed")}
                         disabled={!isEditable || isProjectMember}
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5" />
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Calendar className="w-3 h-3 text-slate-400" />
                         Due Date
                       </label>
                       <UncontrolledInput 
                         type="date"
                         initialValue={task.dueDate ? format(ensureDate(task.dueDate), 'yyyy-MM-dd') : ''}
                         onSave={(val: any) => updateTaskField(task.id, 'dueDate', val)}
-                        className={cn("w-full text-[11px] font-black bg-white border border-slate-200 rounded-2xl px-3 py-2.5 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 shadow-sm outline-none text-slate-500 uppercase tracking-tighter", isProjectMember && "opacity-70 cursor-not-allowed")}
+                        className={cn("h-[38px] w-full text-xs font-medium bg-white border border-slate-200/80 hover:border-slate-300 rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-slate-700", isProjectMember && "opacity-70 cursor-not-allowed")}
                         disabled={!isEditable || isProjectMember}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Tag className="w-3.5 h-3.5" />
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Tag className="w-3 h-3 text-slate-400" />
                         Labels
                       </label>
-                      <div className="relative group/labels">
-                         <UncontrolledInput 
-                          initialValue={task.labels?.join(', ') || ''}
-                          onSave={(val: any) => updateTaskField(task.id, 'labels', val.split(',').map((l: any) => l.trim()).filter(Boolean))}
-                          placeholder="Add tag..."
-                          className="w-full text-[11px] font-bold bg-white border border-slate-200 rounded-2xl px-3 py-2.5 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 shadow-sm outline-none text-slate-600"
-                          disabled={!isEditable}
-                        />
-                      </div>
+                      <UncontrolledInput 
+                        initialValue={task.labels?.join(', ') || ''}
+                        onSave={(val: any) => updateTaskField(task.id, 'labels', val.split(',').map((l: any) => l.trim()).filter(Boolean))}
+                        placeholder="Add tags..."
+                        className="h-[38px] w-full text-xs font-medium bg-white border border-slate-200/80 hover:border-slate-300 rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-slate-700"
+                        disabled={!isEditable}
+                      />
                     </div>
                   </div>
 
-                  {/* Time Tracking Section */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5" />
+                  {/* Time Tracking Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Clock className="w-3 h-3 text-slate-400" />
                         Est. Hours
                       </label>
                       <UncontrolledInput 
@@ -1110,14 +1126,14 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         step="0.5"
                         initialValue={task.estimatedHours || ''}
                         onSave={(val: any) => updateTaskField(task.id, 'estimatedHours', parseFloat(val) || 0)}
-                        className="w-full text-[11px] font-black bg-white border border-slate-200 rounded-2xl px-3 py-2.5 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 shadow-sm outline-none text-slate-600"
+                        className="h-[38px] w-full text-xs font-semibold bg-white border border-slate-200/80 hover:border-slate-300 rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-slate-700"
                         disabled={!isEditable}
                         placeholder="e.g. 5"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <LineChart className="w-3.5 h-3.5 text-indigo-500" />
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <LineChart className="w-3 h-3 text-indigo-500" />
                         Logged Hours
                       </label>
                       <UncontrolledInput 
@@ -1126,7 +1142,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         step="0.5"
                         initialValue={task.loggedHours || ''}
                         onSave={(val: any) => updateTaskField(task.id, 'loggedHours', parseFloat(val) || 0)}
-                        className="w-full text-[11px] font-black bg-indigo-50/50 border border-indigo-100 rounded-2xl px-3 py-2.5 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 shadow-sm outline-none text-indigo-700"
+                        className="h-[38px] w-full text-xs font-semibold bg-indigo-50/50 border border-indigo-100/80 hover:border-indigo-200 rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-indigo-700"
                         disabled={!isEditable}
                         placeholder="e.g. 2.5"
                       />
@@ -1134,20 +1150,22 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   </div>
                 </div>
 
-                {/* Footer Meta */}
-                <div className="pt-8 space-y-3">
-                   <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      <span>Task created</span>
-                      <span className="text-slate-600">{safeFormat(task.createdAt, 'MMM d, yyyy HH:mm')}</span>
+                <div className="h-px bg-slate-200/70 my-2" />
+
+                {/* Footer Metadata */}
+                <div className="pt-2 space-y-2">
+                   <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span>Created</span>
+                      <span className="font-semibold text-slate-700">{safeFormat(task.createdAt, 'MMM d, yyyy HH:mm')}</span>
                    </div>
-                   <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      <span>Last system update</span>
-                      <span className="text-slate-600">{safeFormat(task.updatedAt, 'MMM d, yyyy HH:mm')}</span>
+                   <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span>Updated</span>
+                      <span className="font-semibold text-slate-700">{safeFormat(task.updatedAt, 'MMM d, yyyy HH:mm')}</span>
                    </div>
                    {canDelete && (
-                     <div className="pt-4">
+                     <div className="pt-3">
                         <button 
-                          className="w-full py-3 text-red-400 hover:text-red-600 hover:bg-red-50/50 rounded-2xl border border-dashed border-slate-200 hover:border-red-100 transition-all text-xs font-black uppercase tracking-widest"
+                          className="w-full h-9 text-xs font-semibold text-red-600 bg-red-50/70 hover:bg-red-100/80 border border-red-200/80 rounded-md transition-all flex items-center justify-center gap-1.5 shadow-2xs"
                           onClick={() => {
                             setConfirmModalState({
                               isOpen: true,
@@ -1163,8 +1181,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             });
                           }}
                         >
-                           <Trash2 className="w-4 h-4 mx-auto mb-1" />
-                           Permanently Delete
+                           <Trash2 className="w-3.5 h-3.5" />
+                           Delete Issue
                         </button>
                      </div>
                    )}

@@ -46,6 +46,9 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
   const [sources, setSources] = useState<Source[]>([]);
   const [loadingSources, setLoadingSources] = useState<boolean>(false);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [isNewNoteModalOpen, setIsNewNoteModalOpen] = useState<boolean>(false);
+  const [newNoteTitle, setNewNoteTitle] = useState<string>('');
+  const [newNoteContent, setNewNoteContent] = useState<string>('');
   
   // Custom Source Modal state & File Upload
   const [isDragging, setIsDragging] = useState(false);
@@ -397,11 +400,11 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
 
   return (
     <div id="notebooklm-container" className="flex flex-col h-[calc(100vh-4rem)] bg-[#f4f7f9] p-3 md:p-6 text-slate-800 font-sans">
-      <div className="flex-1 flex flex-col bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-lg shadow-sm overflow-hidden">
         {/* Header Bar */}
         <header id="notebooklm-header" className="flex items-center justify-between px-6 py-5 bg-slate-50/30 border-b border-slate-200/60 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -656,8 +659,8 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
               {/* Chat Conversation Display */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {chatHistory.length === 0 ? (
-                  <div className="max-w-2xl mx-auto my-auto text-center py-12 px-6 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm dark:shadow-xl">
-                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-600/20 rounded-2xl border border-purple-200 dark:border-purple-500/30 flex items-center justify-center mx-auto mb-4">
+                  <div className="max-w-2xl mx-auto my-auto text-center py-12 px-6 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm dark:shadow-xl">
+                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-600/20 rounded-xl border border-purple-200 dark:border-purple-500/30 flex items-center justify-center mx-auto mb-4">
                       <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Selamat Datang di NotebookLM Studio</h2>
@@ -697,7 +700,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
                         </div>
                       )}
 
-                      <div className={`max-w-3xl rounded-2xl p-4 border ${
+                      <div className={`max-w-3xl rounded-xl p-4 border ${
                         msg.role === 'user' 
                           ? 'bg-purple-600 dark:bg-purple-900/40 border-purple-500 dark:border-purple-700/50 text-white dark:text-purple-100 rounded-tr-none' 
                           : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none shadow-sm dark:shadow-lg'
@@ -758,7 +761,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
                     <div className="w-8 h-8 bg-purple-100 dark:bg-purple-600/30 rounded-xl flex items-center justify-center shrink-0 border border-purple-200 dark:border-purple-500/40 animate-pulse">
                       <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" />
                     </div>
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-xs text-slate-600 dark:text-slate-400 flex items-center gap-3 shadow-md">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-xs text-slate-600 dark:text-slate-400 flex items-center gap-3 shadow-md">
                       <RefreshCw className="w-4 h-4 animate-spin text-purple-600 dark:text-purple-400" />
                       <span>NotebookLM sedang menganalisis {activeSources.length} sumber data terpasang...</span>
                     </div>
@@ -854,7 +857,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
                   <p className="text-[11px] text-slate-500">Membaca dan merangkum {activeSources.length} dokumen terpasang.</p>
                 </div>
               ) : overviewContent ? (
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm dark:shadow-xl relative">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm dark:shadow-xl relative">
                   <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
                     <span className="font-bold text-purple-700 dark:text-purple-300 uppercase tracking-wider">Hasil Overview ({overviewType.toUpperCase()})</span>
                     <button
@@ -871,7 +874,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-20 bg-slate-100/50 dark:bg-slate-900/30 border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl">
+                <div className="text-center py-20 bg-slate-100/50 dark:bg-slate-900/30 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl">
                   <Layers className="w-10 h-10 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
                   <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Pilih Format Studio Overview</h3>
                   <p className="text-xs text-slate-500 mb-6 max-w-md mx-auto">
@@ -924,11 +927,11 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
 
                 <button
                   onClick={() => {
-                    const title = prompt('Judul Catatan Baru:');
-                    const content = prompt('Isi Catatan:');
-                    if (title && content) handleSaveToNotes(title, content);
+                    setNewNoteTitle('');
+                    setNewNoteContent('');
+                    setIsNewNoteModalOpen(true);
                   }}
-                  className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-md shadow-purple-600/20 transition-all"
+                  className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-md text-xs font-medium flex items-center gap-1.5 shadow-sm transition-all"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Catatan Baru</span>
@@ -936,7 +939,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
               </div>
 
               {studioNotes.length === 0 ? (
-                <div className="text-center py-20 bg-slate-100/50 dark:bg-slate-900/30 border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl">
+                <div className="text-center py-20 bg-slate-100/50 dark:bg-slate-900/30 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl">
                   <Bookmark className="w-10 h-10 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
                   <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Belum Ada Catatan Saved</h3>
                   <p className="text-xs text-slate-500 max-w-md mx-auto">
@@ -946,7 +949,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {studioNotes.map(note => (
-                    <div key={note.id} className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-lg">
+                    <div key={note.id} className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col justify-between shadow-sm dark:shadow-lg">
                       <div>
                         <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100 dark:border-slate-800/80">
                           <h4 className="text-xs font-bold text-purple-700 dark:text-purple-200">{note.title}</h4>
@@ -995,7 +998,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4"
+            className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-xl space-y-4"
           >
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -1033,7 +1036,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
                 handleFileUpload(e.dataTransfer.files);
               }}
               onClick={() => fileInputRef.current?.click()}
-              className={`p-8 border-2 border-dashed rounded-2xl transition-all cursor-pointer text-center flex flex-col items-center justify-center gap-3 ${
+              className={`p-8 border-2 border-dashed rounded-xl transition-all cursor-pointer text-center flex flex-col items-center justify-center gap-3 ${
                 isDragging
                   ? 'border-purple-500 bg-purple-50/80 dark:bg-purple-950/50 scale-[1.01]'
                   : 'border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950/40 hover:border-purple-400 hover:bg-purple-50/30 dark:hover:bg-purple-950/20'
@@ -1070,6 +1073,76 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({ project, userRole = 'vie
                 className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-medium transition-colors"
               >
                 Tutup
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Velzon Modal Tambah Catatan Baru */}
+      {isNewNoteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 shadow-xl space-y-4"
+          >
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <Bookmark className="w-4 h-4 text-purple-600" />
+                Tambah Catatan Studio Baru
+              </h3>
+              <button 
+                onClick={() => setIsNewNoteModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Judul Catatan</label>
+                <input 
+                  type="text" 
+                  value={newNoteTitle} 
+                  onChange={(e) => setNewNoteTitle(e.target.value)}
+                  placeholder="Masukkan judul catatan..." 
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Isi Catatan</label>
+                <textarea 
+                  rows={4}
+                  value={newNoteContent} 
+                  onChange={(e) => setNewNoteContent(e.target.value)}
+                  placeholder="Tuliskan detail catatan, rangkuman, atau insight..." 
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none resize-y"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+              <button 
+                onClick={() => setIsNewNoteModalOpen(false)}
+                className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-md text-xs font-medium"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={() => {
+                  if (!newNoteTitle.trim()) {
+                    toast.error('Judul catatan tidak boleh kosong!');
+                    return;
+                  }
+                  handleSaveToNotes(newNoteTitle, newNoteContent);
+                  setIsNewNoteModalOpen(false);
+                }}
+                className="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-md text-xs font-medium shadow-xs"
+              >
+                Simpan Catatan
               </button>
             </div>
           </motion.div>

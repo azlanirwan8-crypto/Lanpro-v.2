@@ -59,7 +59,7 @@ export function RateLimitIndicator() {
         className="fixed top-6 left-1/2 -translate-x-1/2 z-[10000] max-w-sm w-full px-4"
         id="rate-limit-global-indicator"
       >
-        <div className="bg-amber-600 dark:bg-amber-700 text-white shadow-2xl rounded-2xl p-4 flex items-center gap-3.5 border border-amber-500/30 backdrop-blur-md bg-opacity-95 dark:bg-opacity-95 font-sans">
+        <div className="bg-amber-600 dark:bg-amber-700 text-white shadow-2xl rounded-xl p-4 flex items-center gap-3.5 border border-amber-500/30 backdrop-blur-md bg-opacity-95 dark:bg-opacity-95 font-sans">
           <div className="p-2 bg-white/10 rounded-xl animate-pulse">
             <ShieldAlert className="w-5 h-5 text-amber-100" />
           </div>

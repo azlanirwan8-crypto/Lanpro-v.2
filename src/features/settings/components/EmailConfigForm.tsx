@@ -34,13 +34,13 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
     toast.success("Template email berhasil disimpan sementara.");
   };
 
-  const inputStyle = "w-full px-3 py-2.5 border border-slate-200 rounded-xl shadow-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all";
+  const inputStyle = "w-full px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100";
   
   return (
-    <div className="space-y-4 relative flex flex-col h-full">
-      <div className="space-y-2 flex-1">
+    <div className="space-y-4 relative">
+      <div className="space-y-2.5">
         <div className="space-y-0.5">
-          <label className="text-sm font-medium text-slate-700">SMTP Host</label>
+          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">SMTP Host</label>
           <input 
              value={formData.host} 
              onChange={(e) => setFormData({...formData, host: e.target.value})}
@@ -49,9 +49,9 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
            />
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-0.5">
-            <label className="text-sm font-medium text-slate-700">SMTP Port</label>
+            <label className="text-xs font-medium text-slate-700 dark:text-slate-300">SMTP Port</label>
             <input 
                value={formData.port} 
                onChange={(e) => setFormData({...formData, port: e.target.value})}
@@ -60,11 +60,11 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
              />
           </div>
           <div className="space-y-0.5">
-            <label className="text-sm font-medium text-slate-700">Encryption Type</label>
+            <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Encryption Type</label>
             <select 
                value={formData.encryption}
               onChange={(e) => setFormData({...formData, encryption: e.target.value})}
-              className={inputStyle + " bg-white"}
+              className={inputStyle}
             >
               <option>SSL</option>
               <option>TLS</option>
@@ -74,7 +74,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         </div>
 
         <div className="space-y-0.5">
-          <label className="text-sm font-medium text-slate-700">Sender Email</label>
+          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Sender Email</label>
           <input 
              value={formData.username} 
              onChange={(e) => setFormData({...formData, username: e.target.value})}
@@ -83,7 +83,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         </div>
 
         <div className="space-y-0.5">
-          <label className="text-sm font-medium text-slate-700">Sender Name</label>
+          <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Sender Name</label>
           <input 
              value={formData.senderName} 
              onChange={(e) => setFormData({...formData, senderName: e.target.value})}
@@ -101,36 +101,36 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3 items-center mt-4 pt-4 border-t border-slate-100">
+      <div className="flex flex-wrap gap-2.5 items-center mt-3 pt-3 border-t border-slate-200 dark:border-slate-800">
         <button
           onClick={() => setIsTemplateModalOpen(true)}
-          className="flex items-center gap-2 border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 px-4 py-2 rounded-xl text-sm font-bold transition h-10 mr-auto shadow-sm"
+          className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 px-3 py-1.5 rounded-md text-xs font-medium transition mr-auto shadow-xs"
         >
-          <FileEdit size={16} />
+          <FileEdit size={14} />
           Edit Broadcast Template
         </button>
 
         <button
           onClick={() => setIsTestModalOpen(true)}
           disabled={isTesting}
-          className="flex items-center gap-2 border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-50 transition h-10"
+          className="flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition"
         >
-          {isTesting ? <Loader2 size={16} className="animate-spin" /> : <TestTube size={16} />}
+          {isTesting ? <Loader2 size={14} className="animate-spin" /> : <TestTube size={14} />}
           Test Connection
         </button>
         
-        <button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition h-10 shadow-sm">
-          <Save size={16} />
+        <button className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-xs">
+          <Save size={14} />
           Save Config
         </button>
       </div>
 
       {isTestModalOpen && (
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50 rounded-2xl">
-          <div className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full space-y-4">
-            <h3 className="font-bold text-slate-800">Uji Coba Koneksi</h3>
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-slate-200 dark:border-slate-800">
+            <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-100">Uji Coba Koneksi</h3>
             <div className="space-y-1">
-                <label className="text-xs text-slate-500">Email Tujuan</label>
+                <label className="text-xs text-slate-500 dark:text-slate-400">Email Tujuan</label>
                 <input
                     value={testTargetEmail}
                     onChange={(e) => setTestTargetEmail(e.target.value)}
@@ -139,8 +139,8 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
                 />
             </div>
             <div className="flex gap-2 justify-end pt-2">
-              <button onClick={() => setIsTestModalOpen(false)} className="px-4 py-2 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-colors">Batal</button>
-              <button onClick={() => handleTestEmail(testTargetEmail)} className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-sm transition-colors">Kirim</button>
+              <button onClick={() => setIsTestModalOpen(false)} className="px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Batal</button>
+              <button onClick={() => handleTestEmail(testTargetEmail)} className="px-3.5 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 shadow-xs transition-colors">Kirim</button>
             </div>
           </div>
         </div>

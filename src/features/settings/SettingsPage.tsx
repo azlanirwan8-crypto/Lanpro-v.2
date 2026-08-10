@@ -29,7 +29,7 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-[#f4f7f9] text-left">
-      <div className="flex-1 flex flex-col min-h-0 bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 bg-white border border-slate-200/80 rounded-lg shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-200/60 bg-white/80 backdrop-blur-sm shrink-0">
           <h1 className="text-xl font-bold text-slate-800">System Configuration</h1>
         </div>
@@ -62,15 +62,15 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 flex-1 h-full">
-            <div className="lg:col-span-5 min-h-[520px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+            <div className="lg:col-span-5">
               {activeTab === 'email' ? (
                 <EmailConfigForm formData={emailConfig} setFormData={setEmailConfig} />
               ) : (
                 <WhatsAppConfigForm formData={waConfig} setFormData={setWaConfig} />
               )}
             </div>
-            <div className="lg:col-span-7 border-l border-slate-100 pl-6">
+            <div className="lg:col-span-7 border-l border-slate-100 dark:border-slate-800 pl-6">
               <BroadcastMonitor 
                 emailTemplate={{ subject: emailConfig.subjectTemplate, body: emailConfig.bodyTemplate }}
                 waTemplate={waConfig.messageTemplate}

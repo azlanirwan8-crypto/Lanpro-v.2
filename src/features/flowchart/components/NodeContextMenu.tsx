@@ -80,7 +80,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
         left: `${adjustedX}px`,
         top: `${adjustedY}px`,
       }}
-      className="fixed z-50 w-48 bg-white/90 backdrop-blur-md border border-slate-200/50 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] p-1.5 select-none text-slate-800"
+      className="fixed z-50 w-48 bg-white/90 backdrop-blur-md border border-slate-200/50 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.14)] p-1.5 select-none text-slate-800"
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* Node Info Header */}

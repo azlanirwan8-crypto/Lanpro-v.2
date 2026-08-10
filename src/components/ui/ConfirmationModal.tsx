@@ -86,20 +86,20 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ type: 'spring', duration: 0.35 }}
-              className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 dark:border-slate-800 z-10 p-6 flex flex-col gap-4"
+              className="relative bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800 z-10 p-5 flex flex-col gap-4"
             >
               {/* Header & Icon */}
-              <div className="flex items-start gap-4">
-                <div className={cn("p-3 rounded-xl shrink-0", colors.icon)}>
+              <div className="flex items-start gap-3.5">
+                <div className={cn("p-2.5 rounded-md shrink-0", colors.icon)}>
                   {variant === 'danger' && <Trash2 className="w-5 h-5" />}
                   {variant === 'warning' && <AlertTriangle className="w-5 h-5" />}
                   {variant === 'info' && <Info className="w-5 h-5" />}
                 </div>
                 <div className="flex-1 min-w-0 pr-6">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
                     {title}
                   </h3>
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                  <p className="mt-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                     {message}
                   </p>
                 </div>
@@ -107,7 +107,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 {/* Close button */}
                 <button 
                   onClick={onClose} 
-                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 p-1.5 rounded-lg transition-colors"
+                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 p-1.5 rounded-md transition-colors"
                   aria-label="Tutup"
                 >
                   <X className="w-4 h-4" />
@@ -115,14 +115,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end gap-2.5 mt-2">
+              <div className="flex justify-end gap-2 mt-2">
                 {!isAlert && (
                   <button
                     ref={cancelButtonRef}
                     type="button"
                     disabled={isLoading}
                     onClick={onClose}
-                    className="px-4 py-2.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs sm:text-sm rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/50 disabled:opacity-50"
+                    className="px-3.5 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs rounded-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500/50 disabled:opacity-50"
                   >
                     {cancelText}
                   </button>
@@ -132,7 +132,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                   disabled={isLoading}
                   onClick={onConfirm}
                   className={cn(
-                    "px-4 py-2.5 font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-sm active:scale-[0.98] outline-none border border-transparent focus:ring-2 focus:ring-offset-2 disabled:opacity-50 flex items-center justify-center gap-1.5",
+                    "px-4 py-2 font-medium text-xs rounded-md transition-all shadow-sm active:scale-[0.98] outline-none border border-transparent focus:ring-2 focus:ring-offset-2 disabled:opacity-50 flex items-center justify-center gap-1.5",
                     colors.button
                   )}
                 >

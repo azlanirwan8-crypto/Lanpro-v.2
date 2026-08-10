@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { toast } from "sonner";
 import { format, formatDistanceToNow, isSameDay } from "date-fns";
 import { id } from "date-fns/locale";
 import {
@@ -400,7 +401,7 @@ export function DashboardView(props: DashboardViewProps) {
     const isAuthorized =
       userRole === "admin" || userRole === "manager" || userRole === "head";
     if (!isAuthorized) {
-      alert(
+      toast.error(
         "Hanya Admin, Project Manager, atau Head yang dapat menyetujui gate ini.",
       );
       return;
@@ -452,138 +453,242 @@ export function DashboardView(props: DashboardViewProps) {
       .catch(console.error);
   }, [selectedProject, currentUser]);
 
+  const taskTypeBreakdown = useMemo(() => {
+    const counts: Record<string, number> = {
+      epic: 0,
+      story: 0,
+      task: 0,
+      bug: 0,
+      subtask: 0,
+    };
+    tasks.forEach((t) => {
+      const type = (t.type || 'task').toLowerCase();
+      if (counts[type] !== undefined) counts[type]++;
+      else counts['task']++;
+    });
+    return [
+      { name: 'Epic', value: counts.epic || 0, color: '#8b5cf6', pct: totalTasks ? Math.round(((counts.epic || 0) / totalTasks) * 100) : 0 },
+      { name: 'Story', value: counts.story || 0, color: '#10b981', pct: totalTasks ? Math.round(((counts.story || 0) / totalTasks) * 100) : 0 },
+      { name: 'Task', value: counts.task || 0, color: '#3b82f6', pct: totalTasks ? Math.round(((counts.task || 0) / totalTasks) * 100) : 0 },
+      { name: 'Bug', value: counts.bug || 0, color: '#ef4444', pct: totalTasks ? Math.round(((counts.bug || 0) / totalTasks) * 100) : 0 },
+      { name: 'Subtask', value: counts.subtask || 0, color: '#06b6d4', pct: totalTasks ? Math.round(((counts.subtask || 0) / totalTasks) * 100) : 0 },
+    ];
+  }, [tasks, totalTasks]);
+
+  const statusBreakdown = useMemo(() => {
+    const statusMap: Record<string, number> = {
+      'To Do': 0,
+      'In Progress': 0,
+      'In Review': 0,
+      'Done': 0,
+      'Blocked': 0
+    };
+    tasks.forEach(t => {
+      const s = t.status || 'To Do';
+      if (statusMap[s] !== undefined) statusMap[s]++;
+      else statusMap[s] = (statusMap[s] || 0) + 1;
+    });
+    return Object.entries(statusMap).map(([name, value]) => ({
+      name,
+      value,
+      pct: totalTasks ? Math.round((value / totalTasks) * 100) : 0,
+      color: name === 'Done' || name === 'Selesai' ? '#10b981' :
+             name === 'In Progress' ? '#3b82f6' :
+             name === 'In Review' ? '#8b5cf6' :
+             name === 'Blocked' ? '#ef4444' : '#64748b'
+    }));
+  }, [tasks, totalTasks]);
+
+  const epicsList = useMemo(() => {
+    const epicTasks = tasks.filter(t => (t.type?.toLowerCase() === 'epic') || (t.category?.toLowerCase() === 'epic'));
+    return epicTasks.map(epic => {
+      const childTasks = tasks.filter(t => t.parentId === epic.id);
+      const childTotal = childTasks.length;
+      const childCompleted = childTasks.filter(t => t.status === 'Done' || t.status === 'Selesai').length;
+      const progress = childTotal === 0 ? (epic.status === 'Done' || epic.status === 'Selesai' ? 100 : 0) : Math.round((childCompleted / childTotal) * 100);
+      return {
+        id: epic.id,
+        key: epic.key,
+        title: epic.title,
+        status: epic.status,
+        endDate: epic.endDate,
+        childTotal,
+        childCompleted,
+        progress
+      };
+    });
+  }, [tasks]);
+
+  const timeTrackingStats = useMemo(() => {
+    let totalEst = 0;
+    let totalLog = 0;
+    tasks.forEach(t => {
+      totalEst += Number(t.estimatedHours) || Number(t.storyPoints) || 0;
+      totalLog += Number(t.loggedHours) || 0;
+    });
+    const diff = totalEst - totalLog;
+    const accuracy = totalEst === 0 ? 100 : Math.min(100, Math.round((totalLog / (totalEst || 1)) * 100));
+    return { totalEst, totalLog, diff, accuracy };
+  }, [tasks]);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
+  const realVelocityChartData = useMemo(() => {
+    if (velocityData && velocityData.length > 0) return velocityData;
+    if (activeSprint) {
+      return [
+        {
+          name: activeSprint.name,
+          Planned: sprintTotalTasks,
+          Completed: sprintCompletedTasks
+        }
+      ];
+    }
+    return [
+      {
+        name: 'All Tasks',
+        Planned: totalTasks,
+        Completed: completedTasks.length
+      }
+    ];
+  }, [velocityData, activeSprint, sprintTotalTasks, sprintCompletedTasks, totalTasks, completedTasks]);
+
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
-        {/* Velzon Dashboard Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
+        {/* Velzon Agile Dashboard Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs">
           <div>
-            <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              Good Morning, {currentUser?.displayName || "Anna"}!
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              {getGreeting()}, {currentUser?.displayName || "Administrator"}!
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">Here's what's happening with your store today.</p>
+            <p className="text-xs text-slate-500 mt-0.5 font-medium">
+              Agile Project Analytics & Real-time Task Summary — <span className="font-semibold text-slate-700 dark:text-slate-300">{props.selectedProject?.name || 'All Active Projects'}</span>
+            </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
-              <Calendar className="w-3.5 h-3.5 text-indigo-500" />
-              <span>01 Jan, 2022 to 31 Jan, 2022</span>
+            <div className="flex items-center gap-2 bg-indigo-50/70 dark:bg-slate-800 px-3 py-2 rounded-lg border border-indigo-100 dark:border-slate-700 text-xs font-semibold text-indigo-700 dark:text-slate-300">
+              <Zap className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Sprint: {activeSprint?.name || 'No Active Sprint'} ({sprintDaysLeft} days left)</span>
             </div>
-            <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm">
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Product</span>
-            </button>
-            <button className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">
-              <Download className="w-4 h-4" />
-            </button>
           </div>
         </div>
 
-        {/* Velzon Top 4 Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          {/* Card 1: Total Earnings */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between relative overflow-hidden">
+        {/* Real-time Agile Top 4 KPI Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+          {/* Card 1: Total Tasks */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Earnings</span>
-                <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">$559.25k</h3>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Tasks</span>
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{totalTasks}</h3>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600">
-                <DollarSign className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 border border-emerald-100">
+                <CheckCircle2 className="w-5 h-5" />
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1 font-bold text-emerald-600">
-                <ArrowUpRight className="w-3.5 h-3.5" /> +16.24%
+            <div className="mt-4 flex items-center justify-between text-xs border-t border-slate-100 dark:border-slate-800 pt-3">
+              <span className="flex items-center gap-1 font-semibold text-emerald-600">
+                <ArrowUpRight className="w-3.5 h-3.5" /> {completionPercentage}% Completed
               </span>
-              <button onClick={() => setCurrentView('reports')} className="text-slate-400 hover:text-indigo-600 text-[11px] font-bold underline transition">
-                View net earnings
+              <button onClick={() => props.setCurrentView('kanban')} className="text-slate-400 hover:text-indigo-600 text-[11px] font-semibold underline transition">
+                View all tasks
               </button>
             </div>
           </div>
 
-          {/* Card 2: Orders */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between relative overflow-hidden">
+          {/* Card 2: Pending & Active Tasks */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Orders</span>
-                <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">36,894</h3>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Pending / Active Tasks</span>
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{inProgressTasks.length + tasks.filter(t => t.status === 'To Do' || t.status === 'Backlog').length}</h3>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 flex items-center justify-center text-blue-600">
-                <ShoppingBag className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/50 flex items-center justify-center text-blue-600 border border-blue-100">
+                <Activity className="w-5 h-5 animate-pulse" />
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1 font-bold text-rose-500">
-                <ArrowDownRight className="w-3.5 h-3.5" /> -3.57%
+            <div className="mt-4 flex items-center justify-between text-xs border-t border-slate-100 dark:border-slate-800 pt-3">
+              <span className="font-semibold text-blue-600">
+                {inProgressTasks.length} In Progress
               </span>
-              <button onClick={() => setCurrentView('kanban')} className="text-slate-400 hover:text-indigo-600 text-[11px] font-bold underline transition">
-                View all orders
+              <button onClick={() => props.setCurrentView('kanban')} className="text-slate-400 hover:text-indigo-600 text-[11px] font-semibold underline transition">
+                View active board
               </button>
             </div>
           </div>
 
-          {/* Card 3: Customers */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between relative overflow-hidden">
+          {/* Card 3: Done Tasks */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Customers</span>
-                <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">183.35M</h3>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Done / Selesai Tasks</span>
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{completedTasks.length}</h3>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 flex items-center justify-center text-amber-600">
-                <Users className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 border border-indigo-100">
+                <PackageOpen className="w-5 h-5" />
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1 font-bold text-emerald-600">
-                <ArrowUpRight className="w-3.5 h-3.5" /> +29.08%
+            <div className="mt-4 flex items-center justify-between text-xs border-t border-slate-100 dark:border-slate-800 pt-3">
+              <span className="flex items-center gap-1 font-semibold text-emerald-600">
+                <ArrowUpRight className="w-3.5 h-3.5" /> +{completionPercentage}% Rate
               </span>
-              <button onClick={() => setCurrentView('team')} className="text-slate-400 hover:text-indigo-600 text-[11px] font-bold underline transition">
-                See details
+              <button onClick={() => props.setCurrentView('kanban')} className="text-slate-400 hover:text-indigo-600 text-[11px] font-semibold underline transition">
+                View done list
               </button>
             </div>
           </div>
 
-          {/* Card 4: My Balance */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between relative overflow-hidden">
+          {/* Card 4: Blocked & Critical Issues */}
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">My Balance</span>
-                <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">$165.89k</h3>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Blocked / Stoppers</span>
+                <h3 className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">{blockedTasks.length + overdueTasks.length}</h3>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 flex items-center justify-center text-cyan-600">
-                <Wallet className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 border border-rose-100">
+                <ShieldAlert className="w-5 h-5" />
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1 font-bold text-slate-500">
-                +0.00%
+            <div className="mt-4 flex items-center justify-between text-xs border-t border-slate-100 dark:border-slate-800 pt-3">
+              <span className="font-semibold text-rose-600">
+                {blockedTasks.length} Blocked • {overdueTasks.length} Overdue
               </span>
-              <button onClick={() => alert("Withdraw modal opened")} className="text-slate-400 hover:text-indigo-600 text-[11px] font-bold underline transition">
-                Withdraw money
+              <button onClick={() => props.setCurrentView('kanban')} className="text-slate-400 hover:text-indigo-600 text-[11px] font-semibold underline transition">
+                Resolve issues
               </button>
             </div>
           </div>
         </div>
 
-        {/* Dashboard Panels Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Real-time Dashboard Panels Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start text-left">
           {/* Main Column: Left Area */}
           <div className="lg:col-span-8 space-y-6">
-            {/* Revenue Section with Velzon Filter & Chart */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            
+            {/* Sprint Velocity & Progress Chart */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                 <div>
-                  <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider">Revenue</h3>
+                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-indigo-500" />
+                    Sprint Progress & Velocity Overview
+                  </h3>
                 </div>
-                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-md">
                   {(['ALL', '1M', '6M', '1Y'] as const).map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setRevenueFilter(filter)}
                       className={cn(
-                        "px-3 py-1 rounded-lg text-[10px] font-black transition",
+                        "px-3 py-1 rounded text-[11px] font-semibold transition cursor-pointer",
                         revenueFilter === filter
-                          ? "bg-indigo-600 text-white shadow-sm"
+                          ? "bg-indigo-600 text-white shadow-2xs"
                           : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
                       )}
                     >
@@ -593,199 +698,376 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
               </div>
 
-              {/* Sub-metrics bar */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
+              {/* Active Sprint Sub-metrics Bar */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200/60 dark:border-slate-800">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Orders</span>
-                  <p className="text-base font-black text-slate-800 dark:text-slate-100 mt-0.5">7,585</p>
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase">Active Sprint</span>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-0.5 truncate">{activeSprint?.name || 'No Sprint'}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Earnings</span>
-                  <p className="text-base font-black text-slate-800 dark:text-slate-100 mt-0.5">$22.89k</p>
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase">Sprint Progress</span>
+                  <p className="text-sm font-bold text-emerald-600 mt-0.5">{sprintProgress}% ({sprintCompletedTasks}/{sprintTotalTasks} tasks)</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Refunds</span>
-                  <p className="text-base font-black text-slate-800 dark:text-slate-100 mt-0.5">358</p>
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase">Weekly Velocity</span>
+                  <p className="text-sm font-bold text-indigo-600 mt-0.5">{weeklyVelocity ? weeklyVelocity : '0.0'} pts/sprint</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Conversion Ratio</span>
-                  <p className="text-base font-black text-slate-800 dark:text-slate-100 mt-0.5">18.92%</p>
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase">Days Left</span>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-0.5">{sprintDaysLeft} days</p>
                 </div>
               </div>
 
-              {/* Revenue Chart */}
-              <div className="h-[280px] w-full">
+              {/* Sprint Velocity Chart */}
+              <div className="h-[260px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={[
-                    { name: 'Jan', Orders: 65, Earnings: 45, Refunds: 12 },
-                    { name: 'Feb', Orders: 59, Earnings: 52, Refunds: 8 },
-                    { name: 'Mar', Orders: 80, Earnings: 68, Refunds: 15 },
-                    { name: 'Apr', Orders: 81, Earnings: 75, Refunds: 10 },
-                    { name: 'May', Orders: 56, Earnings: 48, Refunds: 14 },
-                    { name: 'Jun', Orders: 55, Earnings: 60, Refunds: 9 },
-                    { name: 'Jul', Orders: 40, Earnings: 38, Refunds: 7 },
-                    { name: 'Aug', Orders: 45, Earnings: 42, Refunds: 11 },
-                    { name: 'Sep', Orders: 70, Earnings: 85, Refunds: 13 },
-                    { name: 'Oct', Orders: 50, Earnings: 48, Refunds: 8 },
-                    { name: 'Nov', Orders: 75, Earnings: 72, Refunds: 10 },
-                    { name: 'Dec', Orders: 60, Earnings: 55, Refunds: 12 },
-                  ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <BarChart 
+                    data={realVelocityChartData} 
+                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ borderRadius: '0.75rem', border: 'none', background: '#1e293b', color: '#fff', fontSize: '11px' }} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ borderRadius: '0.5rem', border: 'none', background: '#1e293b', color: '#fff', fontSize: '11px' }} />
                     <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                    <Bar dataKey="Orders" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={16} />
-                    <Bar dataKey="Earnings" fill="#06b6d4" radius={[4, 4, 0, 0]} maxBarSize={16} />
-                    <Bar dataKey="Refunds" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={16} />
+                    <Bar dataKey="Completed" name="Completed Tasks / Points" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={24} />
+                    <Bar dataKey="Planned" name="Total Planned Tasks / Points" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={24} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Best Selling Products Table */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider">Best Selling Products</h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">SORT BY:</span>
-                  <select
-                    value={productSort}
-                    onChange={(e) => setProductSort(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none"
-                  >
-                    <option value="Today">Today</option>
-                    <option value="Weekly">Weekly</option>
-                    <option value="Monthly">Monthly</option>
-                  </select>
+            {/* Task Breakdown Grid (Jenis Task & Status Breakdown) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Task Breakdown by Type (Epic, Story, Task, Bug, Subtask) */}
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                    <LayoutGrid className="w-4 h-4 text-purple-500" />
+                    Task Breakdown by Type
+                  </h3>
+                  <span className="text-[11px] font-semibold text-slate-400">{totalTasks} Total</span>
                 </div>
+
+                <div className="space-y-3">
+                  {taskTypeBreakdown.map((t, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: t.color }} />
+                          <span>{t.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-800 dark:text-slate-100">{t.value}</span>
+                          <span className="text-[11px] text-slate-400">({t.pct}%)</span>
+                        </div>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${t.pct}%`, backgroundColor: t.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Task Breakdown by Status (To Do, In Progress, Review, Done, Blocked) */}
+              <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                    <PieChartIcon className="w-4 h-4 text-emerald-500" />
+                    Task Breakdown by Status
+                  </h3>
+                  <span className="text-[11px] font-semibold text-slate-400">{totalTasks} Total</span>
+                </div>
+
+                <div className="space-y-3">
+                  {statusBreakdown.map((s, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                          <span>{s.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-800 dark:text-slate-100">{s.value}</span>
+                          <span className="text-[11px] text-slate-400">({s.pct}%)</span>
+                        </div>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${s.pct}%`, backgroundColor: s.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Task Allocation per Team Member (Workload per User) */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                    <Users className="w-4 h-4 text-indigo-500" />
+                    Task Workload Distribution per User
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5 font-medium">Alokasi & penyelesaian task tiap anggota tim</p>
+                </div>
+                <button onClick={() => props.setCurrentView('team')} className="text-xs font-semibold text-indigo-600 hover:underline">
+                  Manage Team
+                </button>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-400">
-                      <th className="py-3 px-2">Product</th>
-                      <th className="py-3 px-2">Price</th>
-                      <th className="py-3 px-2">Orders</th>
-                      <th className="py-3 px-2">Stock</th>
-                      <th className="py-3 px-2 text-right">Amount</th>
+                    <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                      <th className="py-2.5 px-2">Team Member</th>
+                      <th className="py-2.5 px-2">Active Tasks</th>
+                      <th className="py-2.5 px-2">Done Tasks</th>
+                      <th className="py-2.5 px-2">Total Allocated</th>
+                      <th className="py-2.5 px-2 text-right">Progress Bar</th>
                     </tr>
                   </thead>
                   <tbody className="text-xs divide-y divide-slate-100 dark:divide-slate-800 font-medium text-slate-700 dark:text-slate-300">
-                    {[
-                      { name: "Branded T-Shirts", date: "24 Apr 2021", price: "$29.00", orders: "62 Orders", stock: "510 Stock", amount: "$1,798" },
-                      { name: "Bentwood Chair", date: "19 Mar 2021", price: "$85.20", orders: "35 Orders", stock: "Out of stock", amount: "$2,982", badge: true },
-                      { name: "Borosil Paper Cup", date: "01 Mar 2021", price: "$14.00", orders: "80 Orders", stock: "749 Stock", amount: "$1,120" },
-                      { name: "One Seater Sofa", date: "11 Feb 2021", price: "$127.50", orders: "56 Orders", stock: "Out of stock", amount: "$7,140", badge: true },
-                      { name: "Stillbird Helmet", date: "17 Jan 2021", price: "$54", orders: "74 Orders", stock: "805 Stock", amount: "$3,996" },
-                    ].map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
-                        <td className="py-3 px-2">
-                          <p className="font-bold text-slate-800 dark:text-slate-100">{item.name}</p>
-                          <span className="text-[10px] text-slate-400">{item.date}</span>
-                        </td>
-                        <td className="py-3 px-2 font-bold">{item.price}</td>
-                        <td className="py-3 px-2">{item.orders}</td>
-                        <td className="py-3 px-2">
-                          {item.badge ? (
-                            <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 text-[10px] font-bold">Out of stock</span>
-                          ) : (
-                            item.stock
-                          )}
-                        </td>
-                        <td className="py-3 px-2 text-right font-black text-slate-800 dark:text-slate-100">{item.amount}</td>
+                    {workloadData.length > 0 ? (
+                      workloadData.map((user, idx) => {
+                        const totalUserTasks = user.Done + user.Active;
+                        const pct = totalUserTasks ? Math.round((user.Done / totalUserTasks) * 100) : 0;
+                        return (
+                          <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                            <td className="py-3 px-2">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                                  {user.name.slice(0, 2).toUpperCase()}
+                                </div>
+                                <span className="font-semibold text-slate-800 dark:text-slate-100">{user.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-2 font-semibold text-blue-600">{user.Active}</td>
+                            <td className="py-3 px-2 font-semibold text-emerald-600">{user.Done}</td>
+                            <td className="py-3 px-2 font-bold text-slate-800 dark:text-slate-100">{totalUserTasks}</td>
+                            <td className="py-3 px-2 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <span className="text-[11px] font-semibold text-slate-500 w-9">{pct}%</span>
+                                <div className="w-24 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${pct}%` }} />
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="py-6 text-center text-slate-400 italic">No task allocations recorded yet.</td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-          </div>
 
-          {/* Right Column: Sales by Locations & Top Sellers */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Sales by Locations */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider">Sales by Locations</h3>
-                <button className="text-xs font-bold text-indigo-600 hover:underline">Export Report</button>
+            {/* Widget 4: Epic & Roadmap Delivery Status (Waterfall & Agile Milestone Tracker) */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                    <Target className="w-4 h-4 text-purple-500" />
+                    Epic & Roadmap Milestone Delivery Status
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5 font-medium">Progress pencapaian Epic & milestone utama proyek</p>
+                </div>
+                <button onClick={() => props.setCurrentView('roadmap')} className="text-xs font-semibold text-indigo-600 hover:underline">
+                  View Roadmap
+                </button>
               </div>
 
-              {/* Map Illustration / Visual Placeholder */}
-              <div className="h-40 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
-                <Globe className="w-16 h-16 text-slate-300 dark:text-slate-700 animate-pulse" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent pointer-events-none" />
-              </div>
-
-              {/* Location progress bars */}
               <div className="space-y-3">
-                {[
-                  { country: "Canada", val: 75 },
-                  { country: "Greenland", val: 47 },
-                  { country: "Russia", val: 82 },
-                  { country: "Palestine", val: 64 },
-                ].map((loc, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-700 dark:text-slate-300">{loc.country}</span>
-                      <span className="text-slate-500">{loc.val}%</span>
+                {epicsList.length > 0 ? (
+                  epicsList.slice(0, 4).map((epic, idx) => (
+                    <div key={idx} className="p-3 bg-slate-50/70 dark:bg-slate-800/50 rounded-lg border border-slate-200/60 dark:border-slate-800 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-[10px] font-mono font-bold text-purple-600 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-100">{epic.key || 'EPIC'}</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-100 truncate">{epic.title}</span>
+                        </div>
+                        <span className="text-[11px] font-semibold text-slate-500 shrink-0">
+                          {epic.childCompleted}/{epic.childTotal} Child Tasks ({epic.progress}%)
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-200/80 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className={cn(
+                            "h-full rounded-full transition-all duration-500",
+                            epic.progress === 100 ? "bg-emerald-500" : "bg-purple-600"
+                          )} 
+                          style={{ width: `${epic.progress}%` }} 
+                        />
+                      </div>
                     </div>
-                    <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${loc.val}%` }} />
-                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-center bg-slate-50/50 rounded-lg border border-dashed border-slate-200 text-xs text-slate-400">
+                    Belum ada Epic yang dikonfigurasi. Buat Epic baru di papan Kanban/Roadmap untuk melacak Milestone.
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
-            {/* Top Sellers Table */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider">Top Sellers</h3>
-                <button className="text-xs font-bold text-indigo-600 hover:underline">Report</button>
+            {/* Widget 5: Sprint Time Tracking & Estimation Accuracy */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-500" />
+                    Time Tracking & Effort Estimation
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5 font-medium">Perbandingan estimasi jam pengerjaan vs jam terpakai</p>
+                </div>
+                <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                  {timeTrackingStats.accuracy}% Accuracy Rate
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase">Estimated Hours</span>
+                  <p className="text-lg font-bold text-slate-800 dark:text-slate-100 mt-0.5">{timeTrackingStats.totalEst} Hours</p>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase">Logged Hours</span>
+                  <p className="text-lg font-bold text-indigo-600 mt-0.5">{timeTrackingStats.totalLog} Hours</p>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase">Remaining Variance</span>
+                  <p className="text-lg font-bold text-emerald-600 mt-0.5">{timeTrackingStats.diff >= 0 ? `${timeTrackingStats.diff} Hours Left` : `${Math.abs(timeTrackingStats.diff)} Hours Over`}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Widget 6: 7-Day Activity Trend & Task Creation Rate */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-emerald-500" />
+                    7-Day Activity & Task Completion Trend
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5 font-medium">Tren pembuatan vs penyelesaian task 7 hari terakhir</p>
+                </div>
+              </div>
+
+              <div className="h-[200px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={last7DaysData && last7DaysData.length > 0 ? last7DaysData : [
+                    { day: 'Mon', Created: 4, Completed: 3 },
+                    { day: 'Tue', Created: 6, Completed: 5 },
+                    { day: 'Wed', Created: 8, Completed: 7 },
+                    { day: 'Thu', Created: 5, Completed: 6 },
+                    { day: 'Fri', Created: 9, Completed: 8 },
+                    { day: 'Sat', Created: 2, Completed: 4 },
+                    { day: 'Sun', Created: 1, Completed: 2 },
+                  ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ borderRadius: '0.5rem', border: 'none', background: '#1e293b', color: '#fff', fontSize: '11px' }} />
+                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                    <Area type="monotone" dataKey="Completed" name="Tasks Selesai" stroke="#10b981" fill="#10b981" fillOpacity={0.15} strokeWidth={2} />
+                    <Area type="monotone" dataKey="Created" name="Tasks Dibuat" stroke="#6366f1" fill="#6366f1" fillOpacity={0.15} strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Priority Distribution & Watchlist */}
+          <div className="lg:col-span-4 space-y-6">
+            
+            {/* Priority Breakdown */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-500" />
+                  Task Priority Breakdown
+                </h3>
+                <button onClick={() => props.setCurrentView('kanban')} className="text-xs font-semibold text-indigo-600 hover:underline">Filter</button>
               </div>
 
               <div className="space-y-3">
-                {[
-                  { name: "iTest Factory", category: "Bags and Wallets", stock: "8,547", amount: "$54,200", pct: 32 },
-                  { name: "Digitech Galaxy", category: "Watches", stock: "895", amount: "$75,030", pct: 79 },
-                  { name: "Nesta Technologies", category: "Bike Accessories", stock: "3,470", amount: "$45,600", pct: 90 },
-                  { name: "Zoetic Fashion", category: "Clothes", stock: "5,438", amount: "$29,456", pct: 40 },
-                  { name: "Meta4Systems", category: "Furniture", stock: "4,100", amount: "$11,260", pct: 57 },
-                ].map((seller, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-indigo-600 font-black text-xs">
-                        {seller.name.slice(0, 2)}
+                {priorityData.map((p, idx) => {
+                  const pct = totalTasks ? Math.round((p.value / totalTasks) * 100) : 0;
+                  const color = p.name === 'Highest' || p.name === 'High' ? '#ef4444' :
+                                p.name === 'Medium' ? '#f59e0b' : '#3b82f6';
+                  return (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                          {p.name} Priority
+                        </span>
+                        <span className="text-slate-800 dark:text-slate-100 font-bold">{p.value} ({pct}%)</span>
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 dark:text-slate-100">{seller.name}</p>
-                        <span className="text-[10px] text-slate-400">{seller.category}</span>
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: color }} />
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs font-black text-slate-800 dark:text-slate-100">{seller.amount}</p>
-                      <span className="text-[10px] font-bold text-emerald-600">{seller.pct}%</span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Blocked & Overdue Watchlist */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-rose-500" />
+                  Blocked & Overdue Issues
+                </h3>
+                <span className="text-[10px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">
+                  {blockedTasks.length + overdueTasks.length} Need Action
+                </span>
+              </div>
+
+              <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
+                {[...blockedTasks, ...overdueTasks].map((issue, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => {
+                      props.setSelectedTaskForDetail(issue);
+                      props.setIsTaskDetailModalOpen(true);
+                    }}
+                    className="p-3 rounded-lg border border-slate-200/70 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-white hover:border-indigo-200 transition cursor-pointer flex items-center justify-between gap-3 shadow-2xs group"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">{issue.key}</span>
+                        {issue.isBlocked && <span className="text-[9px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-100">BLOCKED</span>}
+                      </div>
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate mt-0.5 group-hover:text-indigo-600 transition">{issue.title}</p>
                     </div>
+                    <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition shrink-0" />
                   </div>
                 ))}
+                {blockedTasks.length === 0 && overdueTasks.length === 0 && (
+                  <div className="py-4 text-center text-xs text-slate-400 italic">No blocked or overdue issues detected.</div>
+                )}
               </div>
             </div>
 
             {/* Sidebar Widgets Stack for remaining tools */}
             <SidebarWidgetsStack
-              myActiveTasks={myActiveTasks}
+              myActiveTasks={inProgressTasks}
               blockedTasks={blockedTasks}
               overdueTasks={overdueTasks}
               dueSoonTasks={dueSoonTasks}
-              meetings={meetings}
-              documents={documents}
-              activityLogs={activityLogs}
-              projectMembers={projectMembers}
-              setSelectedTaskForDetail={setSelectedTaskForDetail}
-              setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-              setCurrentView={setCurrentView}
+              meetings={props.activityLogs || []}
+              documents={[]}
+              activityLogs={props.activityLogs || []}
+              projectMembers={props.projectMembers || []}
+              setSelectedTaskForDetail={props.setSelectedTaskForDetail}
+              setIsTaskDetailModalOpen={props.setIsTaskDetailModalOpen}
+              setCurrentView={props.setCurrentView}
             />
           </div>
         </div>

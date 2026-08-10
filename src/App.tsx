@@ -58,6 +58,7 @@ import { SessionExpiryWarning } from "./components/SessionExpiryWarning";
 import { GlobalSkeleton } from "./components/GlobalSkeleton";
 import { RateLimitIndicator } from "./components/RateLimitIndicator";
 import { EnterpriseAuditDashboard } from "./features/enterprise-audit/EnterpriseAuditDashboard";
+import { AppRoutes } from "./routes/AppRoutes";
 import { StatusSelect, PrioritySelect } from "./components/ui/StatusSelect";
 import { IssueTypeDropdown } from "./components/ui/IssueTypeDropdown";
 import { UserAvatar, getUserAvatarColors } from "./components/ui/UserAvatar";
@@ -1270,41 +1271,13 @@ const LoginSkeletonState = ({ loadingText }: { loadingText?: string }) => {
           </div>
         </div>
 
-        {/* Modern Animated Skeleton Submit Button with Particles & Shimmer */}
-        <div className="w-full h-12 bg-gradient-to-r from-[#364574] via-[#405189] to-[#364574] text-white rounded-xl font-semibold text-xs tracking-wider uppercase flex items-center justify-center gap-3 relative overflow-hidden shadow-lg shadow-[#364574]/25 mt-3">
-          {/* Internal Shimmer Wave */}
+        {/* Skeleton Submit Button */}
+        <div className="w-full h-12 bg-slate-100 border border-slate-200/60 rounded-xl relative overflow-hidden mt-3">
           <motion.div 
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/40 to-transparent"
             animate={{ x: ["-100%", "200%"] }}
-            transition={{ duration: 1.4, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+            transition={{ duration: 1.6, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
           />
-
-          {/* Micro floating particle dots inside button matching the hero panel */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-70">
-            <motion.div
-              className="absolute w-1.5 h-1.5 bg-amber-300 rounded-full shadow-[0_0_8px_rgba(252,211,77,0.9)]"
-              style={{ left: "15%", bottom: "0" }}
-              animate={{ y: [-2, -32], opacity: [0, 1, 0] }}
-              transition={{ duration: 1.2, repeat: Number.POSITIVE_INFINITY, ease: "easeOut" }}
-            />
-            <motion.div
-              className="absolute w-1 h-1 bg-white rounded-full shadow-[0_0_6px_rgba(255,255,255,0.9)]"
-              style={{ left: "50%", bottom: "0" }}
-              animate={{ y: [-2, -32], opacity: [0, 1, 0] }}
-              transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, delay: 0.3, ease: "easeOut" }}
-            />
-            <motion.div
-              className="absolute w-1.5 h-1.5 bg-cyan-300 rounded-full shadow-[0_0_8px_rgba(103,232,249,0.9)]"
-              style={{ left: "82%", bottom: "0" }}
-              animate={{ y: [-2, -32], opacity: [0, 1, 0] }}
-              transition={{ duration: 1.3, repeat: Number.POSITIVE_INFINITY, delay: 0.6, ease: "easeOut" }}
-            />
-          </div>
-
-          <div className="relative z-10 flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0" />
-            <span className="font-bold tracking-wider text-amber-200">{loadingText || "Authenticating..."}</span>
-          </div>
         </div>
       </div>
 
@@ -1312,7 +1285,7 @@ const LoginSkeletonState = ({ loadingText }: { loadingText?: string }) => {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-4 rounded-xl bg-slate-900/5 border border-[#405189]/20 backdrop-blur-xs flex items-center gap-3.5 mt-2"
+        className="p-4 rounded-xl bg-slate-900/5 border border-[#405189]/20 backdrop-blur-xs flex items-center gap-3.5 mt-2 shadow-xs"
       >
         <div className="w-9 h-9 rounded-lg bg-[#405189] flex items-center justify-center shrink-0 shadow-sm relative overflow-hidden">
           <motion.div 
@@ -1324,7 +1297,7 @@ const LoginSkeletonState = ({ loadingText }: { loadingText?: string }) => {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-xs font-bold text-slate-800 tracking-tight flex items-center gap-1.5">
-            <span>Memverifikasi Akses Workspace</span>
+            <span>{loadingText || "Memverifikasi Akses Workspace"}</span>
             <span className="flex space-x-1">
               <span className="w-1 h-1 bg-[#405189] rounded-full animate-bounce" />
               <span className="w-1 h-1 bg-[#405189] rounded-full animate-bounce [animation-delay:0.2s]" />
@@ -1444,128 +1417,132 @@ const LoginScreen = ({
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {loading ? (
-        <LoginSkeletonState key="login-skeleton" loadingText={loadingText} />
-      ) : (
-        <motion.div 
-          key="login-form"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 20 }}
-          transition={{ duration: 0.25 }}
-          className="w-full max-w-md space-y-6 mx-auto relative z-10 font-sans"
-        >
-          <div className="space-y-1.5">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-                Sign In
-              </h2>
-              <p className="text-slate-500 text-xs font-semibold mt-1">
-                Enter your credentials to access your workspace
-              </p>
-            </motion.div>
+    <div className="grid grid-cols-1 grid-rows-1 w-full max-w-md mx-auto relative">
+      <AnimatePresence>
+        {loading ? (
+          <div key="login-skeleton" className="col-start-1 row-start-1 w-full">
+            <LoginSkeletonState loadingText={loadingText} />
           </div>
-
-          <form
-            className="space-y-4"
-            onSubmit={handleLoginSubmit}
+        ) : (
+          <motion.div 
+            key="login-form"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.25 }}
+            className="col-start-1 row-start-1 w-full space-y-6 relative z-10 font-sans"
           >
-            <div className="space-y-1">
-              <label className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider ml-0.5">
-                Username <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => handleUsernameChange(e.target.value)}
-                className={cn(
-                  "w-full px-4 py-3.5 bg-slate-50 border rounded-xl focus:bg-white focus:ring-2 transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400",
-                  fieldErrors.username ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600" : "border-slate-200 focus:ring-[#405189]/20 focus:border-[#405189]"
-                )}
-              />
-              {fieldErrors.username && (
-                <p className="text-[11px] font-bold text-rose-500 ml-0.5 flex items-center gap-1 mt-0.5">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  <span>{fieldErrors.username}</span>
+            <div className="space-y-1.5">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                  Sign In
+                </h2>
+                <p className="text-slate-500 text-xs font-semibold mt-1">
+                  Enter your credentials to access your workspace
                 </p>
-              )}
+              </motion.div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider ml-0.5">
-                Password <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
+            <form
+              className="space-y-4"
+              onSubmit={handleLoginSubmit}
+            >
+              <div className="space-y-1">
+                <label className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider ml-0.5">
+                  Username <span className="text-rose-500">*</span>
+                </label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => handlePasswordChange(e.target.value)}
+                  type="text"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => handleUsernameChange(e.target.value)}
                   className={cn(
-                    "w-full pl-4 pr-11 py-3.5 bg-slate-50 border rounded-xl focus:bg-white focus:ring-2 transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400",
-                    fieldErrors.password ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600" : "border-slate-200 focus:ring-[#405189]/20 focus:border-[#405189]"
+                    "w-full px-4 py-3.5 bg-slate-50 border rounded-xl focus:bg-white focus:ring-2 transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400",
+                    fieldErrors.username ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600" : "border-slate-200 focus:ring-[#405189]/20 focus:border-[#405189]"
                   )}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer transition-colors"
-                  title={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+                {fieldErrors.username && (
+                  <p className="text-[11px] font-bold text-rose-500 ml-0.5 flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.username}</span>
+                  </p>
+                )}
               </div>
-              {fieldErrors.password && (
-                <p className="text-[11px] font-bold text-rose-500 ml-0.5 flex items-center gap-1 mt-0.5">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  <span>{fieldErrors.password}</span>
-                </p>
-              )}
-            </div>
 
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-[#405189] focus:ring-[#405189] cursor-pointer"
-                />
-                <span className="text-xs font-semibold text-slate-600">
-                  Remember Me
-                </span>
-              </label>
-            </div>
+              <div className="space-y-1">
+                <label className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider ml-0.5">
+                  Password <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => handlePasswordChange(e.target.value)}
+                    className={cn(
+                      "w-full pl-4 pr-11 py-3.5 bg-slate-50 border rounded-xl focus:bg-white focus:ring-2 transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400",
+                      fieldErrors.password ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600" : "border-slate-200 focus:ring-[#405189]/20 focus:border-[#405189]"
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer transition-colors"
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {fieldErrors.password && (
+                  <p className="text-[11px] font-bold text-rose-500 ml-0.5 flex items-center gap-1 mt-0.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.password}</span>
+                  </p>
+                )}
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading || !username.trim() || !password.trim()}
-              className="w-full bg-[#405189] text-white py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs hover:bg-[#364574] transition-all shadow-lg shadow-[#405189]/25 active:scale-[0.98] mt-2 flex items-center justify-center gap-2.5 group cursor-pointer disabled:bg-[#405189]/60 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <span>Sign In</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </form>
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-300 text-[#405189] focus:ring-[#405189] cursor-pointer"
+                  />
+                  <span className="text-xs font-semibold text-slate-600">
+                    Remember Me
+                  </span>
+                </label>
+              </div>
 
-          <p className="text-center text-xs font-medium text-slate-500 pt-4 border-t border-slate-100">
-            Don't have an account?{" "}
-            <button
-              type="button"
-              onClick={onRegisterClick}
-              className="text-[#405189] font-bold hover:text-[#364574] transition-colors ml-1 cursor-pointer hover:underline"
-            >
-              Sign Up
-            </button>
-          </p>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              <button
+                type="submit"
+                disabled={loading || !username.trim() || !password.trim()}
+                className="w-full bg-[#405189] text-white py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs hover:bg-[#364574] transition-all shadow-lg shadow-[#405189]/25 active:scale-[0.98] mt-2 flex items-center justify-center gap-2.5 group cursor-pointer disabled:bg-[#405189]/60 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <span>Sign In</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </form>
+
+            <p className="text-center text-xs font-medium text-slate-500 pt-4 border-t border-slate-100">
+              Don't have an account?{" "}
+              <button
+                type="button"
+                onClick={onRegisterClick}
+                className="text-[#405189] font-bold hover:text-[#364574] transition-colors ml-1 cursor-pointer hover:underline"
+              >
+                Sign Up
+              </button>
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
@@ -2537,9 +2514,11 @@ function App() {
       }
 
       // Security delay to allow browser password managers (like Chrome) to trigger warnings/saves
-      // while keeping the login screen visible with a loading indicator
-      setLoginStatusText("Memverifikasi keamanan sesi...");
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // while keeping the login screen visible with a loading indicator. Skip if force logout.
+      if (!force) {
+        setLoginStatusText("Memverifikasi keamanan sesi...");
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
 
       setIsAuthLoading(false);
       setIsLoggedIn(true);
@@ -4363,7 +4342,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
       // Real-time Floating Toast Alert
       toast.custom((t: any) => (
-        <div className="max-w-md w-full bg-slate-900 border border-emerald-500/60 shadow-2xl rounded-2xl pointer-events-auto flex p-4 items-center justify-between gap-3 text-white ring-1 ring-emerald-500/30">
+        <div className="max-w-md w-full bg-slate-900 border border-emerald-500/60 shadow-2xl rounded-xl pointer-events-auto flex p-4 items-center justify-between gap-3 text-white ring-1 ring-emerald-500/30">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl shrink-0">
               <Bug className="w-5 h-5 animate-bounce text-emerald-400" />
@@ -5347,6 +5326,334 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <div className="absolute inset-0 bg-[#f8fafc]/50 backdrop-blur-3xl z-[-1]" />
 
+        {/* Global Top Header Bar */}
+        <header className="flex items-center justify-between w-full px-6 py-3 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 pl-14 md:pl-6 text-slate-800 dark:text-white transition-all z-20">
+          <div className="flex items-center gap-4">
+            {selectedProject && !['userDetail', 'users', 'master', 'auditLog', 'auditLogs', 'dbExplorer', 'explorer', 'settings', 'settingsIntegration', 'configuration'].includes(currentView as string) ? (
+              <>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  {selectedProject.name}
+                </h2>
+                <div className="h-4 w-px bg-gray-200 dark:bg-slate-800 mx-2" />
+                <HeaderAvatarGroup allUsers={allUsers} currentUserUid={currentUser?.uid || currentUser?.id} />
+              </>
+            ) : null}
+          </div>
+
+          {/* Area Ikon Navigasi Kanan */}
+          <div className="flex items-center gap-2">
+            {/* Density Toggle (Compact vs Comfortable) */}
+            {effectiveRole === 'admin' && (
+              <>
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-xl border border-slate-200/60 dark:border-slate-700 select-none mr-2">
+                  <button
+                    onClick={() => setDensity("comfortable")}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                      density === "comfortable"
+                        ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs font-extrabold"
+                        : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                    }`}
+                    title="Comfortable Spacing"
+                  >
+                    Comfortable
+                  </button>
+                  <button
+                    onClick={() => setDensity("compact")}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                      density === "compact"
+                        ? "bg-indigo-600 text-white shadow-xs font-extrabold"
+                        : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                    }`}
+                    title="Compact Spacing"
+                  >
+                    Compact
+                  </button>
+                </div>
+
+                {/* Cache & Sync Status Button */}
+                <button
+                  onClick={() => setIsSyncModalOpen(true)}
+                  className={`p-2 rounded-full transition-all flex items-center gap-1.5 ${
+                    isSyncing 
+                      ? "text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40" 
+                      : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800"
+                  }`}
+                  title="Sinkronisasi & Cache Diagnostik"
+                >
+                  <DBIcon className="w-5 h-5" />
+                  <span className="relative flex h-2 w-2 -mt-3 -ml-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                </button>
+
+                {/* Keyboard Shortcuts Button */}
+                <button
+                  onClick={() => setIsShortcutsModalOpen(true)}
+                  className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-full transition-all"
+                  title="Keyboard Shortcuts (?)"
+                >
+                  <Keyboard className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            {/* Tombol Pengaturan Proyek */}
+            {selectedProject && hasPermission(
+              effectiveRole,
+              "configuration",
+              "read",
+              selectedProject?.ownerId === (currentUser?.uid || user?.uid),
+              currentUserProfile?.permissions,
+            ) && (
+              <button
+                onClick={() => {
+                  setEditingProject(selectedProject);
+                  setIsEditProjectModalOpen(true);
+                }}
+                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-slate-600 group transition-all"
+                title="Pengaturan Proyek"
+              >
+                <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+              </button>
+            )}
+
+            {/* Fullscreen Toggle Button */}
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-full transition-all flex items-center justify-center"
+              title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="w-5 h-5" />
+              ) : (
+                <Maximize className="w-5 h-5" />
+              )}
+            </button>
+
+            {/* Theme Switcher Button & Dropdown */}
+            <div className="relative" ref={themeDropdownRef}>
+              <button
+                onClick={() => setIsThemeOpen(!isThemeOpen)}
+                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-slate-800 rounded-full transition-all flex items-center justify-center relative"
+                title="Ubah Tema"
+              >
+                {theme === 'light' ? (
+                  <Sun className="w-5 h-5 text-amber-500" />
+                ) : theme === 'dark' ? (
+                  <Moon className="w-5 h-5 text-indigo-400" />
+                ) : (
+                  <Monitor className="w-5 h-5" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isThemeOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                    className="absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg z-50 py-1.5 overflow-hidden origin-top-right"
+                  >
+                    <button
+                      onClick={() => { setTheme('light'); setIsThemeOpen(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2.5 transition-colors ${theme === 'light' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                    >
+                      <Sun className={`w-4 h-4 ${theme === 'light' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`} />
+                      <span>Light</span>
+                    </button>
+                    <button
+                      onClick={() => { setTheme('dark'); setIsThemeOpen(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2.5 transition-colors ${theme === 'dark' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                    >
+                      <Moon className={`w-4 h-4 ${theme === 'dark' ? 'text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
+                      <span>Dark</span>
+                    </button>
+                    <button
+                      onClick={() => { setTheme('system'); setIsThemeOpen(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2.5 transition-colors ${theme === 'system' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                    >
+                      <Monitor className={`w-4 h-4 ${theme === 'system' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
+                      <span>Auto</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="relative" ref={notificationsRef}>
+              <button
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-full transition-all relative"
+                title="Notifikasi"
+              >
+                <Bell className="w-5 h-5" />
+                {notifications.filter((n) => !n.read).length > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+                )}
+              </button>
+
+              {/* Notifications Dropdown */}
+              <AnimatePresence>
+                {isNotificationsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="absolute right-0 mt-2 w-80 sm:w-[380px] bg-white rounded-xl shadow-lg border border-slate-200 z-50 overflow-hidden origin-top-right"
+                  >
+                  {/* Dropdown Header */}
+                  <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+                    <h3 className="font-semibold text-slate-900 text-[16px]">
+                      Notification
+                    </h3>
+                    <div className="flex items-center gap-2.5">
+                      <span className="bg-violet-100 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-md">
+                        {notifications.filter((n) => !n.read).length} New
+                      </span>
+                      <button
+                        className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-all"
+                        title="Mark all read"
+                        onClick={async () => {
+                          try {
+                            const unread = notifications.filter(
+                              (n) => !n.read,
+                            );
+                            for (const n of unread) {
+                              await apiRequest(`/api/users/${user?.uid || currentUser?.uid}/notifications/${n.id}`, {
+                                method: "PUT",
+                                body: {read: true}
+                              });
+                            }
+                            fetchNotifications();
+                          } catch (e) {}
+                        }}
+                      >
+                        <Mail className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Notification Items List */}
+                  <div className="max-h-[380px] overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-slate-400 text-sm italic">
+                        Belum ada notifikasi
+                      </div>
+                    ) : (
+                      <div className="flex flex-col">
+                        {notifications.map((n, index) => {
+                          const parsed = formatNotification(n.type, n.title, n.message);
+                          
+                          const getRelativeTime = (createdAt: any): string => {
+                            if (!createdAt) return "-";
+                            try {
+                              const date = typeof createdAt.toMillis === "function"
+                                ? new Date(createdAt.toMillis())
+                                : new Date(createdAt);
+                              const diffMs = Date.now() - date.getTime();
+                              const diffSec = Math.floor(diffMs / 1000);
+                              const diffMin = Math.floor(diffSec / 60);
+                              const diffHr = Math.floor(diffMin / 60);
+                              const diffDay = Math.floor(diffHr / 24);
+
+                              if (diffSec < 60) return "Just now";
+                              if (diffMin < 60) return `${diffMin}m ago`;
+                              if (diffHr < 24) return `${diffHr}h ago`;
+                              if (diffDay === 1) return "1 day ago";
+                              if (diffDay < 7) return `${diffDay} days ago`;
+                              
+                              return format(date, "dd MMM, HH:mm");
+                            } catch (e) {
+                              return "-";
+                            }
+                          };
+
+                          const formattedTime = getRelativeTime(n.createdAt);
+
+                          return (
+                            <div
+                              key={n.id ? `${n.id}-${index}` : `notif-${index}`}
+                              onClick={async () => {
+                                try {
+                                  if (!n.read) {
+                                    await apiRequest(`/api/users/${user?.uid || currentUser?.uid}/notifications/${n.id}`, {
+                                      method: "PUT",
+                                      body: {read: true}
+                                    });
+                                    fetchNotifications();
+                                  }
+                                } catch (e) {
+                                  console.error(e);
+                                }
+                                if (n.type === "bug_retest" || (n.title && n.title.toLowerCase().includes("retest")) || (n.message && n.message.toLowerCase().includes("retest"))) {
+                                  setCurrentView("qa");
+                                  setQaInitialStatusFilter("Retest");
+                                  setIsNotificationsOpen(false);
+                                  window.dispatchEvent(new CustomEvent("lanpro_qa_retest_updated", { detail: { taskId: n.relatedId } }));
+                                } else if (n.relatedId) {
+                                  // if it's a task id
+                                  const t = tasks.find(
+                                    (x) => x.id === n.relatedId,
+                                  );
+                                  if (t) {
+                                    setSelectedTaskForDetail(t);
+                                    setIsTaskDetailModalOpen(true);
+                                    setIsNotificationsOpen(false);
+                                  }
+                                }
+                              }}
+                              className="py-3.5 px-5 hover:bg-slate-50/60 transition-all cursor-pointer flex gap-3 items-start relative border-b border-slate-100 last:border-b-0"
+                            >
+                              {/* Left Icon - Compact & circular */}
+                              <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${parsed.iconBgClass || "bg-violet-50 text-violet-600"}`}>
+                                {parsed.icon}
+                              </div>
+
+                              {/* Content Stack */}
+                              <div className="flex-1 min-w-0 pr-4">
+                                <h4 className="text-sm font-semibold text-slate-900 leading-snug break-words">
+                                  {parsed.formattedMessage}
+                                </h4>
+                                <span className="mt-1 block text-xs text-slate-400 font-medium">
+                                  {formattedTime}
+                                </span>
+                              </div>
+
+                              {/* Unread indicator dot */}
+                              {!n.read && (
+                                <div className="absolute right-5 top-5 flex h-2 w-2 shrink-0">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600 shadow-xs shadow-indigo-300"></span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Dropdown Footer */}
+                  <div className="p-4 border-t border-slate-100 bg-white">
+                    <button
+                      onClick={() => {
+                        setIsNotificationsOpen(false);
+                      }}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-150 text-center block shadow-xs"
+                    >
+                      View all notifications
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+        </header>
+
         {currentView === "userDetail" ? (
           <UserDetailView
             user={selectedUserForDetail}
@@ -5354,7 +5661,11 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
             projects={projects}
             tasks={tasks}
             departments={masterData.filter(m => m.type === 'department')}
-            positions={masterData.filter(m => m.type === 'position')}
+            positions={masterData.filter(m => m.type === 'position' || m.type === 'jabatan')}
+            masterData={masterData}
+            onUserUpdated={() => {
+              fetchProjects();
+            }}
           />
         ) : currentView === "users" ? (
           <AdminUserPanel
@@ -5382,331 +5693,6 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           />
         ) : selectedProject ? (
           <React.Fragment>
-            <header className="flex items-center justify-between w-full px-6 py-3 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 pl-14 md:pl-6 text-slate-800 dark:text-white transition-all">
-              <div className="flex items-center gap-4">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {selectedProject.name}
-                </h2>
-
-                <div className="h-4 w-px bg-gray-200 dark:bg-slate-800 mx-2" />
-                
-                <HeaderAvatarGroup allUsers={allUsers} currentUserUid={currentUser?.uid || currentUser?.id} />
-              </div>
-
-              {/* Area Ikon Navigasi Kanan */}
-              <div className="flex items-center gap-2">
-                {/* Density Toggle (Compact vs Comfortable) */}
-                {effectiveRole === 'admin' && (
-                  <>
-<div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200/60 select-none mr-2">
-                  <button
-                    onClick={() => setDensity("comfortable")}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
-                      density === "comfortable"
-                        ? "bg-white text-slate-800 shadow-sm font-extrabold"
-                        : "text-slate-400 hover:text-slate-600"
-                    }`}
-                    title="Comfortable Spacing"
-                  >
-                    Comfortable
-                  </button>
-                  <button
-                    onClick={() => setDensity("compact")}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
-                      density === "compact"
-                        ? "bg-indigo-600 text-white shadow-sm font-extrabold"
-                        : "text-slate-400 hover:text-slate-600"
-                    }`}
-                    title="Compact Spacing"
-                  >
-                    Compact
-                  </button>
-                </div>
-
-                {/* Cache & Sync Status Button */}
-                <button
-                  onClick={() => setIsSyncModalOpen(true)}
-                  className={`p-2 rounded-full transition-all flex items-center gap-1.5 ${
-                    isSyncing 
-                      ? "text-indigo-600 bg-indigo-50" 
-                      : "text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
-                  }`}
-                  title="Sinkronisasi & Cache Diagnostik"
-                >
-                  <DBIcon className="w-5 h-5" />
-                  <span className="relative flex h-2 w-2 -mt-3 -ml-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                </button>
-
-                {/* Keyboard Shortcuts Button */}
-                <button
-                  onClick={() => setIsShortcutsModalOpen(true)}
-                  className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
-                  title="Keyboard Shortcuts (?)"
-                >
-                  <Keyboard className="w-5 h-5" />
-                </button>
-                  </>
-                )}
-
-                {/* Tombol Pengaturan (Icon Only) */}
-                {hasPermission(
-                  effectiveRole,
-                  "configuration",
-                  "read",
-                  selectedProject?.ownerId === (currentUser?.uid || user?.uid),
-                  currentUserProfile?.permissions,
-                ) && (
-                  <button
-                    onClick={() => {
-                      setEditingProject(selectedProject);
-                      setIsEditProjectModalOpen(true);
-                    }}
-                    className="p-2 hover:bg-slate-50 rounded-full text-slate-400 hover:text-slate-600 group transition-all"
-                    title="Pengaturan Proyek"
-                  >
-                    <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-                  </button>
-                )}
-
-                {/* Fullscreen Toggle Button */}
-                <button
-                  onClick={toggleFullscreen}
-                  className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all flex items-center justify-center"
-                  title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
-                >
-                  {isFullscreen ? (
-                    <Minimize2 className="w-5 h-5" />
-                  ) : (
-                    <Maximize className="w-5 h-5" />
-                  )}
-                </button>
-
-                {/* Theme Switcher Button & Dropdown */}
-                <div className="relative" ref={themeDropdownRef}>
-                  <button
-                    onClick={() => setIsThemeOpen(!isThemeOpen)}
-                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-slate-800 rounded-full transition-all flex items-center justify-center relative"
-                    title="Ubah Tema"
-                  >
-                    {theme === 'light' ? (
-                      <Sun className="w-5 h-5 text-amber-500" />
-                    ) : theme === 'dark' ? (
-                      <Moon className="w-5 h-5 text-indigo-400" />
-                    ) : (
-                      <Monitor className="w-5 h-5" />
-                    )}
-                  </button>
-
-                  <AnimatePresence>
-                    {isThemeOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 border border-slate-150 dark:border-slate-700 rounded-2xl shadow-xl z-50 py-1.5 overflow-hidden origin-top-right"
-                      >
-                        <button
-                          onClick={() => { setTheme('light'); setIsThemeOpen(false); }}
-                          className={`w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2.5 transition-colors ${theme === 'light' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
-                        >
-                          <Sun className={`w-4 h-4 ${theme === 'light' ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`} />
-                          <span>Light</span>
-                        </button>
-                        <button
-                          onClick={() => { setTheme('dark'); setIsThemeOpen(false); }}
-                          className={`w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2.5 transition-colors ${theme === 'dark' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
-                        >
-                          <Moon className={`w-4 h-4 ${theme === 'dark' ? 'text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
-                          <span>Dark</span>
-                        </button>
-                        <button
-                          onClick={() => { setTheme('system'); setIsThemeOpen(false); }}
-                          className={`w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2.5 transition-colors ${theme === 'system' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
-                        >
-                          <Monitor className={`w-4 h-4 ${theme === 'system' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
-                          <span>Auto</span>
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <div className="relative" ref={notificationsRef}>
-                  <button
-                    onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                    className="p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-full transition-all relative"
-                    title="Notifikasi"
-                  >
-                    <Bell className="w-5 h-5" />
-                    {notifications.filter((n) => !n.read).length > 0 && (
-                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
-                    )}
-                  </button>
-
-                  {/* Notifications Dropdown */}
-                  <AnimatePresence>
-                    {isNotificationsOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.18, ease: "easeOut" }}
-                        className="absolute right-0 mt-2 w-80 sm:w-[380px] bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-150 z-50 overflow-hidden origin-top-right"
-                      >
-                      {/* Dropdown Header */}
-                      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
-                        <h3 className="font-semibold text-slate-900 text-[16px]">
-                          Notification
-                        </h3>
-                        <div className="flex items-center gap-2.5">
-                          <span className="bg-violet-100 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-md">
-                            {notifications.filter((n) => !n.read).length} New
-                          </span>
-                          <button
-                            className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-all"
-                            title="Mark all read"
-                            onClick={async () => {
-                              try {
-                                const unread = notifications.filter(
-                                  (n) => !n.read,
-                                );
-                                for (const n of unread) {
-                                  await apiRequest(`/api/users/${user?.uid || currentUser?.uid}/notifications/${n.id}`, {
-                                    method: "PUT",
-                                    body: {read: true}
-                                  });
-                                }
-                                fetchNotifications();
-                              } catch (e) {}
-                            }}
-                          >
-                            <Mail className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Notification Items List */}
-                      <div className="max-h-[380px] overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <div className="p-8 text-center text-slate-400 text-sm italic">
-                            Belum ada notifikasi
-                          </div>
-                        ) : (
-                          <div className="flex flex-col">
-                            {notifications.map((n, index) => {
-                              const parsed = formatNotification(n.type, n.title, n.message);
-                              
-                              const getRelativeTime = (createdAt: any): string => {
-                                if (!createdAt) return "-";
-                                try {
-                                  const date = typeof createdAt.toMillis === "function"
-                                    ? new Date(createdAt.toMillis())
-                                    : new Date(createdAt);
-                                  const diffMs = Date.now() - date.getTime();
-                                  const diffSec = Math.floor(diffMs / 1000);
-                                  const diffMin = Math.floor(diffSec / 60);
-                                  const diffHr = Math.floor(diffMin / 60);
-                                  const diffDay = Math.floor(diffHr / 24);
-
-                                  if (diffSec < 60) return "Just now";
-                                  if (diffMin < 60) return `${diffMin}m ago`;
-                                  if (diffHr < 24) return `${diffHr}h ago`;
-                                  if (diffDay === 1) return "1 day ago";
-                                  if (diffDay < 7) return `${diffDay} days ago`;
-                                  
-                                  return format(date, "dd MMM, HH:mm");
-                                } catch (e) {
-                                  return "-";
-                                }
-                              };
-
-                              const formattedTime = getRelativeTime(n.createdAt);
-
-                              return (
-                                <div
-                                  key={n.id ? `${n.id}-${index}` : `notif-${index}`}
-                                  onClick={async () => {
-                                    try {
-                                      if (!n.read) {
-                                        await apiRequest(`/api/users/${user?.uid || currentUser?.uid}/notifications/${n.id}`, {
-                                          method: "PUT",
-                                          body: {read: true}
-                                        });
-                                        fetchNotifications();
-                                      }
-                                    } catch (e) {
-                                      console.error(e);
-                                    }
-                                    if (n.type === "bug_retest" || (n.title && n.title.toLowerCase().includes("retest")) || (n.message && n.message.toLowerCase().includes("retest"))) {
-                                      setCurrentView("qa");
-                                      setQaInitialStatusFilter("Retest");
-                                      setIsNotificationsOpen(false);
-                                      window.dispatchEvent(new CustomEvent("lanpro_qa_retest_updated", { detail: { taskId: n.relatedId } }));
-                                    } else if (n.relatedId) {
-                                      // if it's a task id
-                                      const t = tasks.find(
-                                        (x) => x.id === n.relatedId,
-                                      );
-                                      if (t) {
-                                        setSelectedTaskForDetail(t);
-                                        setIsTaskDetailModalOpen(true);
-                                        setIsNotificationsOpen(false);
-                                      }
-                                    }
-                                  }}
-                                  className="py-3.5 px-5 hover:bg-slate-50/60 transition-all cursor-pointer flex gap-3 items-start relative border-b border-slate-100 last:border-b-0"
-                                >
-                                  {/* Left Icon - Compact & circular */}
-                                  <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${parsed.iconBgClass || "bg-violet-50 text-violet-600"}`}>
-                                    {parsed.icon}
-                                  </div>
-
-                                  {/* Content Stack */}
-                                  <div className="flex-1 min-w-0 pr-4">
-                                    <h4 className="text-sm font-semibold text-slate-900 leading-snug break-words">
-                                      {parsed.formattedMessage}
-                                    </h4>
-                                    <span className="mt-1 block text-xs text-slate-400 font-medium">
-                                      {formattedTime}
-                                    </span>
-                                  </div>
-
-                                  {/* Unread indicator dot */}
-                                  {!n.read && (
-                                    <div className="absolute right-5 top-5 flex h-2 w-2 shrink-0">
-                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                      <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600 shadow-sm shadow-indigo-300"></span>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Dropdown Footer */}
-                      <div className="p-4 border-t border-slate-100 bg-white">
-                        <button
-                          onClick={() => {
-                            setIsNotificationsOpen(false);
-                          }}
-                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-150 text-center block shadow-xs"
-                        >
-                          View all notifications
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              </div>
-            </header>
-
             <AnimatePresence mode="wait">
               <motion.div 
                 key={currentView + (selectedProject?.id || "")}
@@ -5717,19 +5703,23 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 className="flex-1 flex flex-col min-h-0 bg-slate-50 dark:bg-slate-950 transition-colors duration-200"
               >
               {currentView === "issueDetail" && (
-                <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-[#f4f7f9] text-left">
+                <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-[#f3f3f9] text-left">
                   <div className="flex-1 flex flex-col min-h-0 bg-white border border-slate-200/80 rounded-lg shadow-sm overflow-hidden">
-                     {/* Table Header / Action Bar */}
-                     <div className="p-6 md:p-7 border-b border-slate-200/80 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
-                        <div className="flex items-center gap-3.5">
-                          <button onClick={() => setIsTaskDetailModalOpen(false)} className="p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-600 shadow-2xs hover:bg-indigo-600 hover:text-white transition-all">
-                            <ArrowLeft className="w-5 h-5" />
+                     {/* Velzon-style Action / Title Bar */}
+                     <div className="px-4 py-3 md:px-6 md:py-3.5 border-b border-slate-200/80 bg-white flex items-center justify-between gap-4 shrink-0 shadow-2xs">
+                        <div className="flex items-center gap-3">
+                          <button 
+                            onClick={() => setIsTaskDetailModalOpen(false)} 
+                            className="h-8 w-8 rounded-md bg-slate-50 border border-slate-200/80 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 flex items-center justify-center transition-all shadow-2xs"
+                            title="Back"
+                          >
+                            <ArrowLeft className="w-4 h-4" />
                           </button>
-                          <div>
-                            <h3 className="text-base font-black text-slate-900 tracking-tight">Issue Details</h3>
-                            <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                          <div className="flex items-center gap-2.5">
+                            <h3 className="text-sm font-bold text-slate-800 tracking-tight">Issue Details</h3>
+                            <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100/70">
                               {selectedTaskForDetail?.key || 'TASK'}
-                            </p>
+                            </span>
                           </div>
                         </div>
                      </div>
@@ -5799,105 +5789,32 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   </div>
                 </div>
               )}
-                {currentView === "dashboard" && (
-                <div className="flex-1 flex flex-col overflow-auto bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-200">
-                  <DashboardView
-                    tasks={tasks || []}
-                    sprints={sprints || []}
-                    projectMembers={projectMembers || []}
-                    activityLogs={activityLogs || []}
-                    selectedProject={selectedProject}
-                    setCurrentView={setCurrentView}
-                    setSelectedTaskForDetail={setSelectedTaskForDetail}
-                    setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-                    userRole={effectiveRole}
-                    currentUser={currentUser}
-                    fetchTasks={fetchTasks}
-                  />
-                </div>
-              )}
-              {currentView === "meetingNotes" && selectedProject && (
-                <div className="flex-1 flex flex-col min-h-0 bg-slate-50">
-                  <MeetingNotes
-                    projectId={selectedProject.id}
-                    userRole={effectiveRole}
-                    currentUser={currentUserProfile || currentUser}
-                    projectMembers={projectMembers}
-                    masterData={masterData || []}
-                    permissions={currentUserProfile?.permissions}
-                  />
-                </div>
-              )}
-              {currentView === "wiki" && selectedProject && (
-                <div className="flex-1 flex flex-col min-h-0 bg-slate-50">
-                  <WikiView
-                    projectId={selectedProject.id}
-                    users={allUsers}
-                    currentUser={currentUserProfile}
-                    masterData={masterData}
-                  />
-                </div>
-              )}
-              {currentView === "notebooklm" && selectedProject && (
-                <div className="flex-1 flex flex-col min-h-0 p-4 bg-slate-50 dark:bg-slate-950">
-                  {hasPermission(effectiveRole, "notebooklm", "read", false, currentUserProfile?.permissions) ? (
-                    <NotebookLM
-                      project={selectedProject}
-                      userRole={effectiveRole}
-                      currentUser={currentUserProfile}
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center bg-slate-50 dark:bg-slate-900 rounded-2xl min-h-[500px]">
-                      <ShieldAlert className="w-16 h-16 text-rose-500 mb-4 animate-bounce" />
-                      <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">403 Forbidden</h2>
-                      <p className="text-slate-500 dark:text-slate-400 max-w-md text-sm">
-                        Anda tidak memiliki izin untuk mengakses modul NotebookLM.
-                        Silakan hubungi Administrator untuk memperbarui hak akses Anda.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-              {currentView === "list" && (
-                <IssueListView
-                  projectRole={
-                    selectedProject && currentUser?.uid
-                      ? selectedProject.memberRoles?.[currentUser.uid]
-                      : undefined
-                  }
-                  tasks={tasks || []}
-                  roots={(tasks || []).filter((t) => !t.parentId || !(tasks || []).some((p) => p.id === t.parentId))}
-                  sprints={sprints || []}
+                <AppRoutes
+                  currentView={currentView}
+                  setCurrentView={setCurrentView}
+                  selectedProject={selectedProject}
+                  effectiveRole={effectiveRole}
+                  currentUser={currentUser}
+                  currentUserProfile={currentUserProfile}
                   projectMembers={projectMembers || []}
-                  allUsers={allUsers || []}
                   masterData={masterData || []}
-                  userRole={effectiveRole}
-                  user={currentUser}
-                  currentUserProfile={currentUserProfile!}
+                  tasks={tasks || []}
+                  sprints={sprints || []}
+                  allUsers={allUsers || []}
+                  activityLogs={activityLogs || []}
+                  selectedTaskForDetail={selectedTaskForDetail}
+                  expandedSprintId={expandedSprintId}
                   hasPermission={hasPermission}
                   updateTaskField={updateTaskField}
+                  updateTaskStatus={updateTaskStatus}
                   handleQuickCreate={handleQuickCreate}
                   setSelectedTaskForDetail={setSelectedTaskForDetail}
                   setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
                   setIsNewTaskModalOpen={setIsNewTaskModalOpen}
                   deleteTask={deleteTask}
                   bulkDeleteTasks={bulkDeleteTasks}
-                  selectedProject={selectedProject}
                   fetchTasks={fetchTasks}
-                />
-              )}
-              {currentView === "sprints" && (
-                <PlanningView
-                  tasks={tasks || []}
-                  sprints={sprints || []}
-                  masterData={masterData || []}
-                  userRole={effectiveRole}
-                  currentUserProfile={currentUserProfile}
-                  projectMembers={projectMembers || []}
-                  expandedSprintId={expandedSprintId}
                   setExpandedSprintId={setExpandedSprintId}
-                  setSelectedTaskForDetail={setSelectedTaskForDetail}
-                  setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
                   setIsNewSprintModalOpen={setIsNewSprintModalOpen}
                   setIsEditSprintModalOpen={setIsEditSprintModalOpen}
                   setEditingSprint={setEditingSprint}
@@ -5905,123 +5822,17 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   handleCompleteSprint={handleCompleteSprint}
                   handleDeleteSprint={handleDeleteSprint}
                   handleDragEndPlanning={handleDragEndPlanning}
-                />
-              )}
-              {currentView === "board" && (
-                <div className="flex-1 flex flex-col min-h-0 p-6 bg-slate-50 dark:bg-slate-950">
-                  <BoardView
-                    tasks={tasks || []}
-                    masterData={masterData || []}
-                    projectMembers={projectMembers || []}
-                    setSelectedTaskForDetail={setSelectedTaskForDetail}
-                    setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-                    userRole={effectiveRole}
-                    user={currentUser}
-                    selectedProject={selectedProject}
-                    refreshTasks={fetchTasks}
-                    setTasks={setTasks}
-                  />
-                </div>
-              )}
-              {currentView === "qa" && (
-                <div className="flex-1 overflow-auto bg-slate-50 relative custom-scrollbar p-6">
-                  <TestQAPanel
-                    tasks={tasks || []}
-                    projectMembers={projectMembers || []}
-                    selectedProject={selectedProject}
-                    setSelectedTaskForDetail={setSelectedTaskForDetail}
-                    setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-                    updateTaskField={updateTaskField}
-                    updateTaskStatus={updateTaskStatus}
-                    user={currentUser || user}
-                    socket={socket}
-                    initialStatusFilter={qaInitialStatusFilter}
-                  />
-                </div>
-              )}
-              {currentView === "timeline" && (
-                <TimelinePanel
-                  tasks={tasks || []}
-                  selectedProject={selectedProject}
-                  updateTaskField={updateTaskField}
-                  setSelectedTaskForDetail={setSelectedTaskForDetail}
-                  setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-                />
-              )}
-              {((currentView as string) === "access" || (currentView as string) === "team") && (
-                <TeamManagementPanel
-                  projectMembers={projectMembers || []}
-                  selectedProject={selectedProject!}
-                  tasks={tasks || []}
-                  currentUserProfile={currentUserProfile!}
-                  userRole={effectiveRole}
-                  masterData={masterData || []}
+                  fetchMasterData={fetchMasterData}
+                  fetchProjects={fetchProjects}
+                  setTasks={setTasks}
+                  socket={socket}
+                  qaInitialStatusFilter={qaInitialStatusFilter}
+                  exportTasksToCSV={exportTasksToCSV}
+                  safeFormat={safeFormat}
                   StyledDropdown={StyledDropdown}
                   updateProjectRole={updateProjectRole}
                   removeProjectMember={removeProjectMember}
-                  hasPermission={hasPermission}
-                  onRefreshProjects={fetchProjects}
                 />
-              )}
-              {currentView === "activity" && (
-                <ActivityLogPanel
-                  activityLogs={activityLogs || []}
-                  exportTasksToCSV={exportTasksToCSV}
-                  projectMembers={projectMembers || []}
-                  safeFormat={safeFormat}
-                />
-              )}
-              {currentView === "dbExplorer" && (
-                <DbExplorerPanel
-                  selectedProject={selectedProject}
-                  tasks={tasks || []}
-                  sprints={sprints || []}
-                  projectMembers={projectMembers}
-                  activityLogs={activityLogs}
-                  masterData={masterData}
-                />
-              )}
-              {currentView === "settingsIntegration" && (
-                (() => {
-                  const explicitRead = currentUserProfile?.permissions?.settings?.read;
-                  const hasAccess = explicitRead !== undefined 
-                    ? explicitRead === true
-                    : hasPermission(effectiveRole, "settings", "read", false, currentUserProfile?.permissions);
-                    
-                  if (!hasAccess) {
-                    return (
-                      <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center bg-slate-50 min-h-[calc(100vh-theme(spacing.16))]">
-                         <ShieldAlert className="w-16 h-16 text-rose-500 mb-4" />
-                         <h2 className="text-2xl font-bold text-slate-800 mb-2">403 Forbidden</h2>
-                         <p className="text-slate-500 max-w-md">
-                           You do not have permission to view Integration Settings. 
-                           Please contact your administrator if you need access.
-                         </p>
-                      </div>
-                    );
-                  }
-                  
-                  return <SettingsPage />;
-                })()
-              )}
-              {currentView === "flowchart" && selectedProject && (
-                <FlowchartView
-                  selectedProject={selectedProject}
-                  tasks={tasks || []}
-                  projectMembers={projectMembers || []}
-                  setSelectedTaskForDetail={setSelectedTaskForDetail}
-                  setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-                  currentUserProfile={currentUserProfile}
-                />
-              )}
-              {currentView === "auditLog" && (
-                <div className="flex-1 flex flex-col min-h-0">
-                  <EnterpriseAuditDashboard
-                    selectedProject={selectedProject}
-                    currentUser={currentUser}
-                  />
-                </div>
-              )}
               </motion.div>
             </AnimatePresence>
 
@@ -6063,7 +5874,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           </React.Fragment>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center bg-slate-50/50 p-8 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-100/80 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-4 shadow-sm">
+            <div className="w-16 h-16 rounded-xl bg-indigo-100/80 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-4 shadow-sm">
               <FolderKanban className="w-8 h-8" />
             </div>
             <h3 className="text-xl font-bold text-slate-800 mb-2">Pilih atau Buat Proyek Baru</h3>

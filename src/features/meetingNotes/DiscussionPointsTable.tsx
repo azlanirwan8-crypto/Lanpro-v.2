@@ -339,7 +339,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       {/* Header Bar Clean Title */}
       <div className="px-6 py-5 border-b border-slate-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/30">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs">
             <MessageSquare className="w-5 h-5" />
           </div>
           <div>
@@ -377,11 +377,11 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       </div>
 
       {showAiCompanion && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 relative animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl border border-slate-200 p-6 relative animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-              <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-600" /> AI Meeting Assistant
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#405189]" /> AI Meeting Assistant
               </h3>
               <button
                 onClick={() => setShowAiCompanion(false)}
@@ -406,28 +406,27 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       )}
 
       {pointToDelete && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center gap-3 mb-4 text-rose-600">
-              <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-rose-500" />
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-xl border border-slate-200 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-3 text-rose-600">
+              <div className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center">
+                <Trash2 className="w-4 h-4 text-rose-500" />
               </div>
-              <h3 className="text-lg font-bold">Hapus Poin</h3>
+              <h3 className="text-sm font-bold text-slate-900">Hapus Poin</h3>
             </div>
-            <p className="text-sm text-slate-500 leading-relaxed mb-6">
+            <p className="text-xs text-slate-600 leading-relaxed mb-5">
               Apakah Anda yakin ingin menghapus poin diskusi ini? Tindakan ini tidak dapat dibatalkan.
             </p>
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setPointToDelete(null)}
-                className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors border border-slate-200 cursor-pointer"
+                className="px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 cursor-pointer"
               >
                 Batal
               </button>
               <button
                 onClick={handleDelete}
-                disabled={isSaving}
-                className="px-5 py-2.5 bg-rose-600 text-white rounded-xl text-sm font-bold shadow-sm hover:bg-rose-700 transition-all disabled:opacity-50 cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors shadow-xs cursor-pointer"
               >
                 {isSaving ? "Menghapus..." : "Hapus"}
               </button>
@@ -439,7 +438,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       {/* Edit Modal Popup (When clicking edit icon on a row) */}
       {editingId !== null && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-lg w-full max-w-2xl shadow-xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-indigo-100/60 flex items-center justify-center border border-indigo-100 text-indigo-600">
@@ -842,7 +841,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           <div className="bg-white w-full max-w-lg h-full shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-250 text-left">
             <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
               <div className="flex items-center gap-3 pr-4">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center border border-indigo-200 shrink-0">
                   <MessageSquare className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
@@ -866,7 +865,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-4 bg-slate-50/30">
               {threadComments.length === 0 ? (
                 <div className="text-center py-16 px-4">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto mb-3 text-indigo-400">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto mb-3 text-indigo-400">
                     <MessageSquare className="w-6 h-6" />
                   </div>
                   <h4 className="text-xs font-bold text-slate-700">Belum Ada Balasan Komentar</h4>
@@ -887,7 +886,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   return (
                     <div key={comment.id || Math.random()} className={cn("flex w-full", isMine ? "justify-end" : "justify-start")}>
                       <div className={cn(
-                        "p-4 rounded-2xl max-w-[85%] md:max-w-2xl shadow-xs",
+                        "p-4 rounded-xl max-w-[85%] md:max-w-2xl shadow-xs",
                         isMine ? "bg-indigo-600 text-white border-0" : "bg-white text-slate-700 border border-gray-200"
                       )}>
                         {/* Header Baris Atas */}

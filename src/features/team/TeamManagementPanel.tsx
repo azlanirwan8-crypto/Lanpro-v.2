@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  Users, UserPlus, FileText, LayoutGrid, Zap, Search, X, Trash2, Mail, Download, ChevronDown
+  Users, LayoutGrid, List, Search, Download, ChevronDown, CheckCircle2,
+  Clock, Shield, Mail, User, X, Star, FileText, Briefcase
 } from 'lucide-react';
 import { UserProfile, Project, Task, AppRole, MasterData } from '../../types';
-import { UserAvatar } from '../../components/ui/UserAvatar';
 import { toast } from 'sonner';
-import { apiRequest } from '../../lib/api';
-import { ConfirmationModal } from '../../components/ui/ConfirmationModal';
 
 export const TeamManagementPanel = ({ 
   projectMembers: propMembers,
@@ -27,59 +25,97 @@ export const TeamManagementPanel = ({
   currentUserProfile: UserProfile | null;
   userRole: AppRole | null;
   hasPermission: (...args: any[]) => boolean;
-  StyledDropdown: any;
-  updateProjectRole: (uid: string, role: string) => void;
-  removeProjectMember: (uid: string) => Promise<void>;
-  masterData: MasterData[];
+  StyledDropdown?: any;
+  updateProjectRole?: (uid: string, role: string) => void;
+  removeProjectMember?: (uid: string) => Promise<void>;
+  masterData?: MasterData[];
   onRefreshProjects?: () => void;
 }) => {
   const [teamSearch, setTeamSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [memberToDelete, setMemberToDelete] = useState<any | null>(null);
-  const [inviteToCancel, setInviteToCancel] = useState<any | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedProfileUser, setSelectedProfileUser] = useState<any | null>(null);
   
-  const projectMembers = Array.isArray(propMembers) ? propMembers : [];
+  const rawMembers = Array.isArray(propMembers) ? propMembers : [];
   const tasks = Array.isArray(propTasks) ? propTasks : [];
   const masterData = Array.isArray(propMaster) ? propMaster : [];
 
-  const allPeople = [
-    ...projectMembers.map(m => ({ ...m, isPending: false })), 
-    ...(selectedProject?.pendingInvites || []).map(email => ({ uid: email, email, displayName: email.split('@')[0], isPending: true }))
-  ];
+  // Filter strictly to users who have joined the selected project
+  const joinedMembers = useMemo(() => {
+    if (!selectedProject) return rawMembers;
+
+    const projectOwnerId = selectedProject.ownerId;
+    const projectMemberList = Array.isArray(selectedProject.members) ? selectedProject.members : [];
+    const projectRolesMap = selectedProject.memberRoles || {};
+
+    const hasExplicitMembers = projectMemberList.length > 0 || Object.keys(projectRolesMap).length > 0 || Boolean(projectOwnerId);
+
+    if (!hasExplicitMembers) return rawMembers;
+
+    const filtered = rawMembers.filter(m => {
+      const uid = m.uid || (m as any).id;
+      if (!uid) return false;
+      const isOwner = projectOwnerId === uid;
+      const isMember = projectMemberList.includes(uid);
+      const hasRole = Object.prototype.hasOwnProperty.call(projectRolesMap, uid);
+      return isOwner || isMember || hasRole;
+    });
+
+    return filtered.length > 0 ? filtered : rawMembers;
+  }, [rawMembers, selectedProject]);
+
+  const allPeople = useMemo(() => {
+    const active = joinedMembers.map(m => ({ ...m, isPending: false }));
+    const pending = (selectedProject?.pendingInvites || []).map((email: string) => ({
+      uid: email,
+      email,
+      displayName: email.split('@')[0],
+      isPending: true
+    }));
+    return [...active, ...pending];
+  }, [joinedMembers, selectedProject]);
+
+  // Filtered people based on search and role filter
+  const filteredPeople = useMemo(() => {
+    return allPeople.filter(p => {
+      const search = teamSearch.toLowerCase();
+      const pUser = p as any;
+      const matchesSearch = (
+        p?.displayName?.toLowerCase().includes(search) || 
+        p?.email?.toLowerCase().includes(search) ||
+        pUser?.username?.toLowerCase().includes(search) ||
+        pUser?.role?.toLowerCase().includes(search)
+      );
+      
+      const role = selectedProject?.memberRoles?.[p.uid] || pUser?.role || 'viewer';
+      const matchesRole = roleFilter === 'all' || role.toLowerCase() === roleFilter.toLowerCase();
+      return matchesSearch && matchesRole;
+    });
+  }, [allPeople, teamSearch, roleFilter, selectedProject]);
+
+  const activeTeamCount = joinedMembers.length;
+  const pendingInvitesCount = (selectedProject?.pendingInvites || []).length;
+  const assignedTasksCount = tasks.filter(t => t.assigneeId).length;
 
   const handleExportTeamCSV = () => {
     try {
-      const filtered = allPeople.filter(p => {
-        const search = teamSearch.toLowerCase();
-        const pUser = p as any;
-        const matchesSearch = (p?.displayName?.toLowerCase().includes(search) || 
-                              p?.email?.toLowerCase().includes(search) ||
-                              pUser?.username?.toLowerCase().includes(search));
-        
-        const role = selectedProject?.memberRoles?.[p.uid] || 'viewer';
-        const matchesRole = roleFilter === 'all' || role === roleFilter;
-        return matchesSearch && matchesRole;
-      });
-
-      if (filtered.length === 0) {
+      if (filteredPeople.length === 0) {
         toast.error('Tidak ada data tim untuk di-export');
         return;
       }
 
-      const headers = ['UID/Email', 'Nama Lengkap', 'Username', 'Project Role', 'Status', 'Jumlah Tugas', 'Beban Kerja'];
-      const rows = filtered.map(p => {
-        const role = selectedProject?.memberRoles?.[p.uid] || 'viewer';
+      const headers = ['UID/Email', 'Nama Lengkap', 'Username', 'Project Role', 'Status', 'Jumlah Tugas'];
+      const rows = filteredPeople.map(p => {
+        const role = selectedProject?.memberRoles?.[p.uid] || (p as any)?.role || 'viewer';
         const isPending = p.isPending;
         const taskCount = tasks.filter(t => t.assigneeId === p.uid).length;
-        const workload = taskCount === 0 ? 'Idle' : taskCount > 4 ? 'Overloaded' : 'Optimal';
         return [
           p.uid,
           p?.displayName || '',
           (p as any)?.username || '',
           role,
           isPending ? 'Pending' : 'Active',
-          taskCount,
-          workload
+          taskCount
         ];
       });
 
@@ -89,350 +125,388 @@ export const TeamManagementPanel = ({
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `team_members_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute("download", `team_members_${selectedProject?.key || 'project'}_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      toast.success(`Berhasil meng-export ${filtered.length} anggota tim ke CSV!`);
+      toast.success(`Berhasil meng-export ${filteredPeople.length} anggota tim ke CSV!`);
     } catch (e) {
       console.error(e);
       toast.error('Gagal meng-export CSV');
     }
   };
-  
-  const activeTeam = allPeople.filter(p => !p.isPending).length;
-  const pendingInvites = allPeople.filter(p => p.isPending).length;
-  const totalTasks = tasks.length;
-  const assignedTasks = tasks.filter(t => t.assigneeId).length;
 
   return (
-    <div className="p-6 md:p-8 w-full space-y-6 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Team Management</h1>
+    <div className="p-4 md:p-6 w-full space-y-5 animate-in fade-in duration-300 text-left">
+      {/* Header Title */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight">Team Management</h1>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Daftar anggota tim yang bergabung dalam proyek {selectedProject ? <span className="font-bold text-slate-700">{selectedProject.name} ({selectedProject.key})</span> : ''}
+          </p>
         </div>
       </div>
 
-      {/* Confirmation Modals */}
-      {!!memberToDelete && (
-        <ConfirmationModal
-          isOpen={!!memberToDelete}
-          onClose={() => setMemberToDelete(null)}
-          title="Hapus Anggota Tim?"
-          message={`Apakah Anda yakin ingin menghapus ${memberToDelete?.displayName || memberToDelete?.email} dari proyek ini? Tindakan ini akan menghapus akses mereka ke seluruh papan kanban, tugas, dan flowchart di proyek ini.`}
-          onConfirm={async () => {
-            if (!memberToDelete) return;
-            const uid = memberToDelete.uid;
-            setMemberToDelete(null);
-            await removeProjectMember(uid);
-          }}
-          confirmText="Ya, Hapus"
-          cancelText="Batal"
-          variant="danger"
-        />
-      )}
+      {/* Team Summary KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Active Team</div>
+              <div className="text-xl font-bold text-slate-800 mt-0.5">{activeTeamCount}</div>
+            </div>
+          </div>
+        </div>
 
-      {!!inviteToCancel && (
-        <ConfirmationModal
-          isOpen={!!inviteToCancel}
-          onClose={() => setInviteToCancel(null)}
-          title="Batalkan Undangan?"
-          message={`Apakah Anda yakin ingin membatalkan undangan untuk ${inviteToCancel?.email || inviteToCancel?.displayName}?`}
-          onConfirm={async () => {
-            if (!inviteToCancel || !selectedProject) return;
-            const emailToCancel = inviteToCancel.email;
-            setInviteToCancel(null);
-            try {
-              const newPending = (selectedProject.pendingInvites || []).filter((e: string) => e !== emailToCancel);
-              const effectiveUserId = currentUserProfile?.uid || "guest";
-              const data = await apiRequest(`/api/projects/${selectedProject.id}`, {
-                method: 'PUT',
-                headers: { 
-                  'x-user-id': effectiveUserId
-                },
-                body: { pendingInvites: newPending }
-              });
-              if (data.status === 'success') {
-                toast.success('Undangan berhasil dibatalkan');
-                if (onRefreshProjects) {
-                  onRefreshProjects();
-                }
-              } else {
-                toast.error(data.message || 'Gagal membatalkan undangan');
-              }
-            } catch (e: any) {
-              console.error(e);
-              toast.error('Gagal membatalkan undangan: ' + (e.message || e));
-            }
-          }}
-          confirmText="Ya, Batalkan"
-          cancelText="Batal"
-          variant="danger"
-        />
-      )}
+        <div className="bg-white p-4 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Assigned Tasks</div>
+              <div className="text-xl font-bold text-slate-800 mt-0.5">{assignedTasksCount}</div>
+            </div>
+          </div>
+        </div>
 
-      {/* Team Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-5 transition-all hover:shadow-md hover:-translate-y-1">
-              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner">
-                  <Users className="w-7 h-7" />
-              </div>
-              <div>
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Team</div>
-                  <div className="text-4xl font-black text-slate-900 leading-none mt-1">{activeTeam}</div>
-              </div>
+        <div className="bg-white p-4 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Pending Invites</div>
+              <div className="text-xl font-bold text-slate-800 mt-0.5">{pendingInvitesCount}</div>
+            </div>
           </div>
-          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-5 transition-all hover:shadow-md hover:-translate-y-1">
-              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-inner">
-                  <LayoutGrid className="w-7 h-7" />
-              </div>
-              <div>
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Assigned Tasks</div>
-                  <div className="text-4xl font-black text-slate-900 leading-none mt-1">{assignedTasks}</div>
-              </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+              <Briefcase className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Project Tasks</div>
+              <div className="text-xl font-bold text-slate-800 mt-0.5">{tasks.length}</div>
+            </div>
           </div>
-          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-5 transition-all hover:shadow-md hover:-translate-y-1">
-              <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shadow-inner">
-                  <Mail className="w-7 h-7" />
-              </div>
-              <div>
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending Invites</div>
-                  <div className="text-4xl font-black text-slate-900 leading-none mt-1">{pendingInvites}</div>
-              </div>
-          </div>
-          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-5 transition-all hover:shadow-md hover:-translate-y-1">
-              <div className="w-14 h-14 bg-violet-50 text-violet-600 rounded-2xl flex items-center justify-center shadow-inner">
-                  <Zap className="w-7 h-7" />
-              </div>
-              <div>
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Team Velocity</div>
-                  <div className="text-4xl font-black text-slate-900 leading-none mt-1">4.2</div>
-              </div>
-          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] items-center">
+      {/* Filter & View Mode Control Bar */}
+      <div className="bg-white p-3.5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text" 
-            placeholder="Search members by name, role, or username..." 
+            placeholder="Search for name, designation, or email..." 
             value={teamSearch} 
             onChange={(e) => setTeamSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none text-slate-700 transition-all font-bold placeholder:font-medium placeholder:text-slate-400"
+            className="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs focus:ring-1 focus:ring-indigo-500 focus:bg-white outline-none text-slate-700 font-medium transition-all"
           />
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-          <div className="relative w-full sm:w-[180px]">
+
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+          <div className="relative min-w-[140px]">
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none text-slate-750 font-bold text-sm cursor-pointer appearance-none"
+              className="w-full pl-3 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-md outline-none text-slate-700 font-semibold text-xs cursor-pointer appearance-none"
             >
               <option value="all">Semua Role</option>
               <option value="admin">Admin</option>
+              <option value="project manager">Project Manager</option>
               <option value="system analyst">System Analyst</option>
-              <option value="arsitektur">Architecture</option>
-              <option value="dba">DBA</option>
-              <option value="ui/ux">UI/UX</option>
               <option value="developer">Developer</option>
-              <option value="qa">QA</option>
-              <option value="bisnis analyst">Business Analyst</option>
-              <option value="member">Member</option>
+              <option value="ui/ux">UI/UX Designer</option>
+              <option value="qa">QA Engineer</option>
               <option value="viewer">Viewer</option>
             </select>
-            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
+
+          {/* Grid vs List View Mode Buttons */}
+          <div className="flex bg-slate-100 p-0.5 rounded-md border border-slate-200/80">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded transition-all ${viewMode === 'grid' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-800'}`}
+              title="Grid View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded transition-all ${viewMode === 'list' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-800'}`}
+              title="List View"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+
           <button
             onClick={handleExportTeamCSV}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 hover:border-indigo-300 rounded-2xl text-sm font-bold shadow-xs transition-all active:scale-95 cursor-pointer w-full sm:w-auto"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-md text-xs font-semibold shadow-2xs transition-all cursor-pointer"
           >
-            <Download className="w-4 h-4 text-indigo-650" /> Export CSV
+            <Download className="w-3.5 h-3.5" /> Export CSV
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-[0_8px_40px_rgb(0,0,0,0.04)] overflow-hidden">
-        <table className="w-full text-left min-w-[800px]">
-          <thead>
-            <tr className="bg-slate-50/50 border-b border-slate-100">
-              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">MEMBERS</th>
-              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">ALLOCATION</th>
-              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">ROLE</th>
-              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">STATUS</th>
-              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">ACTION</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 italic-rows">
-            {allPeople.filter(p => {
-              const search = teamSearch.toLowerCase();
-              const pUser = p as any;
-              const matchesSearch = (p?.displayName?.toLowerCase().includes(search) || 
-                      p?.email?.toLowerCase().includes(search) ||
-                      pUser?.username?.toLowerCase().includes(search));
-              
-              const role = selectedProject?.memberRoles?.[p.uid] || 'viewer';
-              const matchesRole = roleFilter === 'all' || role === roleFilter;
-              return matchesSearch && matchesRole;
-            }).map((person: any, i) => {
-              const name = person?.displayName || person?.email || 'Unknown';
-              const initialsMatch = name.match(/\b\w/g);
-              const initials = (initialsMatch ? initialsMatch.join('') : name.substring(0, 2)).substring(0, 2).toUpperCase();
-              const colors = ['bg-blue-600', 'bg-indigo-600', 'bg-violet-600', 'bg-emerald-600'];
-              const bgColor = colors[i % colors.length];
-              const isOwner = selectedProject?.ownerId === person.uid || selectedProject?.ownerId === person.id;
-              
-                return (
-                  <tr key={person.uid} className="hover:bg-indigo-50/30 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          {person.photoURL ? (
-                            <img src={person.photoURL} className="w-11 h-11 rounded-2xl object-cover shadow-sm ring-2 ring-white" referrerPolicy="no-referrer" />
-                          ) : (
-                            <div className={`w-11 h-11 rounded-2xl ${bgColor} flex items-center justify-center text-white font-black text-[10px] shadow-sm ring-2 ring-white`}>
-                              {initials}
-                            </div>
-                          )}
-                          <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm ${person.isPending ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                        </div>
-                        <div className="flex flex-col">
-                          <div className="font-bold text-slate-800 tracking-tight text-sm leading-tight">{name}</div>
-                          <div className="text-[10px] text-slate-400 font-black uppercase tracking-tighter mt-0.5">{person?.username || '@' + person.uid.toLowerCase()}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-6">
-                        <div className="flex flex-col min-w-[50px]">
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Tasks</span>
-                          <span className="font-black text-slate-700 text-lg leading-tight mt-0.5">
-                            {tasks.filter(t => t.assigneeId === person.uid).length}
-                          </span>
-                        </div>
-                        {/* Workload Status Bar */}
-                        <div className="flex-1 min-w-[140px] max-w-[200px]">
-                          {(() => {
-                            const count = tasks.filter(t => t.assigneeId === person.uid).length;
-                            const isPending = person.isPending;
-                            
-                            if (isPending) {
-                              return (
-                                <span className="text-[10px] text-slate-400 italic font-semibold">Undangan Terkirim</span>
-                              );
-                            }
-                            
-                            // Workload classification
-                            let statusText = "Idle";
-                            let statusColor = "bg-slate-50 text-slate-500 border-slate-150";
-                            let barColor = "bg-slate-300";
-                            let fillPercent = 0;
-                            
-                            if (count > 0 && count <= 4) {
-                              statusText = "Optimal";
-                              statusColor = "bg-emerald-50 text-emerald-700 border-emerald-100";
-                              barColor = "bg-emerald-500";
-                              fillPercent = Math.min(100, (count / 4) * 100);
-                            } else if (count > 4) {
-                              statusText = "Overloaded";
-                              statusColor = "bg-rose-50 text-rose-700 border-rose-100";
-                              barColor = "bg-rose-500";
-                              fillPercent = 100;
-                            }
-                            
-                            return (
-                              <div className="space-y-1">
-                                <div className="flex items-center justify-between">
-                                  <span className={`inline-flex px-1.5 py-0.5 rounded text-[9px] font-extrabold border ${statusColor}`}>
-                                    {statusText}
-                                  </span>
-                                  <span className="text-[10px] font-bold text-slate-500">{Math.round(fillPercent)}% load</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                                  <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${fillPercent}%` }} />
-                                </div>
+      {/* Grid View Mode - Match Velzon Team Cards */}
+      {viewMode === 'grid' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {filteredPeople.map((person: any, i) => {
+            const name = person?.displayName || person?.email || 'Unknown Member';
+            const initialsMatch = name.match(/\b\w/g);
+            const initials = (initialsMatch ? initialsMatch.join('') : name.substring(0, 2)).substring(0, 2).toUpperCase();
+            const roleName = selectedProject?.memberRoles?.[person.uid] || person?.role || 'Team Member';
+            const userAssignedTasks = tasks.filter(t => t.assigneeId === person.uid);
+            const completedTasks = userAssignedTasks.filter(t => t.status === 'DONE' || t.status === 'Done' || t.status === 'SELESAI');
+            const isOwner = selectedProject?.ownerId === person.uid || selectedProject?.ownerId === person.id;
+
+            return (
+              <div 
+                key={person.uid || i} 
+                className="bg-white rounded-lg border border-slate-200/80 shadow-2xs overflow-hidden flex flex-col hover:border-indigo-300 transition-all duration-200 group"
+              >
+                {/* Banner Header */}
+                <div className="h-16 bg-gradient-to-r from-slate-700 via-indigo-950 to-slate-900 relative p-2.5 flex items-start justify-end">
+                  <Star className="w-4 h-4 text-white/40 hover:text-amber-300 cursor-pointer transition-colors" />
+                </div>
+
+                {/* Avatar Centered Overlap */}
+                <div className="relative -mt-8 mx-auto z-10">
+                  {person.photoURL ? (
+                    <img 
+                      src={person.photoURL} 
+                      alt={name} 
+                      className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-md bg-white"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full border-4 border-white shadow-md bg-indigo-600 flex items-center justify-center text-white font-bold text-base">
+                      {initials}
+                    </div>
+                  )}
+                  <div 
+                    className={`w-3.5 h-3.5 rounded-full border-2 border-white absolute bottom-0 right-0 shadow-2xs ${
+                      person.isPending ? 'bg-amber-500' : 'bg-emerald-500'
+                    }`}
+                  />
+                </div>
+
+                {/* Name & Role */}
+                <div className="p-4 pt-2 text-center flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm leading-snug truncate group-hover:text-indigo-600 transition-colors">
+                      {name}
+                    </h3>
+                    <p className="text-xs font-medium text-slate-500 capitalize mt-0.5 truncate">
+                      {isOwner ? 'Project Owner & Manager' : roleName}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-slate-100 my-3 pt-3 grid grid-cols-2 gap-2 text-center">
+                    <div className="bg-slate-50 p-2 rounded-md border border-slate-100">
+                      <span className="block font-bold text-slate-800 text-sm">{userAssignedTasks.length}</span>
+                      <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Assigned</span>
+                    </div>
+                    <div className="bg-slate-50 p-2 rounded-md border border-slate-100">
+                      <span className="block font-bold text-slate-800 text-sm">{completedTasks.length}</span>
+                      <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Done</span>
+                    </div>
+                  </div>
+
+                  {/* View Profile Button Only */}
+                  <button
+                    onClick={() => setSelectedProfileUser(person)}
+                    className="w-full py-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 text-xs font-semibold rounded-md transition-colors border border-slate-200/70 shadow-2xs cursor-pointer"
+                  >
+                    View Profile
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* List View Mode - Sleek Table / Cards */}
+      {viewMode === 'list' && (
+        <div className="bg-white rounded-lg border border-slate-200/80 shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="px-5 py-3">Member</th>
+                  <th className="px-5 py-3">Role</th>
+                  <th className="px-5 py-3 text-center">Assigned Tasks</th>
+                  <th className="px-5 py-3 text-center">Completed</th>
+                  <th className="px-5 py-3 text-center">Status</th>
+                  <th className="px-5 py-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredPeople.map((person: any, i) => {
+                  const name = person?.displayName || person?.email || 'Unknown Member';
+                  const initialsMatch = name.match(/\b\w/g);
+                  const initials = (initialsMatch ? initialsMatch.join('') : name.substring(0, 2)).substring(0, 2).toUpperCase();
+                  const roleName = selectedProject?.memberRoles?.[person.uid] || person?.role || 'Team Member';
+                  const userAssignedTasks = tasks.filter(t => t.assigneeId === person.uid);
+                  const completedTasks = userAssignedTasks.filter(t => t.status === 'DONE' || t.status === 'Done' || t.status === 'SELESAI');
+                  const isOwner = selectedProject?.ownerId === person.uid || selectedProject?.ownerId === person.id;
+
+                  return (
+                    <tr key={person.uid || i} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            {person.photoURL ? (
+                              <img src={person.photoURL} alt={name} className="w-9 h-9 rounded-full object-cover border border-slate-200" referrerPolicy="no-referrer" />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
+                                {initials}
                               </div>
-                            );
-                          })()}
+                            )}
+                            <div className={`w-2.5 h-2.5 rounded-full border border-white absolute bottom-0 right-0 ${person.isPending ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                          </div>
+                          <div>
+                            <div className="font-bold text-slate-800 text-xs">{name}</div>
+                            <div className="text-[11px] text-slate-400 font-medium">{person?.email || '@' + (person?.username || person.uid)}</div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {hasPermission(userRole, 'team', 'update', false, currentUserProfile?.permissions) ? (
-                        <StyledDropdown
-                          value={selectedProject?.memberRoles?.[person.uid] || 'viewer'}
-                          onChange={(val: any) => updateProjectRole(person.uid, val)}
-                          options={[
-                            { id: 'admin', label: 'Admin' },
-                            { id: 'system analyst', label: 'System Analyst' },
-                            { id: 'arsitektur', label: 'Architecture' },
-                            { id: 'dba', label: 'DBA' },
-                            { id: 'ui/ux', label: 'UI/UX' },
-                            { id: 'developer', label: 'Developer' },
-                            { id: 'qa', label: 'QA' },
-                            { id: 'bisnis analyst', label: 'Business Analyst' },
-                            { id: 'member', label: 'Member' },
-                            { id: 'viewer', label: 'Viewer' },
-                            ...(masterData || []).filter((d: any) => d.type === 'project_role' && (d.roleType === 'PROJECT' || d.role_type === 'PROJECT' || (!d.roleType && !d.role_type))).map((d: any) => ({ id: d.label.toLowerCase(), label: d.label, color: d.color, icon: d.icon }))
-                          ]}
-                          type="role"
-                          masterData={masterData}
-                          disabled={person.isPending}
-                        />
-                      ) : (
-                        <span className="text-sm text-slate-600 font-medium capitalize">
-                          {selectedProject?.memberRoles?.[person.uid] || 'viewer'}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="inline-flex px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100 capitalize">
+                          {isOwner ? 'Project Owner' : roleName}
                         </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${
-                         person.isPending ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                       }`}>
-                         <div className={`w-1.5 h-1.5 rounded-full ${person.isPending ? 'bg-amber-500' : 'bg-emerald-500'} ${person.isPending ? 'animate-pulse' : ''}`} />
-                         {person.isPending ? 'Pending' : 'Active'}
-                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 text-slate-400">
-                        {person.isPending && hasPermission(userRole, 'team', 'update', false, currentUserProfile?.permissions) && (
-                          <button 
-                            onClick={() => setInviteToCancel(person)}
-                            className="p-2.5 text-slate-400 hover:text-rose-500 hover:bg-white rounded-xl transition-all hover:shadow-md active:scale-95 cursor-pointer"
-                            title="Cancel Invite"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                        {!isOwner ? (
-                          hasPermission(userRole, 'team', 'delete', false, currentUserProfile?.permissions) && (
-                            <button 
-                              onClick={() => setMemberToDelete(person)}
-                              className="p-2 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer font-bold flex items-center justify-center"
-                              title="Hapus Anggota"
-                            >
-                              <Trash2 className="w-4 h-4 shrink-0" />
-                            </button>
-                          )
-                        ) : (
-                          <span className="text-[10px] bg-slate-100 text-slate-500 px-2.5 py-1 rounded-xl font-bold uppercase tracking-wider">
-                            Owner
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-            })}
-          </tbody>
-        </table>
-        {allPeople.length === 0 && (
-          <div className="p-12 text-center text-gray-400 italic font-medium">
-            No members found. Invite people to collaborate.
+                      </td>
+                      <td className="px-5 py-3.5 text-center font-bold text-slate-800 text-xs">
+                        {userAssignedTasks.length}
+                      </td>
+                      <td className="px-5 py-3.5 text-center font-bold text-emerald-600 text-xs">
+                        {completedTasks.length}
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                          person.isPending ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        }`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${person.isPending ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                          {person.isPending ? 'Pending' : 'Active'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <button
+                          onClick={() => setSelectedProfileUser(person)}
+                          className="px-3 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 text-xs font-semibold rounded-md transition-colors border border-slate-200/70 shadow-2xs cursor-pointer"
+                        >
+                          View Profile
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {filteredPeople.length === 0 && (
+        <div className="bg-white rounded-lg border border-slate-200/80 p-12 text-center text-slate-400 text-xs font-medium">
+          Tidak ada anggota tim yang cocok dengan kriteria pencarian.
+        </div>
+      )}
+
+      {/* View Profile Modal (View-Only) */}
+      {selectedProfileUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden text-left">
+            {/* Modal Cover */}
+            <div className="h-24 bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-900 p-4 flex justify-end">
+              <button 
+                onClick={() => setSelectedProfileUser(null)}
+                className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Profile Detail Content */}
+            <div className="p-6 pt-0 relative">
+              <div className="-mt-12 mb-4 flex items-end justify-between">
+                {selectedProfileUser.photoURL ? (
+                  <img 
+                    src={selectedProfileUser.photoURL} 
+                    alt="avatar" 
+                    className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-white object-cover" 
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-indigo-600 text-white flex items-center justify-center font-bold text-xl">
+                    {(selectedProfileUser.displayName || '?').charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200">
+                  Joined Project
+                </span>
+              </div>
+
+              <h2 className="text-base font-bold text-slate-800">{selectedProfileUser.displayName || 'Anggota Tim'}</h2>
+              <p className="text-xs text-slate-500 font-medium">{selectedProfileUser.email || '@' + selectedProfileUser.uid}</p>
+              
+              <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200/80 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Project Role</span>
+                  <span className="font-bold text-slate-700 capitalize">
+                    {selectedProject?.memberRoles?.[selectedProfileUser.uid] || selectedProfileUser.role || 'Member'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-medium">Assigned Tasks</span>
+                  <span className="font-bold text-slate-700">
+                    {tasks.filter(t => t.assigneeId === selectedProfileUser.uid).length} Tasks
+                  </span>
+                </div>
+              </div>
+
+              {/* Task list preview */}
+              <div className="mt-4">
+                <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Tugas yang Ditugaskan</h4>
+                <div className="max-h-40 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
+                  {tasks.filter(t => t.assigneeId === selectedProfileUser.uid).map(t => (
+                    <div key={t.id} className="p-2 bg-white rounded border border-slate-200/80 text-xs flex items-center justify-between">
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="font-mono text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1 rounded">{t.key}</span>
+                        <span className="truncate text-slate-700 font-medium">{t.title}</span>
+                      </div>
+                      <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded shrink-0">{t.status}</span>
+                    </div>
+                  ))}
+                  {tasks.filter(t => t.assigneeId === selectedProfileUser.uid).length === 0 && (
+                    <p className="text-xs text-slate-400 italic">Belum ada tugas yang ditugaskan ke anggota ini.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setSelectedProfileUser(null)}
+                  className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-md transition-colors border border-slate-200 cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -38,7 +38,7 @@ const Button = ({ children, onClick, variant = 'primary', className = '', disabl
   let sizeStyle = "";
   if (size === 'sm') sizeStyle = "px-3 py-1.5 text-xs rounded-lg";
   if (size === 'md') sizeStyle = "px-4 py-2 text-sm rounded-xl";
-  if (size === 'lg') sizeStyle = "px-6 py-3 text-base rounded-2xl";
+  if (size === 'lg') sizeStyle = "px-6 py-3 text-base rounded-xl";
 
   return (
     <button onClick={onClick} disabled={disabled} className={`${baseStyle} ${variantStyle} ${sizeStyle} ${className}`}>
@@ -374,20 +374,20 @@ export const MasterDataPanel = ({
   };
 
   return (
-    <div className="flex-1 overflow-hidden bg-slate-50 flex flex-col w-full h-full animate-in fade-in duration-700">
-        <div className="flex flex-1 gap-6 w-full h-full p-4 md:p-6">
+    <div className="flex-1 overflow-hidden bg-[#f3f3f9] flex flex-col w-full h-full animate-in fade-in duration-300 text-left">
+        <div className="flex flex-1 gap-4 w-full h-full p-4 md:p-5">
           {/* Sidebar for Master Data Types */}
-          <div className="w-[300px] shrink-0 flex flex-col h-full bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-sm">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="w-[260px] shrink-0 flex flex-col h-full bg-white border border-slate-200/80 rounded-lg overflow-hidden shadow-2xs">
+            <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
-                    <h3 className="font-black text-slate-800 text-sm tracking-tight">Master Database</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">System configuration</p>
+                    <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Master Database</h3>
+                    <p className="text-[10px] font-medium text-slate-400 mt-0.5">System configuration</p>
                 </div>
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                    <Settings className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-md bg-indigo-50 flex items-center justify-center text-indigo-600">
+                    <Settings className="w-3.5 h-3.5" />
                 </div>
             </div>
-            <div className="flex-1 py-2 flex flex-col gap-1 px-3 overflow-y-auto relative custom-scrollbar">
+            <div className="flex-1 py-2 flex flex-col gap-1 px-2.5 overflow-y-auto relative custom-scrollbar">
               {masterDataTypes.map(t => {
                 const count = t.type === 'modul_aplikasi' ? projectModules.length : masterData.filter(d => d.type === t.type).length;
                 const isActive = selectedType === t.type;
@@ -396,26 +396,19 @@ export const MasterDataPanel = ({
                     key={t.type} 
                     onClick={() => setSelectedType(t.type)}
                     className={cn(
-                      "w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between group relative z-10",
+                      "w-full text-left px-3 py-2 rounded-md text-xs transition-all flex items-center justify-between group relative cursor-pointer select-none",
                       isActive 
-                        ? "text-white shadow-lg shadow-indigo-600/25" 
-                        : "text-slate-600 hover:bg-slate-100/70 hover:text-slate-900"
+                        ? "bg-indigo-50/90 text-indigo-700 font-bold border-l-3 border-l-indigo-600 shadow-2xs" 
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-semibold"
                     )}
                   >
-                    {isActive && (
-                      <motion.div 
-                        layoutId="activeMasterTab"
-                        className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-xl shadow-md -z-10"
-                        transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
-                      />
-                    )}
-                    <span className="relative z-10 flex items-center gap-2 truncate">
-                      <span className={cn("w-2 h-2 rounded-full", isActive ? "bg-white animate-pulse" : "bg-slate-300 group-hover:bg-indigo-400")} />
+                    <span className="flex items-center gap-2 truncate">
+                      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isActive ? "bg-indigo-600" : "bg-slate-300 group-hover:bg-indigo-400")} />
                       {t.label}
                     </span>
                     <span className={cn(
-                        "relative z-10 text-[10px] font-black px-2 py-0.5 rounded-full transition-all shadow-sm", 
-                        isActive ? "bg-white/20 text-white backdrop-blur-sm" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
+                        "text-[10px] font-semibold px-2 py-0.5 rounded-md transition-all shrink-0", 
+                        isActive ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
                     )}>
                       {count}
                     </span>
@@ -428,21 +421,21 @@ export const MasterDataPanel = ({
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="bg-white p-6 md:p-8 rounded-xl border border-slate-200/80 mb-6 flex justify-between items-center shadow-sm shrink-0">
+            <div className="bg-white p-4 md:p-5 rounded-lg border border-slate-200/80 mb-4 flex justify-between items-center shadow-2xs shrink-0">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">System Master</span>
-                      <span className="text-xs text-slate-400 font-semibold">• Enterprise Control Center</span>
+                      <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100/60">System Master</span>
+                      <span className="text-xs text-slate-400 font-medium">• Enterprise Control Center</span>
                     </div>
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">{masterDataTypes.find(t => t.type === selectedType)?.label}</h2>
-                    <p className="text-slate-500 text-xs font-semibold mt-1">
+                    <h2 className="text-base font-bold text-slate-800 tracking-tight">{masterDataTypes.find(t => t.type === selectedType)?.label}</h2>
+                    <p className="text-slate-500 text-xs font-medium mt-0.5">
                       {selectedType === 'modul_aplikasi' 
                         ? "Kelola master data modul / aplikasi yang dipetakan ke project aktif enterprise." 
                         : `Kelola konfigurasi standar untuk ${masterDataTypes.find(t => t.type === selectedType)?.label.toLowerCase()} dengan penguncian integritas data.`}
                     </p>
                 </div>
                 {hasPermission(userRole as AppRole, 'configuration', 'update', false, currentUserProfile?.permissions) && (
-                <Button 
+                <button 
                     onClick={() => {
                       if (selectedType === 'modul_aplikasi') {
                         setNewModuleProjectId(projects?.[0]?.id || '');
@@ -457,49 +450,49 @@ export const MasterDataPanel = ({
                         setIsNewMasterModalOpen(true);
                       }
                     }}
-                    className="bg-indigo-600 hover:bg-indigo-700 font-bold text-white px-5 py-3 rounded-2xl text-xs shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
+                    className="h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
-                    <Plus className="w-4 h-4" /> Add {masterDataTypes.find(t => t.type === selectedType)?.label}
-                </Button>
+                    <Plus className="w-3.5 h-3.5" /> Add {masterDataTypes.find(t => t.type === selectedType)?.label}
+                </button>
                 )}
             </div>
             
             {selectedType === 'modul_aplikasi' ? (
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 flex-1 overflow-y-auto">
+                <div className="bg-white rounded-lg border border-slate-200/80 shadow-2xs p-4 flex-1 overflow-y-auto custom-scrollbar">
                     {loadingModules ? (
                         <div className="flex justify-center items-center h-48">
-                            <span className="text-sm font-semibold text-slate-500 animate-pulse">Memuat modul aplikasi...</span>
+                            <span className="text-xs font-semibold text-slate-500 animate-pulse">Memuat modul aplikasi...</span>
                         </div>
                     ) : projectModules.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                            <Layers className="w-14 h-14 mb-3 text-slate-300 animate-pulse" />
-                            <p className="text-sm font-bold text-slate-700">Belum ada modul / aplikasi</p>
+                            <Layers className="w-12 h-12 mb-3 text-slate-300 animate-pulse" />
+                            <p className="text-xs font-bold text-slate-700">Belum ada modul / aplikasi</p>
                             <p className="text-xs mt-1 text-slate-400">Klik tombol 'Add Modul / Aplikasi' di atas untuk membuat modul master pertama.</p>
                         </div>
                     ) : (
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                             {projectModules.map((mod: any) => {
                                 const p = projects?.find(proj => proj.id === mod.projectId);
                                 return (
-                                    <div key={mod.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-slate-200 transition-all group">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 font-bold text-xs">
+                                    <div key={mod.id} className="flex items-center justify-between p-3 bg-white border border-slate-200/80 rounded-lg shadow-2xs hover:border-indigo-300 transition-all group">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 font-bold text-xs">
                                                 MOD
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-sm font-black text-slate-900">{mod.namaModul}</span>
-                                                    <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">
+                                                    <span className="text-xs font-bold text-slate-800">{mod.namaModul}</span>
+                                                    <span className="text-[10px] bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded-md border border-indigo-100">
                                                         {p ? p.name : mod.projectId}
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                                                <p className="text-[11px] text-slate-400 font-medium mt-0.5">
                                                     {mod.keterangan || <span className="text-slate-300 italic">Tidak ada keterangan</span>}
                                                 </p>
                                             </div>
                                         </div>
                                         {hasPermission(userRole as AppRole, 'configuration', 'update', false, currentUserProfile?.permissions) && (
-                                            <div className="flex gap-2 items-center">
+                                            <div className="flex gap-1.5 items-center">
                                                 <button 
                                                     onClick={() => {
                                                         setEditingModuleId(mod.id);
@@ -508,10 +501,10 @@ export const MasterDataPanel = ({
                                                         setEditingModuleKeterangan(mod.keterangan || '');
                                                         setIsEditModuleModalOpen(true);
                                                     }}
-                                                    className="p-2 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-200/80 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer font-bold flex items-center justify-center"
+                                                    className="w-7 h-7 bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200/60 rounded-md transition-all cursor-pointer font-semibold flex items-center justify-center"
                                                     title="Edit Modul"
                                                 >
-                                                    <Edit className="w-4 h-4 shrink-0" />
+                                                    <Edit className="w-3.5 h-3.5 shrink-0" />
                                                 </button>
                                                 <button 
                                                     onClick={() => {
@@ -521,10 +514,10 @@ export const MasterDataPanel = ({
                                                             label: `${mod.namaModul} (Modul)` 
                                                         });
                                                     }}
-                                                    className="p-2 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer font-bold flex items-center justify-center"
+                                                    className="w-7 h-7 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-md transition-all cursor-pointer font-semibold flex items-center justify-center"
                                                     title="Hapus Modul"
                                                 >
-                                                    <Trash2 className="w-4 h-4 shrink-0" />
+                                                    <Trash2 className="w-3.5 h-3.5 shrink-0" />
                                                 </button>
                                             </div>
                                         )}
@@ -538,22 +531,22 @@ export const MasterDataPanel = ({
                 <div className="flex-1 flex flex-col min-h-0">
                     {/* TOP SEGMENTED CONTROL / TAB FILTER */}
                     {selectedType === 'project_role' && (
-                        <div className="bg-white p-4 rounded-3xl border border-slate-200/80 mb-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="bg-white p-3 rounded-lg border border-slate-200/80 mb-3 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
                             <div>
-                                <span className="text-xs font-black text-slate-400 uppercase tracking-widest block">Scope Filter</span>
-                                <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">Filter berdasarkan jenis jangkauan peran</span>
+                                <span className="text-xs font-bold text-slate-700 block">Scope Filter</span>
+                                <span className="text-[10px] text-slate-400 font-medium block">Filter berdasarkan jenis jangkauan peran</span>
                             </div>
-                            <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 shrink-0 self-start sm:self-auto overflow-x-auto max-w-full">
+                            <div className="flex bg-slate-100 p-0.5 rounded-md border border-slate-200/80 shrink-0 self-start sm:self-auto overflow-x-auto max-w-full">
                                 <button
                                     type="button"
                                     onClick={() => setRoleTabFilter('ALL')}
                                     className={cn(
-                                        "py-2 px-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap",
-                                        roleTabFilter === 'ALL' ? "bg-white text-indigo-600 shadow-sm border border-slate-200/60" : "text-slate-600 hover:text-slate-950"
+                                        "px-2.5 py-1 text-xs font-semibold rounded transition-all flex items-center gap-1.5",
+                                        roleTabFilter === 'ALL' ? "bg-white text-slate-800 shadow-2xs font-bold" : "text-slate-500 hover:text-slate-800"
                                     )}
                                 >
-                                    <span>Semua Role</span>
-                                    <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", roleTabFilter === 'ALL' ? "bg-indigo-50 text-indigo-700" : "bg-slate-200/65 text-slate-600")}>
+                                    <span>All Roles</span>
+                                    <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", roleTabFilter === 'ALL' ? "bg-slate-100 text-slate-700" : "bg-slate-200/60 text-slate-600")}>
                                         {localMasterData.filter(d => d.type === 'project_role').length}
                                     </span>
                                 </button>
@@ -561,12 +554,12 @@ export const MasterDataPanel = ({
                                     type="button"
                                     onClick={() => setRoleTabFilter('PROJECT')}
                                     className={cn(
-                                        "py-2 px-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap",
-                                        roleTabFilter === 'PROJECT' ? "bg-white text-indigo-600 shadow-sm border border-slate-200/60" : "text-slate-600 hover:text-slate-950"
+                                        "px-2.5 py-1 text-xs font-semibold rounded transition-all flex items-center gap-1.5",
+                                        roleTabFilter === 'PROJECT' ? "bg-white text-blue-700 shadow-2xs font-bold" : "text-slate-500 hover:text-slate-800"
                                     )}
                                 >
                                     <span>Project Roles</span>
-                                    <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", roleTabFilter === 'PROJECT' ? "bg-blue-50 text-blue-700" : "bg-slate-200/65 text-slate-600")}>
+                                    <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", roleTabFilter === 'PROJECT' ? "bg-blue-50 text-blue-700" : "bg-slate-200/60 text-slate-600")}>
                                         {localMasterData.filter(d => d.type === 'project_role' && (d.roleType === 'PROJECT' || d.role_type === 'PROJECT' || (!d.roleType && !d.role_type))).length}
                                     </span>
                                 </button>
@@ -574,12 +567,12 @@ export const MasterDataPanel = ({
                                     type="button"
                                     onClick={() => setRoleTabFilter('SYSTEM')}
                                     className={cn(
-                                        "py-2 px-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap",
-                                        roleTabFilter === 'SYSTEM' ? "bg-white text-indigo-600 shadow-sm border border-slate-200/60" : "text-slate-600 hover:text-slate-950"
+                                        "px-2.5 py-1 text-xs font-semibold rounded transition-all flex items-center gap-1.5",
+                                        roleTabFilter === 'SYSTEM' ? "bg-white text-purple-700 shadow-2xs font-bold" : "text-slate-500 hover:text-slate-800"
                                     )}
                                 >
                                     <span>System Roles</span>
-                                    <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", roleTabFilter === 'SYSTEM' ? "bg-purple-50 text-purple-700" : "bg-slate-200/65 text-slate-600")}>
+                                    <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", roleTabFilter === 'SYSTEM' ? "bg-purple-50 text-purple-700" : "bg-slate-200/60 text-slate-600")}>
                                         {localMasterData.filter(d => d.type === 'project_role' && (d.roleType === 'SYSTEM' || d.role_type === 'SYSTEM')).length}
                                     </span>
                                 </button>
@@ -587,7 +580,7 @@ export const MasterDataPanel = ({
                         </div>
                     )}
 
-                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="bg-white rounded-lg border border-slate-200/80 shadow-2xs p-3.5 flex-1 overflow-y-auto custom-scrollbar">
                     <DragDropContext 
                         onDragEnd={async (result) => {
                             if (!result.destination) return;
@@ -637,7 +630,7 @@ export const MasterDataPanel = ({
                             <div 
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
-                                className={cn("space-y-2.5 min-h-[400px] transition-colors p-2", snapshot.isDraggingOver ? 'bg-indigo-50/20 rounded-2xl' : '')}
+                                className={cn("space-y-2 min-h-[300px] transition-colors p-1", snapshot.isDraggingOver ? 'bg-indigo-50/20 rounded-lg' : '')}
                             >
                                 {localMasterData
                                 .filter(d => {
@@ -663,38 +656,38 @@ export const MasterDataPanel = ({
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
                                             className={cn(
-                                                "flex justify-between items-center p-4 bg-white border border-slate-200/70 rounded-2xl transition-all group hover:border-indigo-200 hover:shadow-md",
-                                                snapshot.isDragging ? 'shadow-2xl border-indigo-500 bg-indigo-50/50 cursor-grabbing z-50' : ''
+                                                "flex justify-between items-center p-3 bg-white border border-slate-200/80 rounded-lg transition-all group hover:border-indigo-300 shadow-2xs",
+                                                snapshot.isDragging ? 'shadow-lg border-indigo-500 bg-indigo-50/50 cursor-grabbing z-50' : ''
                                             )}
                                             >
-                                                <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-3">
                                                     <div className="text-slate-300 group-hover:text-slate-500 transition-colors cursor-grab active:cursor-grabbing p-1">
-                                                        <GripVertical className="w-5 h-5" />
+                                                        <GripVertical className="w-4 h-4" />
                                                     </div>
                                                     
                                                     {item.icon ? (
-                                                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border border-slate-100 shadow-sm" style={{ backgroundColor: (item.color || '#3b82f6') + '15', color: item.color || '#3b82f6' }}>
-                                                            <RenderIcon iconName={item.icon} className="w-5 h-5" />
+                                                        <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 border border-slate-100 shadow-2xs" style={{ backgroundColor: (item.color || '#3b82f6') + '15', color: item.color || '#3b82f6' }}>
+                                                            <RenderIcon iconName={item.icon} className="w-4 h-4" />
                                                         </div>
                                                     ) : (
-                                                        <div className="w-5 h-5 rounded-full shrink-0 shadow-inner border border-black/10" style={{ backgroundColor: item.color || '#ccc' }} />
+                                                        <div className="w-4 h-4 rounded-full shrink-0 shadow-2xs border border-black/10" style={{ backgroundColor: item.color || '#ccc' }} />
                                                     )}
 
                                                     <div className="flex flex-col">
-                                                        <div className="flex items-center gap-2.5 flex-wrap">
-                                                            <span className="text-sm font-bold text-slate-900">{item.label}</span>
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="text-xs font-bold text-slate-800">{item.label}</span>
                                                             
                                                             {selectedType === 'project_role' && (() => {
                                                                 const rType = item.roleType || item.role_type || 'PROJECT';
                                                                 const isSystemReserved = item.is_system_default || ['admin', 'member', 'viewer', 'developer', 'ui/ux', 'qa', 'dba', 'arsitektur', 'system analyst', 'bisnis analyst'].some(def => (item.label || '').toLowerCase().includes(def));
                                                                 return (
-                                                                    <div className="flex items-center gap-1.5 shrink-0 select-none">
+                                                                    <div className="flex items-center gap-1 shrink-0 select-none">
                                                                         {rType === 'PROJECT' ? (
-                                                                            <span className="text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/50 uppercase">
+                                                                            <span className="text-[9px] font-semibold px-2 py-0.2 rounded-md bg-blue-50 text-blue-700 border border-blue-200/50 uppercase">
                                                                                 PROJECT ROLE
                                                                             </span>
                                                                         ) : (
-                                                                            <span className="text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200/50 uppercase">
+                                                                            <span className="text-[9px] font-semibold px-2 py-0.2 rounded-md bg-purple-50 text-purple-700 border border-purple-200/50 uppercase">
                                                                                 SYSTEM ROLE
                                                                             </span>
                                                                         )}
@@ -706,36 +699,36 @@ export const MasterDataPanel = ({
                                                             })()}
 
                                                             {usageCount > 0 && (
-                                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center gap-1">
+                                                                <span className="text-[10px] font-semibold px-2 py-0.2 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center gap-1">
                                                                     <Tag className="w-3 h-3" /> {usageCount} Task aktif
                                                                 </span>
                                                             )}
                                                         </div>
                                                         {item.description && (
-                                                            <span className="text-xs text-slate-400 font-semibold mt-0.5">{item.description}</span>
+                                                            <span className="text-[11px] text-slate-400 font-medium mt-0.5">{item.description}</span>
                                                         )}
                                                     </div>
                                                 </div>
                                                 
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-2">
                                                     {hasPermission(userRole as AppRole, 'configuration', 'update', false, currentUserProfile?.permissions) && (
-                                                        <div className="flex gap-2 items-center">
+                                                        <div className="flex gap-1.5 items-center">
                                                             <button 
                                                                 onClick={() => {
                                                                     setEditingMaster(item);
                                                                     setIsEditMasterModalOpen(true);
                                                                 }}
-                                                                className="p-2 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-200/80 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer font-bold flex items-center justify-center"
+                                                                className="w-7 h-7 bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200/60 rounded-md transition-all cursor-pointer font-semibold flex items-center justify-center"
                                                                 title="Edit Master Data"
                                                             >
-                                                                <Edit className="w-4 h-4 shrink-0" />
+                                                                <Edit className="w-3.5 h-3.5 shrink-0" />
                                                             </button>
                                                             <button 
                                                                 onClick={() => setDeleteConfirmState({ isOpen: true, id: item.id, label: item.label })}
-                                                                className="p-2 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer font-bold flex items-center justify-center"
+                                                                className="w-7 h-7 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-md transition-all cursor-pointer font-semibold flex items-center justify-center"
                                                                 title="Hapus Master Data"
                                                             >
-                                                                <Trash2 className="w-4 h-4 shrink-0" />
+                                                                <Trash2 className="w-3.5 h-3.5 shrink-0" />
                                                             </button>
                                                         </div>
                                                     )}
@@ -765,7 +758,7 @@ export const MasterDataPanel = ({
         >
         <div className="space-y-6">
           {/* Live Preview Badge Component */}
-          <div className="p-4 bg-slate-900 text-white rounded-2xl flex items-center justify-between shadow-lg border border-slate-800">
+          <div className="p-4 bg-slate-900 text-white rounded-xl flex items-center justify-between shadow-lg border border-slate-800">
             <div className="flex items-center gap-3.5">
               <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-white/10 shadow-inner" style={{ color: newMasterColor }}>
                 <RenderIcon iconName={newMasterIcon} className="w-6 h-6" />
@@ -784,7 +777,7 @@ export const MasterDataPanel = ({
           {selectedType === 'project_role' && (
             <div className="space-y-2">
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">TIPE ROLE / SCOPE</label>
-              <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+              <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-xl border border-slate-200">
                 <button
                   type="button"
                   onClick={() => setNewMasterRoleType('PROJECT')}
@@ -1002,7 +995,7 @@ export const MasterDataPanel = ({
             {editingMaster && (
             <div className="space-y-6">
               {/* Live Preview Badge */}
-              <div className="p-4 bg-slate-900 text-white rounded-2xl flex items-center justify-between shadow-lg border border-slate-800">
+              <div className="p-4 bg-slate-900 text-white rounded-xl flex items-center justify-between shadow-lg border border-slate-800">
                 <div className="flex items-center gap-3.5">
                   <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-white/10 shadow-inner" style={{ color: editingMaster.color || '#3b82f6' }}>
                     <RenderIcon iconName={editingMaster.icon || 'CircleDot'} className="w-6 h-6" />

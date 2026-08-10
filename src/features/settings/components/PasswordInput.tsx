@@ -12,15 +12,15 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({ label, value, onCh
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="space-y-1">
-      <label className="text-sm font-medium text-slate-700">{label}</label>
+    <div className="space-y-0.5">
+      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</label>
       <div className="relative">
         <input
           type={showPassword ? 'text' : 'password'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-3 pr-10 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
+          className="w-full pl-3 pr-10 py-1.5 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
         />
         <button
           type="button"

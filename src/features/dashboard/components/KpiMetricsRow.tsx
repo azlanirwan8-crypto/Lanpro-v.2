@@ -19,7 +19,7 @@ export const KpiMetricsRow: React.FC<KpiMetricsRowProps> = ({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 w-full h-full select-none">
       {/* Card 1: Total Completion */}
-      <div className="bg-white dark:bg-slate-900 p-5 rounded-[1.5rem] border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
         <div className="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-950/40 text-violet-500 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
           <CheckCircle2 className="w-5 h-5" />
         </div>
@@ -31,7 +31,7 @@ export const KpiMetricsRow: React.FC<KpiMetricsRowProps> = ({
       </div>
 
       {/* Card 2: In Progress */}
-      <div className="bg-white dark:bg-slate-900 p-5 rounded-[1.5rem] border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
         <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-500 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
           <Activity className="w-5 h-5 animate-pulse" />
         </div>
@@ -43,7 +43,7 @@ export const KpiMetricsRow: React.FC<KpiMetricsRowProps> = ({
       </div>
 
       {/* Card 3: Overdue Alerts */}
-      <div className="bg-white dark:bg-slate-900 p-5 rounded-[1.5rem] border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
         <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
           <AlertCircle className="w-5 h-5" />
         </div>
@@ -55,7 +55,7 @@ export const KpiMetricsRow: React.FC<KpiMetricsRowProps> = ({
       </div>
 
       {/* Card 4: Weekly Velocity */}
-      <div className="bg-white dark:bg-slate-900 p-5 rounded-[1.5rem] border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
         <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
           <Zap className="w-5 h-5 text-amber-500" />
         </div>
@@ -69,7 +69,7 @@ export const KpiMetricsRow: React.FC<KpiMetricsRowProps> = ({
       </div>
 
       {/* Card 5: Team Size */}
-      <div className="bg-white dark:bg-slate-900 p-5 rounded-[1.5rem] border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200/60 dark:border-slate-800 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-sm group">
         <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
           <Users className="w-5 h-5" />
         </div>

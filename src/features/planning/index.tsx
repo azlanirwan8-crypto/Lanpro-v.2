@@ -55,83 +55,77 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                 useAppStore.getState().setCurrentView('issueDetail' as any); 
               }}
               className={cn(
-                "transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] select-none",
+                "transition-all duration-200 ease-out select-none",
                 variant === 'card' ? 
-                  "group bg-white p-3.5 rounded-xl border border-slate-200 border-l-[3px] shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:bg-slate-50/80 hover:border-indigo-300" : 
-                  "group bg-white flex items-center justify-between p-3 rounded-xl border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50/80 hover:border-indigo-200",
-                task.isBlocked && "ring-2 ring-red-500/50 bg-red-50/5",
-                task.priority === 'Highest' && variant === 'card' && "border-l-red-500",
-                task.priority === 'High' && variant === 'card' && "border-l-orange-500",
-                task.priority === 'Medium' && variant === 'card' && "border-l-yellow-500",
-                task.priority === 'Low' && variant === 'card' && "border-l-green-500",
-                snapshot.isDragging && "shadow-2xl ring-4 ring-indigo-500/20 scale-105 rotate-2 z-50 bg-white border-indigo-400"
+                  "group bg-white p-3 rounded-lg border border-slate-200/80 shadow-2xs cursor-pointer hover:border-indigo-300 hover:shadow-xs" : 
+                  "group bg-white flex items-center justify-between p-2.5 px-3 rounded-lg border border-slate-200/80 shadow-2xs cursor-pointer hover:bg-slate-50/70 hover:border-indigo-300",
+                task.isBlocked && "ring-1 ring-red-500/50 bg-red-50/10 border-red-200",
+                snapshot.isDragging && "shadow-xl ring-2 ring-indigo-500/20 scale-[1.02] z-50 bg-white border-indigo-400"
               )}
             >
               {variant === 'card' ? (
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-start">
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center">
                     <div className="flex gap-2 items-center">
-                      <span className="text-[10px] font-bold text-indigo-500">{task.key}</span>
-                      {task.priority && <span className={cn("text-[9px] font-black uppercase tracking-widest", 
-                        task.priority === 'Highest' ? 'text-red-500' : 
-                        task.priority === 'High' ? 'text-orange-500' : 
-                        task.priority === 'Medium' ? 'text-yellow-600' : 'text-green-500'
+                      <span className="text-[11px] font-mono font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-100/60">{task.key}</span>
+                      {task.priority && <span className={cn("text-[10px] font-semibold uppercase tracking-wider", 
+                        task.priority === 'Highest' ? 'text-red-600' : 
+                        task.priority === 'High' ? 'text-amber-600' : 
+                        task.priority === 'Medium' ? 'text-yellow-600' : 'text-slate-500'
                       )}>{task.priority}</span>}
                     </div>
                   </div>
-                  <h4 className="text-[11px] font-bold text-slate-800 leading-snug line-clamp-2">{task.title}</h4>
-                  <div className="flex items-center justify-between mt-1">
+                  <h4 className="text-xs font-semibold text-slate-800 leading-snug line-clamp-2">{task.title}</h4>
+                  <div className="flex items-center justify-between mt-1 pt-1 border-t border-slate-100">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
                         {task.assigneeId ? 
                           <UserAvatar uid={task.assigneeId} members={projectMembers} className="w-5 h-5" /> : 
-                          <span className="text-[9px] font-black text-slate-400">?</span>
+                          <span className="text-[10px] font-bold text-slate-400">?</span>
                         }
                       </div>
                       {task.dueDate && (
                         <div className={cn(
-                          "flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded",
+                          "flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.2 rounded",
                           ensureDate(task.dueDate) < new Date(new Date().setHours(0,0,0,0)) 
-                            ? "bg-red-50 text-red-500" 
+                            ? "bg-red-50 text-red-600 border border-red-100" 
                             : "bg-slate-50 text-slate-500"
                         )}>
                           <Clock className="w-3 h-3" />
-                          {format(ensureDate(task.dueDate), 'MMM d, yy')}
+                          {format(ensureDate(task.dueDate), 'MMM d')}
                         </div>
                       )}
                     </div>
-                    <button className="text-[9px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100">Move to...</button>
+                    <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100/60">
+                      {task.status}
+                    </span>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-4 w-full">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="text-orange-500 shrink-0">
-                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20V4M5 11l7-7 7 7"/></svg>
-                    </div>
-                    <span className="text-[11px] font-bold text-indigo-500 shrink-0">{task.key}</span>
-                    <h4 className="text-[12px] font-bold text-slate-800 truncate">{task.title}</h4>
+                <div className="flex items-center gap-3 w-full">
+                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                    <span className="text-[11px] font-mono font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-100/60 shrink-0">{task.key}</span>
+                    <h4 className="text-xs font-semibold text-slate-800 truncate">{task.title}</h4>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-2.5 shrink-0">
                     {task.dueDate && (
                       <div className={cn(
-                        "flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded border",
+                        "flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.2 rounded border",
                         ensureDate(task.dueDate) < new Date(new Date().setHours(0,0,0,0)) 
-                          ? "bg-red-50 text-red-500 border-red-100" 
-                          : "bg-slate-50 text-slate-500 border-slate-100"
+                          ? "bg-red-50 text-red-600 border-red-100" 
+                          : "bg-slate-50 text-slate-500 border-slate-200/60"
                       )}>
                         <Clock className="w-3 h-3" />
-                        {format(ensureDate(task.dueDate), 'MMM d, yyyy')}
+                        {format(ensureDate(task.dueDate), 'MMM d')}
                       </div>
                     )}
-                    <div className="px-2 py-1 bg-white border border-slate-200 rounded text-[10px] font-black text-slate-600 flex items-center gap-1 shadow-sm">
-                      <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
-                      {task.status.toUpperCase()}
-                    </div>
-                    <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center">
+                    <span className="px-2 py-0.5 bg-slate-50 border border-slate-200/70 rounded text-[10px] font-semibold text-slate-700">
+                      {task.status}
+                    </span>
+                    <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center">
                       {task.assigneeId ? 
-                        <UserAvatar uid={task.assigneeId} members={projectMembers} className="w-6 h-6" /> : 
-                        <span className="text-[10px] font-black text-slate-400">?</span>
+                        <UserAvatar uid={task.assigneeId} members={projectMembers} className="w-5 h-5" /> : 
+                        <span className="text-[10px] font-bold text-slate-400">?</span>
                       }
                     </div>
                   </div>
@@ -144,10 +138,10 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
   );
 
   return (
-    <div className="flex-1 overflow-hidden bg-[#f8fafc] flex flex-col pt-8 px-8 pb-0 h-screen">
+    <div className="flex-1 overflow-hidden bg-[#f3f3f9] flex flex-col p-4 md:p-5 h-screen text-left">
       <DragDropContext onDragEnd={handleDragEndPlanning}>
-        <div className="flex flex-1 gap-8 w-full h-full pb-8">
-          <div className="w-[450px] shrink-0 flex flex-col h-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="flex flex-1 gap-5 w-full h-full min-h-0">
+          <div className="w-[360px] lg:w-[380px] shrink-0 flex flex-col h-full bg-white border border-slate-200/80 rounded-lg overflow-hidden shadow-2xs">
             <Droppable droppableId="backlog">
               {(provided: any) => (
                   <div {...provided.droppableProps} ref={provided.innerRef} className="h-full flex flex-col">
@@ -157,19 +151,20 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
               )}
             </Droppable>
           </div>
-          <div className="flex-1 flex flex-col h-full overflow-hidden">
-            <div className="bg-white p-6 rounded-xl border border-slate-200 mb-6 flex justify-between items-center shadow-sm shrink-0">
+          <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+            <div className="bg-white px-5 py-3.5 rounded-lg border border-slate-200/80 mb-4 flex justify-between items-center shadow-2xs shrink-0">
               <div>
-                <h2 className="text-[22px] font-black text-slate-800 tracking-tight">Sprint Planning</h2>
-                <p className="text-[13px] font-bold text-slate-400 mt-1">Manage your project timeline and task allocation</p>
+                <h2 className="text-base font-bold text-slate-800 tracking-tight">Sprint Planning</h2>
+                <p className="text-xs font-medium text-slate-500 mt-0.5">Kelola lini masa proyek dan alokasi sprint tim</p>
               </div>
               {canEditPlanning && (
                 <div className="flex gap-2">
                   <button 
                     onClick={() => setIsNewSprintModalOpen(true)} 
-                    className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-black transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/25 active:scale-95 hover:bg-indigo-700 cursor-pointer"
+                    className="h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    NEW SPRINT
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>NEW SPRINT</span>
                   </button>
                 </div>
               )}

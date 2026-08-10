@@ -92,9 +92,9 @@ export const ConnectPanel = () => {
     <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden">        
         <div className="flex-1 overflow-auto p-6 lg:p-8 relative z-10 w-full">
            <div className="w-full mx-auto space-y-6">
-             <div className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-xl shadow-emerald-500/5 mb-8">
+             <div className="bg-white p-6 rounded-xl border border-emerald-100 shadow-xl shadow-emerald-500/5 mb-8">
                  <div className="flex items-start gap-4">
-                   <div className="bg-emerald-100 text-emerald-600 p-3 rounded-2xl mt-1 shrink-0">
+                   <div className="bg-emerald-100 text-emerald-600 p-3 rounded-xl mt-1 shrink-0">
                      <CheckCircle2 className="w-6 h-6" />
                    </div>
                    <div>
@@ -107,7 +107,7 @@ export const ConnectPanel = () => {
                  </div>
               </div>
 
-              <div className="bg-white shadow-xl shadow-slate-200/40 rounded-3xl border border-slate-200/60 overflow-hidden">
+              <div className="bg-white shadow-md shadow-slate-200/40 rounded-lg border border-slate-200/60 overflow-hidden">
                  <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                     <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                        <Database className="w-5 h-5 text-indigo-500" />

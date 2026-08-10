@@ -85,35 +85,52 @@ export const KanbanCard = React.memo<KanbanCardProps>(({ task, mArr, pArr, onCli
 
   return (
     <Component
-      {...(!isDragging ? { layout: true, transition: { type: "spring", stiffness: 300, damping: 30 }, whileHover: { y: -4, transition: { duration: 0.2 } }, whileTap: { scale: 0.98 } } : {})}
+      {...(!isDragging ? { layout: true, transition: { type: "spring", stiffness: 350, damping: 30 }, whileHover: { y: -2, transition: { duration: 0.15 } }, whileTap: { scale: 0.99 } } : {})}
       onClick={onClick}
       className={cn(
-        "bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-l-4 cursor-pointer group flex flex-col overflow-hidden",
-        "transition-all duration-200 ease-out",
+        "bg-white dark:bg-slate-800 rounded-lg shadow-2xs border cursor-pointer group flex flex-col overflow-hidden",
+        "transition-all duration-200 ease-out select-none border-l-4",
         isCompact 
-          ? "p-2 gap-1" 
-          : "p-3.5 gap-2.5",
+          ? "p-2 gap-1.5" 
+          : "p-3 gap-2",
         task.isBlocked 
-          ? "border-l-red-500 border-red-200 dark:border-red-900/50 bg-red-50/10 dark:bg-red-950/20 hover:border-red-400 hover:shadow-red-50" 
-          : "border-l-indigo-500 border-slate-200 dark:border-slate-700/80 hover:border-indigo-400/70 dark:hover:border-indigo-500 hover:shadow-indigo-50/50 dark:hover:shadow-indigo-950/20",
-        hasUnfinishedSubtasks && "border-red-300 dark:border-red-800 bg-red-50/20 dark:bg-red-950/30",
-        isDragging && "z-[9999] cursor-grabbing opacity-90 shadow-2xl ring-2 ring-indigo-400 !transition-none pointer-events-none",
+          ? "border-l-red-600 border-red-200 dark:border-red-900/50 bg-red-50/10 dark:bg-red-950/20 hover:border-red-400 shadow-rose-100/30" 
+          : (task.priority === 'Highest' || task.priority === 'High')
+          ? "border-l-red-500 border-slate-200/80 dark:border-slate-700/80 hover:border-red-300 dark:hover:border-red-500 hover:shadow-xs"
+          : task.priority === 'Medium'
+          ? "border-l-amber-500 border-slate-200/80 dark:border-slate-700/80 hover:border-amber-300 dark:hover:border-amber-500 hover:shadow-xs"
+          : "border-l-indigo-400 border-slate-200/80 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-xs",
+        hasUnfinishedSubtasks && "border-red-300 dark:border-red-800 bg-red-50/10 dark:bg-red-950/30",
+        isDragging && "z-[9999] cursor-grabbing opacity-90 shadow-xl ring-2 ring-indigo-400 !transition-none pointer-events-none",
         shakingTaskId === task.id && "animate-shake"
       )}
     >
-      {/* Top row: task key + more options */}
+      {/* Top row: task key + status badges */}
       <div className="flex items-center justify-between">
-         <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-400 group-hover:text-slate-500 dark:group-hover:text-slate-300 transition-colors flex-wrap">
+         <div className="flex items-center gap-1.5 transition-colors flex-wrap">
             {priorityInfo ? (
-               <RenderIcon iconName={priorityInfo.icon} className={cn("group-hover:scale-110 transition-transform duration-300", isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} style={{ color: priorityInfo.color }} />
+               <RenderIcon iconName={priorityInfo.icon} className={cn("transition-transform duration-200", isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} style={{ color: priorityInfo.color }} />
             ) : (
-               <RenderIcon iconName="CheckSquare" className={cn("group-hover:scale-110 transition-transform duration-300", isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
+               <RenderIcon iconName="CheckSquare" className={cn("transition-transform duration-200", isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
             )}
-            <span className={cn("font-mono font-bold uppercase tracking-tight text-slate-500 dark:text-slate-400", isCompact ? "text-[9px]" : "text-[10px]")}>
+            <span className="font-mono font-bold text-[11px] text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.2 rounded border border-indigo-100/60">
               {task.key}
             </span>
+            {task.priority && (
+              <span className={cn(
+                "font-extrabold uppercase rounded tracking-wider border",
+                isCompact ? "text-[8px] px-1 py-0.2" : "text-[9px] px-1.5 py-0.2",
+                (task.priority === 'Highest' || task.priority === 'High') 
+                  ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/60 dark:text-red-400 dark:border-red-800" 
+                  : task.priority === 'Medium' 
+                  ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800" 
+                  : "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
+              )}>
+                {task.priority}
+              </span>
+            )}
             {task.isBlocked && (
-              <span className={cn("font-black uppercase text-red-500 dark:text-red-400 bg-red-100/80 dark:bg-red-950/80 rounded tracking-widest animate-pulse", isCompact ? "text-[8px] px-1 py-0.5" : "text-[9px] px-1.5 py-0.5")}>Blocked</span>
+              <span className={cn("font-black uppercase text-red-600 dark:text-red-400 bg-red-100/90 dark:bg-red-950/90 rounded tracking-widest animate-pulse border border-red-200", isCompact ? "text-[8px] px-1 py-0.5" : "text-[9px] px-1.5 py-0.5")}>Blocked</span>
             )}
             {hasUnfinishedSubtasks && (
               <div 

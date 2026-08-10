@@ -20,7 +20,7 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
   COLORS,
 }) => {
   return (
-    <div className="w-full h-full bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between overflow-y-auto no-scrollbar select-none">
+    <div className="w-full h-full bg-white p-6 rounded-xl border border-slate-200/80 shadow-sm flex flex-col justify-between overflow-y-auto no-scrollbar select-none">
       <div className="space-y-6">
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div>

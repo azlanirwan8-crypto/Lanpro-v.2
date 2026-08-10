@@ -45,7 +45,10 @@ import { TERMINAL_STATUSES } from "./src/lib/constants";
 // ... (existing code)
 
 
-// API routes
+import healthRoutes from "./server/routes/health.routes";
+import systemRoutes from "./server/routes/system.routes";
+import auditRoutes from "./server/routes/audit.routes";
+import authRoutes from "./server/routes/auth.routes";
 
 
 // Active sessions for concurrent control
@@ -172,7 +175,7 @@ import { initWhatsAppScheduler, sendDailyTaskDigest } from "./src/lib/whatsappSe
 export const app = express();
 
 async function startServer() {
-  const PORT = Number(process.env.PORT) || 3001;
+  const PORT = Number(process.env.PORT) || 3002;
 
   // ============================================
   // SECURE PASSWORD HASHING UTILITIES (v1.5 Security Audit)
@@ -893,7 +896,10 @@ async function startServer() {
     next();
   });
 
-  // --- CORE API ROUTES (Audit & Health) ---
+  // --- MODULAR ROUTE MOUNTS ---
+  app.use(healthRoutes);
+  app.use(systemRoutes);
+  app.use(auditRoutes);
   
   // ==========================================
 // WILAYAH III: Core API Engine (Seluruh rute API dengan prefix /api/ disatukan di sini)

@@ -55,7 +55,7 @@ export const SprintBanner: React.FC<SprintBannerProps> = ({
       </div>
 
       {/* Progress Radial Gauge */}
-      <div className="relative z-10 shrink-0 self-center md:self-auto flex items-center justify-center p-1 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-lg w-28 h-28">
+      <div className="relative z-10 shrink-0 self-center md:self-auto flex items-center justify-center p-1 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-lg w-28 h-28">
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-black text-white">{sprintProgress}%</span>
           <span className="text-[7px] font-extrabold tracking-widest text-indigo-200 uppercase leading-none mt-0.5">

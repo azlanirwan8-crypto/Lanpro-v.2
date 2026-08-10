@@ -159,7 +159,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
             exit={{ opacity: 0, y: 15, scale: 0.92 }}
             transition={{ type: "spring", stiffness: 350, damping: 25 }}
             className={cn(
-              "p-2 rounded-2xl border mb-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 relative overflow-hidden",
+              "p-2 rounded-xl border mb-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 relative overflow-hidden",
               isMiro 
                 ? "bg-white/80 border-slate-200/40 backdrop-blur-md text-slate-800" 
                 : "bg-slate-950/80 border-slate-880/60 backdrop-blur-md text-slate-100"

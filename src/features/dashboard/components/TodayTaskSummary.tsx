@@ -14,7 +14,7 @@ interface TodayTaskSummaryProps {
 
 export const TodayTaskSummary: React.FC<TodayTaskSummaryProps> = ({ statusData }) => {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-100/80 shadow-sm flex flex-col h-full">
+    <div className="bg-white rounded-xl p-5 border border-slate-100/80 shadow-sm flex flex-col h-full">
       <h3 className="text-sm font-bold text-slate-800 mb-4">Today's Task Summary</h3>
       
       {statusData.length === 0 ? (

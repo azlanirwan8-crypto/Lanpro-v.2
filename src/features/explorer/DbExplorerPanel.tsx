@@ -177,50 +177,54 @@ export const DbExplorerPanel: React.FC<any> = ({
 
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden">
-        <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10 shrink-0">
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
-               <Database className="w-6 h-6 text-indigo-600" />
+    <div className="flex-1 flex flex-col min-h-0 bg-[#f3f3f9] p-4 md:p-5 gap-4 text-left animate-in fade-in duration-300">
+        {/* Header & Tabs */}
+        <div className="bg-white p-4 md:p-5 rounded-lg border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100/60">System Tools</span>
+              <span className="text-xs text-slate-400 font-medium">• Enterprise Control Center</span>
+            </div>
+            <h1 className="text-base font-bold text-slate-800 tracking-tight flex items-center gap-2">
                Database Tools
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
                Manage Database Explorer, Connection, and Backups.
             </p>
           </div>
-        </div>
 
-        <div className="bg-white border-b border-slate-200 px-6 py-2 flex items-center gap-4 shrink-0 overflow-x-auto">
-           <button
-             onClick={() => setActiveTab('backup')}
-             className={cn(
-                "px-4 py-2 text-sm font-medium transition-all rounded-lg flex items-center gap-2",
-                activeTab === 'backup' ? "bg-indigo-50 text-indigo-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-             )}
-           >
-              <HardDrive className="w-4 h-4" />
-              Backup & Restore
-           </button>
-           <button
-             onClick={() => setActiveTab('connect')}
-             className={cn(
-                "px-4 py-2 text-sm font-medium transition-all rounded-lg flex items-center gap-2",
-                activeTab === 'connect' ? "bg-indigo-50 text-indigo-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-             )}
-           >
-              <Wifi className="w-4 h-4" />
-              Connection
-           </button>
-           <button
-             onClick={() => setActiveTab('explorer')}
-             className={cn(
-                "px-4 py-2 text-sm font-medium transition-all rounded-lg flex items-center gap-2",
-                activeTab === 'explorer' ? "bg-indigo-50 text-indigo-700" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-             )}
-           >
-              <Code className="w-4 h-4" />
-              DB Explorer
-           </button>
+          <div className="flex bg-slate-100 p-0.5 rounded-md border border-slate-200/80 shrink-0">
+             <button
+               onClick={() => setActiveTab('backup')}
+               className={cn(
+                  "px-3 py-1.5 text-xs font-semibold transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                  activeTab === 'backup' ? "bg-white text-indigo-700 font-bold shadow-2xs" : "text-slate-500 hover:text-slate-800"
+               )}
+             >
+                <HardDrive className="w-3.5 h-3.5" />
+                <span>Backup & Restore</span>
+             </button>
+             <button
+               onClick={() => setActiveTab('connect')}
+               className={cn(
+                  "px-3 py-1.5 text-xs font-semibold transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                  activeTab === 'connect' ? "bg-white text-indigo-700 font-bold shadow-2xs" : "text-slate-500 hover:text-slate-800"
+               )}
+             >
+                <Wifi className="w-3.5 h-3.5" />
+                <span>Connection</span>
+             </button>
+             <button
+               onClick={() => setActiveTab('explorer')}
+               className={cn(
+                  "px-3 py-1.5 text-xs font-semibold transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                  activeTab === 'explorer' ? "bg-white text-indigo-700 font-bold shadow-2xs" : "text-slate-500 hover:text-slate-800"
+               )}
+             >
+                <Code className="w-3.5 h-3.5" />
+                <span>DB Explorer</span>
+             </button>
+          </div>
         </div>
 
         {activeTab === 'backup' && (
@@ -243,15 +247,15 @@ export const DbExplorerPanel: React.FC<any> = ({
         )}
 
         {activeTab === 'explorer' && (
-        <div className="flex-1 overflow-hidden flex flex-col relative z-10">
+        <div className="flex-1 bg-white rounded-lg border border-slate-200/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
            {/* Database Mode Banner */}
-           <div className="px-6 py-3 border-b flex flex-wrap items-center justify-between gap-4 shrink-0 shadow-xs bg-emerald-50 border-emerald-100 text-emerald-800">
+           <div className="px-4 py-2.5 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-4 shrink-0 bg-emerald-50/80 text-emerald-800">
               <div className="flex items-center gap-2">
-                 <div className="w-2.5 h-2.5 rounded-full animate-pulse bg-emerald-500" />
-                 <span className="text-sm font-semibold flex items-center gap-1.5">
+                 <div className="w-2 h-2 rounded-full animate-pulse bg-emerald-500" />
+                 <span className="text-xs font-semibold flex items-center gap-1.5">
                     Mode Database: <span className="underline font-bold">PostgreSQL (Neon Cloud)</span>
                  </span>
-                 <span className="text-xs opacity-75 hidden sm:inline">
+                 <span className="text-[11px] opacity-75 hidden sm:inline">
                     (Primary Engine Active)
                  </span>
               </div>
@@ -260,9 +264,9 @@ export const DbExplorerPanel: React.FC<any> = ({
                  <button
                     onClick={fetchSchema}
                     title="Refresh Table Schema"
-                    className="p-1 hover:bg-black/5 rounded transition-all text-slate-500 hover:text-slate-800 flex items-center gap-1 text-xs font-semibold cursor-pointer"
+                    className="p-1 hover:bg-black/5 rounded transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1 text-xs font-semibold cursor-pointer"
                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 4.75L18 8" />
                     </svg>
                     Refresh Schema
@@ -272,8 +276,8 @@ export const DbExplorerPanel: React.FC<any> = ({
 
            <div className="flex-1 flex overflow-hidden">
               {/* Sidebar: Table List */}
-           <div className="w-[300px] bg-white border-r border-slate-200 flex flex-col overflow-y-auto shrink-0">
-              <div className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider sticky top-0 bg-white/90 backdrop-blur-sm z-10 border-b border-slate-100 flex justify-between items-center">
+           <div className="w-[240px] bg-slate-50/50 border-r border-slate-200/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar">
+              <div className="px-3.5 py-2.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 bg-slate-50 border-b border-slate-200/80 flex justify-between items-center z-10">
                  Tables
               </div>
               <div className="p-2 flex flex-col gap-1">
@@ -283,10 +287,10 @@ export const DbExplorerPanel: React.FC<any> = ({
                         <button 
                            key={tableName}
                            onClick={() => loadTable(tableName)}
-                           className={`flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-md transition-colors ${activeTable === tableName ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-slate-600 hover:bg-slate-100'}`}
+                           className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-100' : 'text-slate-600 hover:bg-slate-100 font-medium'}`}
                         >
                            <div className="flex items-center gap-2 truncate">
-                              <TableIcon className="w-4 h-4 shrink-0 text-slate-400" />
+                              <TableIcon className="w-3.5 h-3.5 shrink-0 text-slate-400" />
                               <span className="truncate">{tableName}</span>
                            </div>
                            {stats && (
@@ -298,7 +302,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                     )
                 })}
                 {!schema && (
-                  <div className="text-sm text-slate-400 px-3 py-2">Loading tables...</div>
+                  <div className="text-xs text-slate-400 px-3 py-2 font-medium">Loading tables...</div>
                 )}
               </div>
            </div>
@@ -306,21 +310,21 @@ export const DbExplorerPanel: React.FC<any> = ({
            {/* Main Content: Query Editor and Results */}
            <div className="flex-1 flex flex-col min-w-0">
                {/* Query Editor */}
-               <div className="p-4 border-b border-slate-200 bg-slate-50 shrink-0">
+               <div className="p-3.5 border-b border-slate-200/80 bg-slate-50/50 shrink-0">
                   <div className="relative">
                       <textarea 
                          value={query}
                          onChange={(e) => setQuery(e.target.value)}
                          placeholder="SELECT * FROM Users;"
-                         className="w-full text-slate-700 bg-white border border-slate-300 rounded-lg p-4 font-mono text-sm min-h-[120px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-y"
+                         className="w-full text-slate-800 bg-white border border-slate-200 rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-y"
                       />
                       <button 
                          onClick={() => handleRunQuery(query)}
                          disabled={loading || !query.trim()}
-                         className="absolute bottom-4 right-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md shadow-sm font-medium text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                         className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white h-8 px-3.5 rounded-md shadow-2xs font-semibold text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
                       >
-                         <Play className="w-4 h-4" />
-                         Run Query
+                         <Play className="w-3.5 h-3.5" />
+                         <span>Run Query</span>
                       </button>
                   </div>
                </div>

@@ -597,15 +597,15 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       <div className="flex-1 overflow-y-auto p-3 md:p-6 w-full animate-in fade-in duration-700">
         <div className="flex flex-col space-y-6 min-h-full">
           {/* Header & Controls */}
-          <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200/50 p-8 shrink-0">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
-                <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center shadow-inner">
-                        <Users className="w-8 h-8" />
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 p-5 shrink-0">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-5">
+                <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center border border-blue-100 dark:border-blue-900">
+                        <Users className="w-6 h-6" />
                     </div>
                     <div>
-                        <h3 className="text-3xl font-black text-slate-800 tracking-tighter">User Management</h3>
-                        <p className="text-slate-500 font-medium text-sm">Manage user access, roles, and permissions.</p>
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">User Management</h3>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium text-xs mt-0.5">Manage user access, roles, and permissions.</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -632,13 +632,13 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         placeholder="Search by name, username, or email..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
                     />
                 </div>
                 <select
                     value={filterRole}
                     onChange={(e) => setFilterRole(e.target.value)}
-                    className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-700 font-medium"
+                    className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-700 font-medium"
                 >
                     <option value="all">All Roles</option>
                     <option value="admin">Admin</option>
@@ -650,7 +650,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-700 font-medium"
+                    className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-700 font-medium"
                 >
                     <option value="all">All Status</option>
                     <option value="approved">Approved</option>
@@ -663,7 +663,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           {/* Statistics Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
               <div className="bg-white p-6 rounded-xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
-                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
                       <Users className="w-6 h-6" />
                   </div>
                   <div>
@@ -672,7 +672,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   </div>
               </div>
               <div className="bg-white p-6 rounded-xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
-                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
                       <CheckCircle className="w-6 h-6" />
                   </div>
                   <div>
@@ -681,7 +681,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   </div>
               </div>
               <div className="bg-white p-6 rounded-xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
-                  <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
                       <Clock className="w-6 h-6" />
                   </div>
                   <div>
@@ -690,7 +690,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   </div>
               </div>
               <div className="bg-white p-6 rounded-xl border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5">
-                  <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
                       <Shield className="w-6 h-6" />
                   </div>
                   <div>
@@ -701,7 +701,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           </div>
 
           {/* User List */}
-          <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200/50 overflow-hidden flex-1 flex flex-col">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200/50 overflow-hidden flex-1 flex flex-col">
             {selectedUserIds.length > 0 && (
             <div className="bg-indigo-50/80 border-b border-indigo-100 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top duration-300">
               <div className="flex items-center gap-2">
@@ -772,10 +772,10 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           )}
 
           <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[900px]">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-100">
-                  <th className="py-5 px-4 text-center w-12">
+                <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th className="py-4 px-4 text-center w-12">
                     <input
                       type="checkbox"
                       checked={paginatedUsers.length > 0 && paginatedUsers.every(u => selectedUserIds.includes(u.id))}
@@ -791,15 +791,15 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           setSelectedUserIds(selectedUserIds.filter(id => !paginatedIds.includes(id)));
                         }
                       }}
-                      className="w-4 h-4 rounded text-indigo-650 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                      className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
                     />
                   </th>
-                  <th className="py-5 px-6 font-bold text-xs uppercase tracking-wider text-slate-500">User</th>
-                  <th className="py-5 px-6 font-bold text-xs uppercase tracking-wider text-slate-500">Department / Position</th>
-                  <th className="py-5 px-6 font-bold text-xs uppercase tracking-wider text-slate-500">Proyek & Tugas</th>
-                  <th className="py-5 px-6 font-bold text-xs uppercase tracking-wider text-slate-500">Role</th>
-                  <th className="py-5 px-6 font-bold text-xs uppercase tracking-wider text-slate-500 text-center">Status</th>
-                  <th className="py-5 px-6 font-bold text-xs uppercase tracking-wider text-slate-500 text-center">Action</th>
+                  <th className="py-4 px-4 w-60">User</th>
+                  <th className="py-4 px-4 w-60">Department / Position</th>
+                  <th className="py-4 px-4 w-40">Proyek & Tugas</th>
+                  <th className="py-4 px-4 w-28">Role</th>
+                  <th className="py-4 px-4 w-28 text-center">Status</th>
+                  <th className="py-4 px-4 w-28 text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100/60">
@@ -833,7 +833,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           className="w-4 h-4 rounded text-indigo-650 border-slate-300 focus:ring-indigo-500 cursor-pointer"
                         />
                       </td>
-                      <td className="py-4 px-6 cursor-pointer" onClick={() => { if (props.onSelectUserForDetail) props.onSelectUserForDetail(user); }}>
+                      <td className="py-4 px-4 cursor-pointer" onClick={() => { if (props.onSelectUserForDetail) props.onSelectUserForDetail(user); }}>
                         <div className="flex items-center gap-4">
                           <UserAvatar user={user} className="w-10 h-10 text-base" />
                           <div>
@@ -850,7 +850,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-4">
                           <div className="flex flex-col">
                               <span className="text-xs font-bold text-slate-700">
                                   {user.department ? getDepartmentName(user.department) : '-'}
@@ -860,7 +860,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               </span>
                           </div>
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-4">
                         <div className="flex flex-col gap-1.5">
                           <div className="flex items-center gap-2">
                             <span className={cn(
@@ -886,7 +886,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-4">
                         <span className={cn(
                           "inline-flex font-black text-[10px] tracking-widest uppercase px-2.5 py-1 rounded-lg border",
                           user.role === 'admin' ? "bg-rose-50 text-rose-600 border-rose-200" :
@@ -897,7 +897,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           {user.role}
                         </span>
                       </td>
-                    <td className="py-4 px-6 text-center">
+                    <td className="py-4 px-4 text-center">
                       <div className="flex justify-center">
                         {user.status === 'approved' ? (
                           <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500" title="Disetujui">
@@ -914,7 +914,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         )}
                       </div>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-4">
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => {
@@ -1023,7 +1023,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               <div className="space-y-6">
 
                 {/* Header Profile Info Card */}
-                <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-200 shadow-sm animate-in fade-in duration-300">
+                <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start bg-slate-50/50 p-6 rounded-xl border border-slate-200 shadow-sm animate-in fade-in duration-300">
                   <UserAvatar user={selectedUser} className="w-20 h-20 text-3xl shadow-md border-4 border-white ring-4 ring-indigo-50 shrink-0" />
                   <div className="flex-1 text-center sm:text-left space-y-3">
                       <div>
@@ -1102,7 +1102,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       {/* LEFT COLUMN: Account, Access controls & System Permissions Grid (5 cols) */}
                       <div className="xl:col-span-5 space-y-6">
                         {/* Status & Organisation Card */}
-                        <div className="bg-slate-50 border border-slate-200/85 rounded-2xl p-5 space-y-4">
+                        <div className="bg-slate-50 border border-slate-200/85 rounded-xl p-5 space-y-4">
                           <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-widest border-b border-slate-200/60 pb-2 flex items-center gap-2">
                             <Lock className="w-4 h-4 text-indigo-500" />
                             Pengaturan Akun & Organisasi
@@ -1150,7 +1150,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             {editRole && (
                               ROLE_DESCRIPTIONS[editRole] ? (
                                 <div className={cn(
-                                  "p-3 rounded-2xl border text-[11px] leading-relaxed transition-all flex gap-3 animate-in fade-in duration-200",
+                                  "p-3 rounded-xl border text-[11px] leading-relaxed transition-all flex gap-3 animate-in fade-in duration-200",
                                   editRole === 'admin' ? "bg-rose-50/55 border-rose-100/65 text-rose-800" :
                                   editRole === 'head' ? "bg-purple-50/55 border-purple-100/65 text-purple-800" :
                                   editRole === 'manager' ? "bg-blue-50/55 border-blue-100/65 text-blue-800" :
@@ -1170,7 +1170,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                   </div>
                                 </div>
                               ) : (
-                                <div className="p-3 rounded-2xl border text-[11px] leading-relaxed transition-all flex gap-3 animate-in fade-in duration-200 bg-indigo-50/55 border-indigo-100/65 text-indigo-800">
+                                <div className="p-3 rounded-xl border text-[11px] leading-relaxed transition-all flex gap-3 animate-in fade-in duration-200 bg-indigo-50/55 border-indigo-100/65 text-indigo-800">
                                   <div className="shrink-0 mt-0.5">
                                     <ShieldCheck className="w-4 h-4 text-indigo-500" />
                                   </div>
@@ -1299,7 +1299,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         </div>
 
                         {/* Custom Permissions Grid */}
-                        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-3xs">
+                        <div className="bg-white border border-slate-200/80 rounded-xl p-5 space-y-4 shadow-3xs">
                             <div className="border-b border-slate-100 pb-3">
                                 <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-widest">Active System Permissions & Overrides</h4>
                                 <p className="text-[11px] text-slate-500 font-medium leading-normal mt-1">Configure explicit permission overrides for this user account. Hover headers or modules for detailed permission insights.</p>
@@ -1394,7 +1394,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
                         {/* Work Overview Stats Bar */}
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-slate-50/60 border border-slate-200 p-4 rounded-2xl flex items-center gap-3">
+                          <div className="bg-slate-50/60 border border-slate-200 p-4 rounded-xl flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
                               <Server className="w-5 h-5 animate-pulse" />
                             </div>
@@ -1403,7 +1403,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               <span className="text-lg font-black text-slate-800 leading-none">{userProjects.length}</span>
                             </div>
                           </div>
-                          <div className="bg-slate-50/60 border border-slate-200 p-4 rounded-2xl flex items-center gap-3">
+                          <div className="bg-slate-50/60 border border-slate-200 p-4 rounded-xl flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
                               <CheckCircle className="w-5 h-5" />
                             </div>
@@ -1422,7 +1422,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           </h4>
 
                           {userProjects.length === 0 ? (
-                            <div className="text-center py-10 px-6 bg-slate-50/40 border border-slate-200 border-dashed rounded-2xl flex flex-col items-center justify-center">
+                            <div className="text-center py-10 px-6 bg-slate-50/40 border border-slate-200 border-dashed rounded-xl flex flex-col items-center justify-center">
                               <Server className="w-10 h-10 text-slate-300 mb-2.5 animate-pulse" />
                               <h5 className="font-bold text-slate-700 text-sm">Tidak Tergabung dalam Project</h5>
                               <p className="text-xs text-slate-455 font-semibold max-w-sm mt-1 leading-relaxed text-center font-medium">
@@ -1436,7 +1436,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 const projectTasks = userTasks.filter(t => t.projectId === p.id);
 
                                 return (
-                                  <div key={p.id} className="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-3xs hover:border-slate-300 transition-all flex flex-col gap-4">
+                                  <div key={p.id} className="bg-white border border-slate-200 rounded-xl p-4 md:p-5 shadow-3xs hover:border-slate-300 transition-all flex flex-col gap-4">
                                     {/* Project Header Row */}
                                     <div className="flex items-center justify-between gap-4 flex-wrap pb-3 border-b border-slate-100">
                                       <div className="flex items-center gap-3">
@@ -1550,7 +1550,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
                         {/* Detached/Other Tasks */}
                         {otherTasks.length > 0 && (
-                          <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-3xs flex flex-col gap-3">
+                          <div className="bg-white border border-slate-200 rounded-xl p-4 md:p-5 shadow-3xs flex flex-col gap-3">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-sm border border-amber-100 uppercase shrink-0">
                                 MISC
@@ -1628,7 +1628,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         )}
 
                         {/* Design-Reviewed Assign Form for Adding a Project Assignment */}
-                        <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 hover:border-indigo-200 transition-all shadow-3xs duration-350">
+                        <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 hover:border-indigo-200 transition-all shadow-3xs duration-350">
                           <div className="space-y-4">
                             <div className="space-y-1">
                               <h4 className="font-extrabold text-indigo-950 text-xs uppercase tracking-wider flex items-center gap-1.5">
@@ -1781,7 +1781,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         title="Add New User"
       >
         <div className="space-y-4">
-          <div className="p-4 bg-violet-50 rounded-2xl border border-violet-100 mb-2">
+          <div className="p-4 bg-violet-50 rounded-xl border border-violet-100 mb-2">
             <p className="text-sm font-semibold text-violet-900">Registrasi Pengguna</p>
             <p className="text-xs text-violet-700 mt-1">Register new user to the system.</p>
           </div>
@@ -2014,7 +2014,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       {/* Senior Portal-Style Hover Tooltip overlay */}
       {hoveredTooltip && (
         <div
-          className="fixed z-9999 pointer-events-none bg-slate-900/95 backdrop-blur-md border border-slate-700/80 text-white text-xs font-semibold rounded-2xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-in fade-in zoom-in-95"
+          className="fixed z-9999 pointer-events-none bg-slate-900/95 backdrop-blur-md border border-slate-700/80 text-white text-xs font-semibold rounded-xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-in fade-in zoom-in-95"
           style={{
             left: `${hoveredTooltip.x + 14}px`,
             top: `${hoveredTooltip.y + 14}px`,

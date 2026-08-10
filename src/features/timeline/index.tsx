@@ -1075,13 +1075,16 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   }, [tasks, pixelsPerDay]);
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-slate-50">
+    <div className="flex-1 flex flex-col min-h-0 bg-[#f3f3f9] p-4 md:p-5 gap-4 text-left">
       {/* Timeline Controls Header */}
-      <div className="h-16 bg-white border-b border-gray-200 px-6 flex items-center justify-between shrink-0 shadow-sm z-30">
-        <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Project Roadmap</h2>
+      <div className="bg-white px-5 py-3.5 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between shrink-0">
+        <div>
+          <h2 className="text-base font-bold text-slate-800 tracking-tight">Project Roadmap</h2>
+          <p className="text-xs font-medium text-slate-500 mt-0.5">Visualisasi lini masa proyek, epics, dan ketergantungan tugas</p>
+        </div>
         <div className="flex items-center gap-3">
           {/* Quick Action Navigation Buttons */}
-          <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-lg border border-slate-200/80">
+          <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-md border border-slate-200/80">
             <button
               type="button"
               onClick={() => {
@@ -1089,7 +1092,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 scrollToDate(earliest, 'smooth');
                 toast.success("Berhasil fokus ke Task Pertama Aktif");
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-md text-xs font-bold shadow-sm transition-all border border-slate-200/60"
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-100/70 text-slate-700 rounded text-xs font-semibold shadow-2xs transition-all border border-slate-200/60"
               title="Focus First Task"
             >
               <Target className="w-3.5 h-3.5 text-indigo-600" />
@@ -1101,7 +1104,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 scrollToDate(new Date(), 'smooth');
                 toast.success("Berhasil melompat ke garis hari ini (Today)");
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-md text-xs font-bold shadow-sm transition-all border border-slate-200/60"
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-100/70 text-slate-700 rounded text-xs font-semibold shadow-2xs transition-all border border-slate-200/60"
               title="Jump to Today"
             >
               <Calendar className="w-3.5 h-3.5 text-emerald-600" />
@@ -1110,7 +1113,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
           </div>
 
 
-          <div className="flex bg-white rounded-lg border border-gray-200 p-0.5 shadow-sm items-center">
+          <div className="flex bg-white rounded-md border border-slate-200/80 p-0.5 shadow-2xs items-center">
             <button
               type="button"
               onClick={() => setPixelsPerDay(prev => Math.max(4, prev - 4))}
@@ -1119,7 +1122,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
-            <div className="w-px h-4 bg-gray-200 mx-1" />
+            <div className="w-px h-4 bg-slate-200 mx-1" />
             
             {(['days', 'weeks', 'months'] as const).map((z) => (
               <button 
@@ -1130,17 +1133,17 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   else if (z === 'weeks') setPixelsPerDay(24);
                   else if (z === 'months') setPixelsPerDay(8);
                 }}
-                className={`px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${
+                className={`px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded transition-all ${
                   timelineZoom === z 
-                    ? 'bg-slate-100 text-slate-800 shadow-sm' 
-                    : 'text-slate-400 hover:text-slate-600'
+                    ? 'bg-slate-100 text-slate-800 font-bold shadow-2xs' 
+                    : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 {z}
               </button>
             ))}
 
-            <div className="w-px h-4 bg-gray-200 mx-1" />
+            <div className="w-px h-4 bg-slate-200 mx-1" />
             <button
               type="button"
               onClick={() => setPixelsPerDay(prev => Math.min(150, prev + 4))}
@@ -1154,16 +1157,16 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             <button 
               onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
               onBlur={() => setTimeout(() => setIsExportMenuOpen(false), 200)}
-              className="flex items-center gap-2 text-xs bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg font-black text-indigo-600 transition-colors uppercase border border-indigo-100 shadow-sm"
+              className="h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <Download className="w-4 h-4" />
-              Export As <ChevronDown className="w-3 h-3" />
+              <Download className="w-3.5 h-3.5" />
+              <span>EXPORT AS</span> <ChevronDown className="w-3 h-3" />
             </button>
             {isExportMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200/80 py-1 z-50">
                 <button 
                   onClick={exportTimelineToPdf}
-                  className="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm font-bold text-slate-700 flex items-center gap-2"
+                  className="w-full text-left px-4 py-2 hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center gap-2"
                 >
                   <FileText className="w-4 h-4 text-rose-500" />
                   PDF Document
@@ -1181,9 +1184,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden p-4 lg:p-6 flex">
-        <div ref={timelineContainerRef} className="print-roadmap-container flex flex-1 w-full relative bg-white rounded-xl border border-slate-200 shadow-sm shadow-slate-200/40 overflow-hidden select-none">
-          <div className="w-64 md:w-80 shrink-0 border-r border-slate-200 flex flex-col z-20 bg-white relative">
+      <div className="flex-1 overflow-hidden flex min-h-0">
+        <div ref={timelineContainerRef} className="print-roadmap-container flex flex-1 w-full relative bg-white rounded-lg border border-slate-200/80 shadow-2xs overflow-hidden select-none">
+          <div className="w-64 md:w-80 shrink-0 border-r border-slate-200/80 flex flex-col z-20 bg-white relative">
             <div className="sticky top-0 z-30 h-[73px] bg-slate-50/90 backdrop-blur-sm border-b border-slate-200 px-5 flex items-center justify-between">
               <span className="font-bold text-[11px] text-slate-500 uppercase tracking-widest">Item & Hierarki</span>
             </div>

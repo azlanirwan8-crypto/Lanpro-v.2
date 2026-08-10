@@ -33,6 +33,7 @@ import {
   MessageSquare,
   Send
 } from 'lucide-react';
+import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { toast } from 'sonner';
 import { validateFileClient } from '../../lib/fileSecurity';
 import { UserProfile, MasterData } from '../../types';
@@ -779,16 +780,16 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
             {/* Datatable Container */}
             <div className="flex-1 overflow-x-auto overflow-y-auto m-6 bg-white rounded-lg border border-slate-200/60 shadow-xs">
-              <table className="w-full text-left border-collapse">
+              <ResponsiveTable className="w-full text-left border-collapse min-w-[880px]">
                 <thead>
-                  <tr className="bg-slate-50/50 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    <th className="py-4 px-5 w-16 text-center">No</th>
-                    <th className="py-4 px-5">Document Title</th>
-                    <th className="py-4 px-5 w-40">Category</th>
-                    <th className="py-4 px-5 w-48">Document File</th>
-                    <th className="py-4 px-5 w-48">Author</th>
-                    <th className="py-4 px-5 w-36">Last Updated</th>
-                    <th className="py-4 px-5 w-32 text-center">Action</th>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <th className="py-3.5 px-4 w-14 text-center">No</th>
+                    <th className="py-3.5 px-4 min-w-[200px] max-w-[320px]">Document Title</th>
+                    <th className="py-3.5 px-4 w-44">Category</th>
+                    <th className="py-3.5 px-4 w-44">Document File</th>
+                    <th className="py-3.5 px-4 w-40">Author</th>
+                    <th className="py-3.5 px-4 w-36">Last Updated</th>
+                    <th className="py-3.5 px-4 w-28 text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
@@ -816,25 +817,25 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             setActiveDocId(doc.id);
                             setMobileActiveView('detail');
                           }}
-                          className="hover:bg-slate-50/60 transition-colors duration-200 group cursor-pointer"
+                          className="hover:bg-slate-50/60 transition-colors duration-200 group cursor-pointer whitespace-nowrap h-14"
                         >
-                          <td className="py-4 px-5 text-center text-slate-400 font-bold">
+                          <td className="py-3 px-4 text-center text-slate-400 font-bold whitespace-nowrap">
                             {String(srNo).padStart(2, "0")}
                           </td>
-                          <td className="py-4 px-5 font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                            <div className="line-clamp-1">{doc.title}</div>
+                          <td className="py-3 px-4 font-bold text-slate-900 group-hover:text-indigo-600 transition-colors max-w-[320px]">
+                            <div className="truncate">{doc.title}</div>
                             {doc.description && (
-                              <div className="text-slate-400 font-normal text-[11px] line-clamp-1 mt-0.5">
+                              <div className="text-slate-400 font-normal text-[11px] truncate mt-0.5">
                                 {doc.description}
                               </div>
                             )}
                           </td>
-                          <td className="py-4 px-5">
+                          <td className="py-3 px-4 whitespace-nowrap">
                             <span className={style.badge}>
                               {doc.type}
                             </span>
                           </td>
-                          <td className="py-4 px-5" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3 px-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             {doc.fileName ? (
                               <button
                                 onClick={() => handleDownload(doc.id, doc.fileName)}
@@ -842,16 +843,16 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 title="Klik untuk mengunduh berkas"
                               >
                                 <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
-                                <span className="truncate max-w-[140px]">{doc.fileName}</span>
+                                <span className="truncate max-w-[130px]">{doc.fileName}</span>
                               </button>
                             ) : (
                               <span className="text-slate-300 italic text-xs">—</span>
                             )}
                           </td>
-                          <td className="py-4 px-5 text-slate-700 font-semibold">
+                          <td className="py-3 px-4 text-slate-700 font-semibold whitespace-nowrap truncate max-w-[150px]">
                             {creatorName}
                           </td>
-                          <td className="py-4 px-5 text-slate-500 font-medium">
+                          <td className="py-3 px-4 text-slate-500 font-medium whitespace-nowrap">
                             {lastEdited}
                           </td>
                           <td className="py-4 px-5 text-center" onClick={(e) => e.stopPropagation()}>
@@ -880,7 +881,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     })
                   )}
                 </tbody>
-              </table>
+              </ResponsiveTable>
             </div>
 
             {/* Table Footer / Pagination */}
@@ -917,7 +918,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       </div>
       ) : (
         <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-[#f4f7f9] text-left font-sans">
-      <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-white border border-slate-200/80 rounded-lg shadow-sm overflow-hidden">
         
         {/* MAIN VIEWPORT: ACTIVE DOCUMENT VIEW */}
         <div className="flex-1 bg-[#f8fafc] flex flex-col h-full overflow-hidden transition-all">
@@ -929,7 +930,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <div className="flex-1 min-w-0 flex items-center gap-3">
                   <button
                     onClick={() => setActiveDocId(null)}
-                    className="flex items-center gap-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer shrink-0"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0"
                     title="Kembali ke Daftar Dokumen"
                   >
                     <ChevronLeft className="w-4 h-4" /> Daftar
@@ -1013,7 +1014,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden p-3 gap-3">
                 
                 {/* LEFT PANE / MAIN VIEW (DOCUMENT VIEWER) */}
-                <div className="flex-1 bg-white border border-slate-200/80 rounded-2xl flex flex-col min-h-0 overflow-hidden relative shadow-sm">
+                <div className="flex-1 bg-white border border-slate-200/80 rounded-lg flex flex-col min-h-0 overflow-hidden relative shadow-sm">
                   {/* Title Bar Left Pane */}
                   <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between shrink-0 select-none">
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -1103,7 +1104,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             if (canUpdate) directFileInputRef.current?.click();
                           }}
                           className={cn(
-                            "border-2 border-dashed rounded-3xl p-6 max-w-sm w-full flex flex-col items-center justify-center gap-3 text-center group transition-all bg-white shadow-sm",
+                            "border-2 border-dashed rounded-lg p-5 max-w-sm w-full flex flex-col items-center justify-center gap-3 text-center group transition-all bg-white shadow-sm",
                             canUpdate 
                               ? "cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/5 hover:shadow-md" 
                               : "cursor-not-allowed opacity-70 border-slate-200"
@@ -1150,7 +1151,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                 {/* RIGHT PANE / SIDE WIDGET (CATATAN & KOMENTAR CHAT BUBBLE) */}
                 <div className={cn(
-                  "w-full md:w-[350px] lg:w-[400px] shrink-0 bg-white border border-slate-200/80 rounded-2xl flex flex-col min-h-0 overflow-hidden shadow-sm transition-all duration-300",
+                  "w-full md:w-[350px] lg:w-[400px] shrink-0 bg-white border border-slate-200/80 rounded-lg flex flex-col min-h-0 overflow-hidden shadow-sm transition-all duration-300",
                   isFullscreenPreview ? "hidden md:hidden" : "flex"
                 )}>
                   {/* Side Pane Header */}
@@ -1168,7 +1169,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 bg-slate-50/30">
                     {(!activeDocId || (docCommentsMap[activeDocId] || []).length === 0) ? (
                       <div className="text-center py-12 px-4 my-auto">
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto mb-3 text-indigo-500 shadow-xs">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto mb-3 text-indigo-500 shadow-xs">
                           <MessageSquare className="w-6 h-6" />
                         </div>
                         <h4 className="text-xs font-bold text-slate-800">Belum Ada Catatan / Komentar</h4>
@@ -1182,7 +1183,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         return (
                           <div key={comment.id} className={cn("flex w-full", isMine ? "justify-end" : "justify-start")}>
                             <div className={cn(
-                              "p-3.5 rounded-2xl max-w-[85%] md:max-w-2xl shadow-xs",
+                              "p-3.5 rounded-xl max-w-[85%] md:max-w-2xl shadow-xs",
                               isMine ? "bg-indigo-600 text-white border-0" : "bg-white text-slate-700 border border-gray-200"
                             )}>
                               <div className={cn(
@@ -1257,7 +1258,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
           ) : (
             /* Immersive Workspace Empty State */
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50/10 hover:bg-slate-50/20 transition-all duration-300 select-none">
-              <div className="w-20 h-20 rounded-3xl bg-indigo-50/70 border border-indigo-100/60 flex items-center justify-center mb-6 shadow-sm shadow-indigo-100/30">
+              <div className="w-16 h-16 rounded-lg bg-indigo-50/70 border border-indigo-100/60 flex items-center justify-center mb-5 shadow-xs">
                 <BookOpen className="w-9 h-9 text-indigo-500 animate-pulse" />
               </div>
               <h2 className="text-base font-black text-slate-800 tracking-tight">
@@ -1294,7 +1295,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-2xl w-full flex flex-col relative overflow-hidden my-auto max-h-[90vh]"
+              className="bg-white rounded-lg shadow-xl border border-slate-200 max-w-2xl w-full flex flex-col relative overflow-hidden my-auto max-h-[90vh]"
             >
               {/* Modal header decor */}
               <div className="bg-gradient-to-r from-slate-50 to-white px-5 py-4 border-b border-slate-200 flex justify-between items-center select-none">
@@ -1330,7 +1331,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                     placeholder="Contoh: PRD Fitur Pembayaran, SOP Server Production, dll"
-                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 px-3 py-2.5 rounded-xl text-xs font-black text-slate-900 outline-none transition-all placeholder:text-slate-400"
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 px-3 py-2 rounded-md text-xs font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400"
                   />
                 </div>
 
@@ -1348,7 +1349,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     placeholder="Tuliskan spesifikasi detail, instruksi instalasi, atau memo kerja di sini..."
-                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 outline-none transition-all placeholder:text-slate-400 min-h-[120px] resize-y font-sans"
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 px-3 py-2 rounded-md text-xs font-medium text-slate-700 outline-none transition-all placeholder:text-slate-400 min-h-[100px] resize-y font-sans"
                   />
                 </div>
 
@@ -1364,7 +1365,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       <select 
                         value={editType}
                         onChange={(e) => setEditType(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 pl-3 pr-8 py-2.5 rounded-xl text-xs font-black text-slate-700 outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 appearance-none cursor-pointer transition-all"
+                        className="w-full bg-slate-50 border border-slate-200 pl-3 pr-8 py-2 rounded-md text-xs font-medium text-slate-700 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 appearance-none cursor-pointer transition-all"
                       >
                         {documentTypes.map(t => (
                           <option key={t.value} value={t.value}>{t.label}</option>
@@ -1402,7 +1403,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
                     className={cn(
-                      "border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer text-center group transition-all",
+                      "border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer text-center group transition-all",
                       dragActive 
                         ? "border-indigo-500 bg-indigo-50/50" 
                         : "border-slate-200 bg-slate-50/50 hover:border-indigo-400 hover:bg-indigo-50/10"

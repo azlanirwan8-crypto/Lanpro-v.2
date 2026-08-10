@@ -969,7 +969,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="mx-6 mb-4 bg-white rounded-2xl border border-slate-200/80 shadow-md overflow-hidden relative"
+            className="mx-6 mb-4 bg-white rounded-xl border border-slate-200/80 shadow-md overflow-hidden relative"
           >
             <div className="p-5">
                {/* Section 1: Standard Issue Attributes */}
@@ -1426,7 +1426,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
             animate={{ y: 0, opacity: 1, x: "-50%" }}
             exit={{ y: 80, opacity: 0, x: "-50%" }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 left-1/2 z-50 bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-md border border-slate-700/50 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-white text-xs font-semibold select-none"
+            className="fixed bottom-6 left-1/2 z-50 bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-white text-xs font-semibold select-none"
           >
             <div className="flex items-center gap-2 border-r border-slate-700 pr-4">
               <span className="bg-indigo-600 text-white text-[10px] font-black rounded-full px-2 py-0.5 min-w-[20px] text-center">

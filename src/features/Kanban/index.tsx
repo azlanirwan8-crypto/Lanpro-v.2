@@ -142,24 +142,24 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
 
   const renderBoard = () => {
     return (
-      <div className={cn("relative w-fit min-w-full pb-8")}>
+      <div className="relative w-fit min-w-full pb-16">
         {/* Header Bar - Static Sidebar and Scrollable Status Headers */}
-        <div className="grid grid-cols-[320px_1fr] sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 shadow-xs">
+        <div className="grid grid-cols-[280px_1fr] sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 shadow-2xs">
             {/* Bagian A Header */}
-            <div className="sticky left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200/60 dark:border-slate-800 h-[64px] flex items-center px-6 relative">
-                <div className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider flex items-center justify-between w-full gap-2">
-                    <div className="flex items-center gap-3">
-                        <span className="text-slate-700 dark:text-slate-200 font-extrabold text-[12px]">Swimlanes</span>
-                        <label className="flex items-center gap-1.5 cursor-pointer bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md text-[10px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
-                            <input type="checkbox" checked={showEmptySwimlanes} onChange={(e) => setShowEmptySwimlanes(e.target.checked)} className="accent-indigo-500 rounded" />
+            <div className="sticky left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 h-[56px] flex items-center px-3.5 relative">
+                <div className="text-xs font-bold text-slate-700 dark:text-slate-200 tracking-wider flex items-center justify-between w-full gap-2">
+                    <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-slate-800 dark:text-slate-100">Swimlanes</span>
+                        <label className="flex items-center gap-1 cursor-pointer bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+                            <input type="checkbox" checked={showEmptySwimlanes} onChange={(e) => setShowEmptySwimlanes(e.target.checked)} className="accent-indigo-600 rounded" />
                             <span>Empty</span>
                         </label>
                     </div>
-                    <div className="relative">
+                    <div className="relative shrink-0">
                         <select 
                           value={groupBy}
                           onChange={(e) => setGroupBy(e.target.value as any)}
-                          className="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-lg text-[10px] font-bold px-2.5 py-1.5 cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500/20"
+                          className="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800 rounded-md text-[11px] font-semibold px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-indigo-500/30 max-w-[110px]"
                         >
                           <option value="epic">By Epic</option>
                           <option value="assignee">By Assignee</option>
@@ -168,27 +168,23 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                 </div>
             </div>
             {/* Bagian B Header - Scrollable */}
-            <div className="flex overflow-x-auto items-center px-6 py-3 gap-6 bg-white dark:bg-slate-900 custom-scrollbar">
+            <div className="flex overflow-x-auto items-center px-4 py-2.5 gap-4 bg-white dark:bg-slate-900 custom-scrollbar">
                 {boardStatuses.map((status, index) => {
                     const statusStyle = getStatusStyle(status.label);
+                    const taskCount = tArr.filter((t: any) => t.status === status.label).length;
                     return (
-                      <div key={`header-${status.id || status.label}-${index}`} className={cn("shrink-0", index === 0 ? "relative z-10 pl-0" : "", isCompact ? "w-[250px]" : "w-[300px]")}>
-                           <div className={cn(
-                             "flex items-center justify-between border-t-4 border-x border-b border-slate-200/60 rounded-xl shadow-sm transition-all duration-200",
-                             statusStyle.bg,
-                             statusStyle.border,
-                             isCompact ? "px-3 py-2" : "px-4 py-3"
-                           )}>
-                              <div className="flex items-center gap-2">
+                      <div key={`header-${status.id || status.label}-${index}`} className={cn("shrink-0", isCompact ? "w-[240px]" : "w-[270px]")}>
+                           <div className="flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 px-3.5 py-2 rounded-lg shadow-2xs transition-all">
+                              <div className="flex items-center gap-2 min-w-0">
                                  {status.icon ? (
-                                      <RenderIcon iconName={status.icon} className="w-4 h-4 saturate-150" style={{ color: statusStyle.borderColor }} />
+                                      <RenderIcon iconName={status.icon} className="w-3.5 h-3.5 shrink-0" style={{ color: statusStyle.borderColor }} />
                                  ) : (
-                                      <div className="w-3 h-3 rounded-full shadow-inner border border-black/10" style={{ backgroundColor: statusStyle.borderColor }} />
+                                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: statusStyle.borderColor }} />
                                  )}
-                                 <span className={cn("text-[12px] font-black uppercase tracking-widest", statusStyle.text)}>{status.label}</span>
+                                 <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100 truncate">{status.label}</span>
                               </div>
-                              <span className={cn("px-2 py-1 rounded text-[10px] font-black shadow-sm", statusStyle.indicatorBg, statusStyle.indicatorText)}>
-                                  {tArr.filter((t: any) => t.status === status.label).length}
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700 shadow-2xs shrink-0">
+                                  {taskCount}
                               </span>
                            </div>
                       </div>
@@ -198,32 +194,32 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
         </div>
 
         {/* Rows Rendering */}
-        <div className="flex flex-col gap-6 mt-4">
+        <div className="flex flex-col gap-4 mt-3">
           {groupBy === 'epic' ? (
              <>
                 {filteredEpics.map((epic, epicIndex) => (
-                  <div key={epic.id} className="grid grid-cols-[320px_1fr] items-stretch border-b border-slate-200 dark:border-slate-800 min-h-[120px]">
+                  <div key={epic.id} className="grid grid-cols-[280px_1fr] items-stretch border-b border-slate-200/70 dark:border-slate-800/80 min-h-[110px]">
                       {/* Bagian A Row Cell - Sticky Sidebar */}
-                      <div className="sticky left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 pl-6 pr-6 py-4 relative">
+                      <div className="sticky left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 px-3.5 py-3 relative">
                           {/* Epic Card Content */}
-                          <div className={cn("bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 border-l-4 border-l-indigo-600 transition-all duration-300 hover:shadow-md", isCompact ? "p-3" : "p-5")}>
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-500 dark:text-indigo-400">
-                                    <Layers className="w-3.5 h-3.5" />
+                          <div className={cn("bg-white dark:bg-slate-800 rounded-lg shadow-2xs border border-slate-200/80 dark:border-slate-700/80 border-l-4 border-l-purple-600 transition-all duration-200 hover:border-purple-300 p-3", isCompact ? "p-2.5" : "p-3")}>
+                            <div className="flex items-center gap-2 mb-1.5">
+                                <div className="w-5 h-5 rounded bg-purple-50 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                                    <Layers className="w-3 h-3" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Epic</span>
-                                <span className="ml-auto bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded text-[9px] font-bold">
-                                  {boardStatuses.reduce((acc, status) => acc + (groupedTasks[`${epic.id}:${status.label}`]?.length || 0), 0)} Issues
+                                <span className="text-[10px] font-mono font-bold text-purple-600 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-100">{epic.key || 'EPIC'}</span>
+                                <span className="ml-auto bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 px-1.5 py-0.2 rounded text-[10px] font-semibold border border-purple-100/60">
+                                  {boardStatuses.reduce((acc, status) => acc + (groupedTasks[`${epic.id}:${status.label}`]?.length || 0), 0)}
                                 </span>
                             </div>
-                            <h3 className={cn("font-bold text-slate-800 dark:text-slate-100 leading-snug", isCompact ? "text-xs" : "text-sm")}>{epic.title}</h3>
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-xs leading-snug line-clamp-2">{epic.title}</h3>
                           </div>
                       </div>
                       
                       {/* Bagian B Row Cells - Columns */}
-                      <div className="flex gap-8 px-6 py-4">
+                      <div className="flex gap-4 px-4 py-3">
                           {boardStatuses.map((status, index) => (
-                              <div key={`${epic.id}-${status.id || status.label}-${index}`} className={cn("shrink-0", isCompact ? "w-[250px]" : "w-[300px]")}>
+                              <div key={`${epic.id}-${status.id || status.label}-${index}`} className={cn("shrink-0", isCompact ? "w-[240px]" : "w-[270px]")}>
                                   <KanbanColumn
                                     status={status}
                                     tasks={groupedTasks[`${epic.id}:${status.label}`] || []}
@@ -241,19 +237,19 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                 ))}
                 {/* Standalone Tasks when Epic grouped */}
                 {standaloneTasks.length > 0 && (
-                  <div className="grid grid-cols-[320px_1fr] items-stretch border-b border-slate-200 dark:border-slate-800 min-h-[120px]">
+                  <div className="grid grid-cols-[280px_1fr] items-stretch border-b border-slate-200/70 dark:border-slate-800/80 min-h-[110px]">
                       {/* Bagian A Row Cell - Sticky Sidebar */}
-                      <div className="sticky left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 pl-6 pr-6 py-4 relative">
-                          <div className={cn("bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 h-fit transition-shadow group-hover:shadow-sm", isCompact ? "p-3" : "p-5")}>
-                              <h3 className={cn("font-bold text-slate-600 dark:text-slate-300 leading-snug", isCompact ? "text-xs" : "text-sm")}>Other Tasks</h3>
-                              <p className="mt-1 text-[10px] font-medium text-slate-400 dark:text-slate-500">Tasks not assigned to any Epic</p>
+                      <div className="sticky left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 px-3.5 py-3 relative">
+                          <div className={cn("bg-slate-50/70 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 h-fit p-3", isCompact ? "p-2.5" : "p-3")}>
+                              <h3 className="font-bold text-slate-700 dark:text-slate-300 text-xs leading-snug">Other Tasks</h3>
+                              <p className="mt-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-500">Tasks not assigned to any Epic</p>
                           </div>
                       </div>
                       
                       {/* Bagian B Row Cells - Columns */}
-                      <div className="flex gap-8 px-6 py-4">
+                      <div className="flex gap-4 px-4 py-3">
                           {boardStatuses.map((status, index) => (
-                              <div key={`standalone-${status.id || status.label}-${index}`} className={cn("shrink-0", isCompact ? "w-[250px]" : "w-[300px]")}>
+                              <div key={`standalone-${status.id || status.label}-${index}`} className={cn("shrink-0", isCompact ? "w-[240px]" : "w-[270px]")}>
                                   <KanbanColumn
                                     status={status}
                                     tasks={groupedTasks[`standalone:${status.label}`] || []}
@@ -281,18 +277,18 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                   );
 
                   return (
-                    <div key={uId} className="grid grid-cols-[320px_1fr] items-stretch border-b border-slate-200 dark:border-slate-800 min-h-[120px]">
+                    <div key={uId} className="grid grid-cols-[280px_1fr] items-stretch border-b border-slate-200/70 dark:border-slate-800/80 min-h-[110px]">
                       {/* Bagian A Row Cell - Sticky Sidebar */}
-                      <div className="sticky left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 pl-6 pr-6 py-4 relative">
+                      <div className="sticky left-0 z-50 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 px-3.5 py-3 relative">
                         <div className={cn(
-                          "bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 border-l-4 transition-shadow group-hover:shadow-md",
+                          "bg-white dark:bg-slate-800 rounded-lg shadow-2xs border border-slate-200/80 dark:border-slate-700/80 border-l-4 p-3 transition-all",
                           isUnassigned ? "border-l-slate-400 bg-slate-50/50 dark:bg-slate-800/50" : "border-l-indigo-600",
-                          isCompact ? "p-3" : "p-5"
+                          isCompact ? "p-2.5" : "p-3"
                         )}>
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2 mb-1.5">
                             <div className={cn(
-                              "w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs uppercase overflow-hidden shrink-0",
-                              isUnassigned ? "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300" : "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400"
+                              "w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] uppercase overflow-hidden shrink-0",
+                              isUnassigned ? "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300" : "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300"
                             )}>
                               {isUnassigned ? (
                                 '?'
@@ -302,26 +298,23 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                                 (member.displayName || '?').charAt(0).toUpperCase()
                               )}
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 truncate">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
                               {isUnassigned ? 'Unassigned' : 'Assignee'}
                             </span>
-                            <span className="ml-auto bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">
-                              {totalIssueCount} Issues
+                            <span className="ml-auto bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.2 rounded text-[10px] font-semibold shrink-0">
+                              {totalIssueCount}
                             </span>
                           </div>
-                          <h3 className={cn("font-bold text-slate-800 dark:text-slate-100 leading-snug truncate", isCompact ? "text-xs" : "text-sm")}>
+                          <h3 className="font-bold text-slate-800 dark:text-slate-100 text-xs leading-snug truncate">
                             {member.displayName}
                           </h3>
-                          {member.email && member.email !== 'No Assignee' && (
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5">{member.email}</p>
-                          )}
                         </div>
                       </div>
                       
                       {/* Bagian B Row Cells - Columns */}
-                      <div className="flex gap-8 px-6 py-4">
+                      <div className="flex gap-4 px-4 py-3">
                         {boardStatuses.map((status, index) => (
-                          <div key={`${uId}-${status.id || status.label}-${index}`} className={cn("shrink-0", isCompact ? "w-[250px]" : "w-[300px]")}>
+                          <div key={`${uId}-${status.id || status.label}-${index}`} className={cn("shrink-0", isCompact ? "w-[240px]" : "w-[270px]")}>
                             <KanbanColumn
                               status={status}
                               tasks={groupedTasks[`${uId}:${status.label}`] || []}
@@ -346,8 +339,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden font-sans relative">
-        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:20px_20px] z-0 opacity-40 pointer-events-none" />
+    <div className="flex flex-col h-full bg-[#f8fafc] dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs overflow-hidden font-sans relative">
     <DragDropContext onDragEnd={handleDragEndBoard}>
         <div className="flex-1 overflow-auto bg-transparent relative z-10 custom-scrollbar">
             {renderBoard()}

@@ -67,7 +67,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
   });
 
   return (
-    <div className="bg-slate-900 text-white rounded-[2.5rem] border border-slate-800 p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+    <div className="bg-slate-900 text-white rounded-xl border border-slate-800 p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden">
       {/* Decorative gradient blur */}
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -92,14 +92,14 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => setCurrentView('team')}
-            className="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-slate-700 flex items-center gap-2 shadow-sm"
+            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-slate-700 flex items-center gap-2 shadow-sm"
           >
             <Users className="w-4 h-4 text-indigo-400" />
             Kelola Anggota Tim
           </button>
           <button
             onClick={() => setCurrentView('planning')}
-            className="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/25"
+            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/25"
           >
             <Zap className="w-4 h-4" />
             Manajemen Sprint & Backlog
@@ -109,40 +109,40 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
 
       {/* Quick Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
-        <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-2xl border border-slate-700/60 flex items-center justify-between">
+        <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-xl border border-slate-700/60 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Anggota Aktif</span>
             <div className="text-2xl font-black text-white mt-1">{projectMembers.length} Personil</div>
             <span className="text-[10px] text-emerald-400 font-bold mt-1 inline-block">● {projectMembers.filter(m => m?.status === 'online' || true).length} Siap Tugas</span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center">
             <Users className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-2xl border border-slate-700/60 flex items-center justify-between">
+        <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-xl border border-slate-700/60 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tugas Terhambat (Blockers)</span>
             <div className="text-2xl font-black text-rose-400 mt-1">{blockedTasks.length} Kendala</div>
             <span className="text-[10px] text-rose-400/80 font-bold mt-1 inline-block">⚠️ Perlu Intervensi Lead</span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center">
             <AlertTriangle className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-2xl border border-slate-700/60 flex items-center justify-between">
+        <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-xl border border-slate-700/60 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tugas Terlambat (Overdue)</span>
             <div className="text-2xl font-black text-amber-400 mt-1">{overdueTasks.length} Tugas</div>
             <span className="text-[10px] text-amber-400/80 font-bold mt-1 inline-block">⏰ Melewati Deadline</span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center">
             <Clock className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-2xl border border-slate-700/60 flex items-center justify-between">
+        <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-xl border border-slate-700/60 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sprint Aktif</span>
             <div className="text-2xl font-black text-emerald-400 mt-1 truncate max-w-[140px]">
@@ -152,7 +152,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
               {activeSprint ? `${activeSprint.progress || 0}% Selesai` : 'Mulai sprint baru'}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
             <Zap className="w-6 h-6" />
           </div>
         </div>
@@ -221,7 +221,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
       {/* Tab 1: Workload & Capacity */}
       {selectedTab === 'workload' && (
         <div className="space-y-4 relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-800/40 p-4 rounded-xl border border-slate-800">
             <div className="flex items-center gap-2 w-full sm:w-72 relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3" />
               <input
@@ -268,7 +268,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
               const isOverloaded = activeCount >= 6;
 
               return (
-                <div key={member.uid || idx} className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 hover:border-indigo-500/50 transition-all flex flex-col justify-between shadow-sm">
+                <div key={member.uid || idx} className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 hover:border-indigo-500/50 transition-all flex flex-col justify-between shadow-sm">
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-3">
@@ -342,7 +342,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
       {/* Tab 2: Blockers & Risk */}
       {selectedTab === 'blockers' && (
         <div className="space-y-4 relative z-10">
-          <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-2xl flex items-center gap-3">
+          <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
             <p className="text-xs text-rose-200 leading-relaxed font-medium">
               Daftar tugas berikut mengalami hambatan (blocker) atau telah melewati tenggat waktu (overdue) yang memerlukan perhatian segera dari Team Lead.
@@ -351,7 +351,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
 
           <div className="space-y-3">
             {blockedTasks.length === 0 && overdueTasks.length === 0 ? (
-              <div className="text-center py-12 bg-slate-800/40 rounded-2xl border border-slate-800">
+              <div className="text-center py-12 bg-slate-800/40 rounded-xl border border-slate-800">
                 <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
                 <h4 className="text-base font-bold text-white">Tidak Ada Kendala Kritis!</h4>
                 <p className="text-xs text-slate-400 mt-1">Semua tugas berjalan lancar tanpa blocker maupun overdue yang tertunda.</p>
@@ -360,7 +360,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
               [...blockedTasks, ...overdueTasks].map((task, idx) => {
                 const isBlocked = task.isBlocked || task.labels?.some((l: string) => l.toLowerCase() === 'blocked');
                 return (
-                  <div key={task.id || idx} className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-rose-500/40 transition-all">
+                  <div key={task.id || idx} className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-rose-500/40 transition-all">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-0.5 rounded bg-slate-900 text-slate-300 text-[10px] font-black uppercase font-mono">
@@ -406,7 +406,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
       {selectedTab === 'sprint' && (
         <div className="space-y-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 space-y-4">
+            <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 space-y-4">
               <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-emerald-400" /> Beban Tugas per Departemen
               </h3>
@@ -425,7 +425,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
               </div>
             </div>
 
-            <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 space-y-4">
+            <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 space-y-4">
               <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <Flame className="w-4 h-4 text-amber-400" /> Informasi Sprint Aktif
               </h3>

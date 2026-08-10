@@ -46,7 +46,7 @@ export const ActivityLogPanel = ({
       <div className="space-y-6 w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-200 pb-6 mb-2">
           <div className="flex gap-4 items-center">
-            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shadow-inner">
+            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
               <History className="w-7 h-7" />
             </div>
             <div>
@@ -91,11 +91,11 @@ export const ActivityLogPanel = ({
           </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
         <div className="p-6 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="relative flex-1 custom-search-bar w-full">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input placeholder="Search event logs, user ID, or actions by keyword..." value={auditLogSearch} onChange={(e)=>setAuditLogSearch(e.target.value)} className="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-2xl text-[13px] font-bold text-slate-700 tracking-wide focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:font-medium placeholder:text-slate-400" />
+              <input placeholder="Search event logs, user ID, or actions by keyword..." value={auditLogSearch} onChange={(e)=>setAuditLogSearch(e.target.value)} className="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold text-slate-700 tracking-wide focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:font-medium placeholder:text-slate-400" />
             </div>
         </div>
         {activityLogs.length === 0 ? (

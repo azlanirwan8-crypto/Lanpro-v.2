@@ -208,7 +208,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
               initial={{ scale: 0.95, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 15 }}
-              className="relative w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden p-6 text-center"
+              className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden p-5 text-center"
             >
               {/* Alert Icon & Ring */}
               <div className="mx-auto w-16 h-16 bg-rose-50 border border-rose-100 rounded-full flex items-center justify-center mb-4 text-rose-500 relative">
@@ -225,7 +225,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
               </p>
 
               {/* Countdown Progress Card */}
-              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-5 mb-6 relative">
+              <div className="bg-slate-50 rounded-xl border border-slate-100 p-5 mb-6 relative">
                 <div className="text-xs text-slate-400 font-semibold mb-1">OTOMATIS KELUAR DALAM</div>
                 <div className="text-4xl font-black font-mono text-rose-500 tracking-wider">
                   {formatTime(activeTimeLeft)}
@@ -258,7 +258,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
                 <button
                   onClick={handleExtendSession}
                   disabled={isExtending}
-                  className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-2xl text-sm font-bold tracking-wide shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-sm font-bold tracking-wide shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <RefreshCw className={`w-4 h-4 ${isExtending ? 'animate-spin' : ''}`} />
                   Perpanjang Sesi Aktif
@@ -266,7 +266,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
 
                 <button
                   onClick={() => onLogout(false)}
-                  className="w-full py-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-2xl text-sm font-bold active:scale-[0.99] transition-all"
+                  className="w-full py-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-sm font-bold active:scale-[0.99] transition-all"
                 >
                   Keluar Sekarang
                 </button>

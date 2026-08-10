@@ -631,7 +631,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({ socket, currentU
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             ref={chatBoxRef}
-            className="absolute bottom-16 right-0 w-80 h-[480px] bg-white rounded-2xl border border-slate-200/80 shadow-2xl flex flex-col overflow-hidden z-50 bg-opacity-95 backdrop-blur-md"
+            className="absolute bottom-16 right-0 w-80 h-[480px] bg-white rounded-xl border border-slate-200/80 shadow-2xl flex flex-col overflow-hidden z-50 bg-opacity-95 backdrop-blur-md"
           >
             {/* VIEW A: CONTACT LIST VIEW */}
             {!activeChatUser ? (
@@ -957,7 +957,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({ socket, currentU
                           )}
 
                           <div
-                            className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs break-all shadow-sm ${
+                            className={`max-w-[85%] px-3 py-2 rounded-xl text-xs break-all shadow-sm ${
                               isSelf
                                 ? "bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-br-none"
                                 : "bg-white border border-slate-100 text-slate-800 rounded-bl-none"
@@ -985,7 +985,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({ socket, currentU
                   )}
                   {isPartnerTyping && (
                     <div className="flex flex-col items-start space-y-1">
-                      <div className="bg-white border border-slate-100 text-slate-800 px-3 py-1.5 rounded-2xl rounded-bl-none text-xs shadow-sm flex items-center gap-1.5 text-slate-500 font-medium">
+                      <div className="bg-white border border-slate-100 text-slate-800 px-3 py-1.5 rounded-xl rounded-bl-none text-xs shadow-sm flex items-center gap-1.5 text-slate-500 font-medium">
                         <span className="text-[10px] text-slate-400">
                           {activeChatUser?.id === "lanpro-ai" ? "LanPro AI sedang mengetik" : `${activeChatUser?.displayName} sedang mengetik`}
                         </span>

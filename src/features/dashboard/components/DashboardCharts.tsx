@@ -11,7 +11,7 @@ interface ChartProps {
 
 export const DashboardDonutChart: React.FC<ChartProps> = ({ data, colors, totalTasks, title }) => {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-100/80 shadow-sm flex flex-col h-full">
+    <div className="bg-white rounded-xl p-5 border border-slate-100/80 shadow-sm flex flex-col h-full">
       <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 select-none shrink-0">
         <span className="text-[10px] font-black tracking-widest text-slate-800 uppercase">{title}</span>
       </div>

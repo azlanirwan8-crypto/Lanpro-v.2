@@ -89,7 +89,7 @@ export function TestQAPanel({
   // If no project is selected, show empty state
   if (!selectedProject) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 bg-white rounded-3xl border border-slate-200 shadow-sm max-w-lg mx-auto mt-12">
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm max-w-lg mx-auto mt-12">
         <div className="p-4 bg-indigo-50 text-indigo-600 rounded-full mb-4 animate-bounce">
           <ShieldAlert className="w-8 h-8" />
         </div>
@@ -1684,18 +1684,21 @@ ${lastCommentText}
       `}</style>
 
       {/* Title & Metadata Topbar */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white border border-slate-100 p-5 rounded-3xl shadow-sm">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white border border-slate-200 p-4 rounded-lg shadow-sm">
         <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">QA Testing Dashboard</h1>
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            QA Test Cases & Execution Matrix
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">Kelola test suite, skenario pengujian, dan catat hasil eksekusi pengujian kualitas perangkat lunak.</p>
         </div>
 
         {/* Concurrency Locking Status Panel */}
-        <div className="flex flex-wrap items-center gap-2 bg-slate-50 border border-slate-200/50 p-3 rounded-2xl w-full lg:w-auto">
+        <div className="flex flex-wrap items-center gap-2 bg-slate-50 border border-slate-200/50 p-2.5 rounded-md w-full lg:w-auto">
           {lockState.lockedBy ? (
             <>
               {isLockedBySomeoneElse ? (
                 <div className="flex items-center gap-3 w-full lg:w-auto">
-                  <div className="p-2 bg-rose-50 text-rose-600 rounded-xl">
+                  <div className="p-2 bg-rose-50 text-rose-600 rounded-lg">
                     <Lock className="w-5 h-5 animate-pulse" />
                   </div>
                   <div>
@@ -1754,7 +1757,7 @@ ${lastCommentText}
           <div className="space-y-3">
             <button
               onClick={() => { setIsAddCaseOpen(true); setActiveAddTab("single"); }}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
               <Plus className="w-5 h-5" />
               <span>Upload / Tambah Dokumen</span>
@@ -1762,7 +1765,7 @@ ${lastCommentText}
           </div>
 
           {/* Test Suites List Selector */}
-          <div className="bg-white border border-slate-200/60 rounded-3xl p-5 shadow-sm space-y-4">
+          <div className="bg-white border border-slate-200/60 rounded-lg p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Daftar Dokumen Skrip</h3>
               <div className="flex items-center gap-2">
@@ -1813,7 +1816,7 @@ ${lastCommentText}
                     <div
                       key={suite.id ? `${suite.id}-${sIdx}` : `suite-${sIdx}`}
                       onClick={() => setSelectedSuiteId(suite.id)}
-                      className={`group p-4 rounded-2xl border transition-all cursor-pointer relative ${
+                      className={`group p-4 rounded-xl border transition-all cursor-pointer relative ${
                         isActive 
                           ? "bg-indigo-50/40 border-indigo-200 shadow-sm" 
                           : "bg-white border-slate-100 hover:border-slate-300"
@@ -1883,7 +1886,7 @@ ${lastCommentText}
         <div className="lg:col-span-8 space-y-6 lg:sticky lg:top-4">
           
           {draftTestCases.length > 0 && (
-            <div className="bg-white border-2 border-indigo-200 p-6 rounded-3xl shadow-xl space-y-6 max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
+            <div className="bg-white border-2 border-indigo-200 p-5 rounded-lg shadow-xl space-y-5 max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
                 <div>
                   <div className="flex items-center gap-2">
@@ -1913,7 +1916,7 @@ ${lastCommentText}
               </div>
 
               {/* Destination Suite Settings */}
-              <div className="bg-slate-50 border border-slate-200/60 p-5 rounded-2xl space-y-4">
+              <div className="bg-slate-50 border border-slate-200/60 p-5 rounded-xl space-y-4">
                 <h3 className="text-xs font-black text-slate-700 uppercase tracking-wider">Pengaturan Suite Tujuan</h3>
                 <div className="flex flex-wrap items-center gap-4">
                   <label className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 cursor-pointer">
@@ -1984,7 +1987,7 @@ ${lastCommentText}
               {/* Draft Test Cases Cards List */}
               <div className="space-y-4 max-h-[calc(100vh-420px)] overflow-y-auto pr-1 custom-scrollbar">
                 {draftTestCases.map((tc, idx) => (
-                  <div key={tc.id ? `${tc.id}-${idx}` : `draft-${idx}`} className="p-5 border border-slate-200/80 rounded-2xl bg-white shadow-xs hover:border-slate-300 transition-all space-y-4 relative border-l-4 border-l-indigo-500">
+                  <div key={tc.id ? `${tc.id}-${idx}` : `draft-${idx}`} className="p-5 border border-slate-200/80 rounded-xl bg-white shadow-xs hover:border-slate-300 transition-all space-y-4 relative border-l-4 border-l-indigo-500">
                     <div className="flex items-start gap-3">
                       <input
                         type="checkbox"
@@ -2095,7 +2098,7 @@ ${lastCommentText}
 
           {/* Active Suite Overview Stats */}
           {draftTestCases.length === 0 && activeSuite ? (
-            <div className="bg-white border border-slate-200/60 p-5 rounded-3xl shadow-sm space-y-4">
+            <div className="bg-white border border-slate-200/60 p-5 rounded-lg shadow-sm space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                   <h2 className="text-xl font-black text-slate-800 tracking-tight">{activeSuite.name}</h2>
@@ -2124,27 +2127,27 @@ ${lastCommentText}
 
               {/* Grid of Micro Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3.5">
-                <div className="bg-indigo-50 border border-indigo-100/50 p-3 rounded-2xl text-center">
+                <div className="bg-indigo-50 border border-indigo-100/50 p-3 rounded-xl text-center">
                   <span className="text-[10px] text-indigo-600 font-black uppercase tracking-wider block">Total Test Case</span>
                   <span className="text-lg font-black text-indigo-700 block mt-1">{totalCasesCount}</span>
                 </div>
-                <div className="bg-slate-50/50 p-3 rounded-2xl border border-slate-100 text-center">
+                <div className="bg-slate-50/50 p-3 rounded-xl border border-slate-100 text-center">
                   <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Passed Rate</span>
                   <span className="text-lg font-black text-slate-800 block mt-1">{passedPercent}%</span>
                 </div>
-                <div className="bg-emerald-50/30 p-3 rounded-2xl border border-emerald-100/30 text-center">
+                <div className="bg-emerald-50/30 p-3 rounded-xl border border-emerald-100/30 text-center">
                   <span className="text-[10px] text-emerald-600 font-black uppercase tracking-wider block">PASSED</span>
                   <span className="text-lg font-black text-emerald-700 block mt-1">{passedCasesCount}</span>
                 </div>
-                <div className="bg-rose-50/30 p-3 rounded-2xl border border-rose-100/30 text-center">
+                <div className="bg-rose-50/30 p-3 rounded-xl border border-rose-100/30 text-center">
                   <span className="text-[10px] text-rose-600 font-black uppercase tracking-wider block">FAILED</span>
                   <span className="text-lg font-black text-rose-700 block mt-1">{failedCasesCount}</span>
                 </div>
-                <div className="bg-amber-50/30 p-3 rounded-2xl border border-amber-100/30 text-center">
+                <div className="bg-amber-50/30 p-3 rounded-xl border border-amber-100/30 text-center">
                   <span className="text-[10px] text-amber-600 font-black uppercase tracking-wider block">BLOCKED</span>
                   <span className="text-lg font-black text-amber-700 block mt-1">{blockedCasesCount}</span>
                 </div>
-                <div className="bg-slate-50/50 p-3 rounded-2xl border border-slate-100 text-center col-span-2 sm:col-span-1">
+                <div className="bg-slate-50/50 p-3 rounded-xl border border-slate-100 text-center col-span-2 sm:col-span-1">
                   <span className="text-[10px] text-slate-500 font-black uppercase tracking-wider block">RETEST/PEND</span>
                   <span className="text-lg font-black text-slate-700 block mt-1">
                     {retestCasesCount + pendingCasesCount}
@@ -2182,7 +2185,7 @@ ${lastCommentText}
                 </div>
               </div>
 
-              <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-slate-50/50 p-3">
+              <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-slate-50/50 p-3">
                 <div className="space-y-2.5 max-h-[600px] lg:max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar pr-1">
                   
                   {filteredCases.length === 0 ? (
@@ -2324,7 +2327,7 @@ ${lastCommentText}
 
             </div>
           ) : draftTestCases.length === 0 ? (
-            <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl">
+            <div className="text-center py-16 bg-white border border-slate-200 rounded-lg">
               <p className="text-slate-400 text-sm font-bold">Harap upload atau pilih dokumen skrip pengujian.</p>
             </div>
           ) : null}
@@ -2341,7 +2344,7 @@ ${lastCommentText}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-200 rounded-3xl p-6 max-w-lg w-full shadow-xl space-y-5"
+              className="bg-white border border-slate-200 rounded-lg p-5 max-w-lg w-full shadow-xl space-y-4"
             >
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                 <h3 className="text-base font-black text-slate-800">
@@ -2555,7 +2558,7 @@ ${lastCommentText}
                           Memuat riwayat eksekusi...
                         </div>
                       ) : executionLogs.length === 0 ? (
-                        <div className="py-10 text-center bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                        <div className="py-10 text-center bg-slate-50 border border-slate-100 rounded-xl p-4">
                           <History className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                           <p className="text-xs font-bold text-slate-600">Belum Ada Catatan Run Eksekusi</p>
                           <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
@@ -2582,7 +2585,7 @@ ${lastCommentText}
                                   "border-slate-400 bg-slate-400"
                                 }`} />
 
-                                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 shadow-2xs hover:shadow-xs transition-shadow space-y-2">
+                                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 shadow-2xs hover:shadow-xs transition-shadow space-y-2">
                                   <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-center gap-1.5">
                                       <span className="text-[10px] font-black bg-slate-900 text-white px-2 py-0.5 rounded-md uppercase tracking-wider">
@@ -2703,7 +2706,7 @@ ${lastCommentText}
                     <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Bukti Pengujian (Evidence - Multiple Upload)</label>
                     
                     {/* Upload Drop Zone / Button (Always visible so user can append more files) */}
-                    <div className="border border-dashed border-slate-200 rounded-2xl p-4 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <div className="border border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors">
                       <input
                         type="file"
                         id="drawer-evidence-input"
@@ -2811,7 +2814,7 @@ ${lastCommentText}
                             </div>
                           )}
                           {selectedTestCase.commentsList?.map((comment, idx) => (
-                            <div key={comment.id ? `${comment.id}-${idx}` : `comment-${idx}`} className="p-3 bg-indigo-50/30 border border-indigo-100/30 rounded-2xl space-y-1">
+                            <div key={comment.id ? `${comment.id}-${idx}` : `comment-${idx}`} className="p-3 bg-indigo-50/30 border border-indigo-100/30 rounded-xl space-y-1">
                               <div className="flex justify-between items-center text-[10px] font-black text-indigo-600">
                                 <span className="flex items-center gap-1">
                                   <User className="w-3 h-3 text-indigo-400" />
@@ -2891,12 +2894,12 @@ ${lastCommentText}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-200 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5 my-8 max-h-[90vh] overflow-y-auto custom-scrollbar"
+              className="bg-white border border-slate-200 rounded-lg p-5 max-w-xl w-full shadow-xl space-y-4 my-8 max-h-[90vh] overflow-y-auto custom-scrollbar"
             >
               {/* Header */}
               <div className="flex justify-between items-start pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100">
+                  <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl border border-rose-100">
                     <Bug className="w-5 h-5" />
                   </div>
                   <div>
@@ -2925,7 +2928,7 @@ ${lastCommentText}
 
               <form onSubmit={handleSubmitCreateBugTicket} className="space-y-4">
                 {/* 1. DYNAMIC SEARCHABLE PARENT LINK DROPDOWN (REQUIRED MANUAL SELECTION) */}
-                <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl space-y-2.5">
+                <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl space-y-2.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-black text-indigo-950 flex items-center gap-1.5 uppercase tracking-wider">
                       <Link className="w-4 h-4 text-indigo-600" />
@@ -3120,38 +3123,40 @@ ${lastCommentText}
       {/* Add New Test Suite Modal */}
       <AnimatePresence>
         {isAddSuiteOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4"
+              className="bg-white border border-slate-200 rounded-xl p-6 max-w-sm w-full shadow-xl space-y-4"
             >
-              <div className="flex items-center gap-2 text-slate-800 mb-2">
-                <Plus className="w-5 h-5 text-indigo-500" />
-                <h3 className="text-sm font-black uppercase tracking-wider">Tambah Dokumen Skrip</h3>
+              <div className="flex items-center gap-2 text-slate-900 mb-2">
+                <div className="w-7 h-7 rounded-lg bg-[#405189]/10 text-[#405189] flex items-center justify-center">
+                  <Plus className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Tambah Dokumen Skrip</h3>
               </div>
               
               <form onSubmit={handleAddSuiteOnly} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Nama Dokumen *</label>
+                  <label className="text-[11px] text-slate-700 font-bold block">Nama Dokumen *</label>
                   <input
                     autoFocus
                     type="text"
                     required
                     value={newSuiteNameOnly}
                     onChange={(e) => setNewSuiteNameOnly(e.target.value)}
-                    className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
+                    className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:border-[#405189] focus:outline-none focus:ring-1 focus:ring-[#405189]/20 font-medium text-slate-800"
                     placeholder="Masukkan nama dokumen..."
                   />
                 </div>
                 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Fase Testing *</label>
+                  <label className="text-[11px] text-slate-700 font-bold block">Fase Testing *</label>
                   <select
                     value={newSuitePhaseOnly}
                     onChange={(e) => setNewSuitePhaseOnly(e.target.value as any)}
-                    className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-black text-indigo-700"
+                    className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:border-[#405189] focus:outline-none focus:ring-1 focus:ring-[#405189]/20 font-semibold text-[#405189]"
                   >
                     <option value="SIT">SIT</option>
                     <option value="UAT">UAT</option>
@@ -3188,7 +3193,7 @@ ${lastCommentText}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-200 rounded-3xl p-6 max-w-4xl w-full shadow-2xl space-y-4"
+              className="bg-white border border-slate-200 rounded-lg p-5 max-w-4xl w-full shadow-xl space-y-4"
             >
               <div className="flex justify-between items-center pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
@@ -3406,7 +3411,7 @@ ${lastCommentText}
                   </div>
 
                   {/* Info Box & Template */}
-                  <div className="bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl flex flex-col items-start gap-3">
+                  <div className="bg-indigo-50/50 border border-indigo-100 p-4 rounded-xl flex flex-col items-start gap-3">
                     <div className="flex items-center gap-2 text-indigo-700 font-bold text-sm">
                       <FileSpreadsheet className="w-5 h-5" />
                       <span>Format Standar Kolom Excel</span>
@@ -3429,7 +3434,7 @@ ${lastCommentText}
                   {/* Upload Area */}
                   <div className="space-y-1.5">
                     <label className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Unggah Berkas *</label>
-                    <div className="border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/50 rounded-2xl p-6 text-center transition-colors">
+                    <div className="border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/50 rounded-xl p-6 text-center transition-colors">
                       <input
                         type="file"
                         id="bulk-upload-file"
@@ -3448,7 +3453,7 @@ ${lastCommentText}
                         }}
                       />
                       <label htmlFor="bulk-upload-file" className="cursor-pointer flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 bg-white border border-slate-200 text-slate-500 rounded-2xl flex items-center justify-center shadow-sm">
+                        <div className="w-12 h-12 bg-white border border-slate-200 text-slate-500 rounded-xl flex items-center justify-center shadow-sm">
                           <Upload className="w-6 h-6" />
                         </div>
                         <div>
@@ -3492,30 +3497,30 @@ ${lastCommentText}
       {/* Custom Modal for Suite Deletion */}
       <AnimatePresence>
         {suiteToDelete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4"
+              className="bg-white border border-slate-200 rounded-xl p-6 max-w-sm w-full shadow-xl space-y-4"
             >
               <div className="flex items-center gap-3 text-rose-600 mb-2">
-                <AlertTriangle className="w-6 h-6" />
-                <h3 className="text-sm font-black uppercase tracking-wider">Konfirmasi Hapus</h3>
+                <AlertTriangle className="w-5 h-5" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Konfirmasi Hapus</h3>
               </div>
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Apakah Anda yakin ingin menghapus seluruh Test Suite <strong>{suiteToDelete.name}</strong> dan semua Test Case di dalamnya? Tindakan ini tidak dapat dibatalkan.
               </p>
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-2 pt-3">
                 <button
                   onClick={() => setSuiteToDelete(null)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-black uppercase tracking-wider rounded-xl transition-all"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-all"
                 >
                   Batal
                 </button>
                 <button
                   onClick={() => handleDeleteSuite(suiteToDelete.id)}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 shadow-sm"
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-2 shadow-xs"
                 >
                   <Trash2 className="w-4 h-4" /> Ya, Hapus
                 </button>
@@ -3528,30 +3533,30 @@ ${lastCommentText}
       {/* Custom Modal for Case Deletion */}
       <AnimatePresence>
         {caseToDelete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4"
+              className="bg-white border border-slate-200 rounded-xl p-6 max-w-sm w-full shadow-xl space-y-4"
             >
               <div className="flex items-center gap-3 text-rose-600 mb-2">
-                <AlertTriangle className="w-6 h-6" />
-                <h3 className="text-sm font-black uppercase tracking-wider">Hapus Test Case</h3>
+                <AlertTriangle className="w-5 h-5" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Hapus Test Case</h3>
               </div>
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Apakah Anda yakin ingin menghapus Test Case ini?
               </p>
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-2 pt-3">
                 <button
                   onClick={() => setCaseToDelete(null)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-black uppercase tracking-wider rounded-xl transition-all"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-all"
                 >
                   Batal
                 </button>
                 <button
                   onClick={() => handleDeleteTestCase(caseToDelete)}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 shadow-sm"
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-2 shadow-xs"
                 >
                   <Trash2 className="w-4 h-4" /> Ya, Hapus
                 </button>
@@ -3564,35 +3569,37 @@ ${lastCommentText}
       {/* Custom Modal for Suite Editing */}
       <AnimatePresence>
         {suiteToEdit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4"
+              className="bg-white border border-slate-200 rounded-xl p-6 max-w-sm w-full shadow-xl space-y-4"
             >
               <div className="flex items-center gap-2 text-slate-800 mb-2">
-                <Edit3 className="w-5 h-5 text-indigo-500" />
-                <h3 className="text-sm font-black uppercase tracking-wider">Ubah Nama Dokumen</h3>
+                <div className="w-7 h-7 rounded-lg bg-[#405189]/10 text-[#405189] flex items-center justify-center">
+                  <Edit3 className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Ubah Nama Dokumen</h3>
               </div>
               <input
                 autoFocus
                 type="text"
                 value={suiteEditName}
                 onChange={(e) => setSuiteEditName(e.target.value)}
-                className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
+                className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:border-[#405189] focus:outline-none focus:ring-1 focus:ring-[#405189]/20 font-medium text-slate-800"
                 placeholder="Masukkan nama dokumen..."
               />
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-2 pt-3">
                 <button
                   onClick={() => setSuiteToEdit(null)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-black uppercase tracking-wider rounded-xl transition-all"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-all"
                 >
                   Batal
                 </button>
                 <button
                   onClick={submitEditSuite}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-sm"
+                  className="px-4 py-2 bg-[#405189] hover:bg-[#364574] text-white text-xs font-semibold rounded-lg transition-all shadow-xs"
                 >
                   Simpan
                 </button>
@@ -3605,26 +3612,28 @@ ${lastCommentText}
       {/* Custom Modal for Case Info Editing */}
       <AnimatePresence>
         {caseToEditInfo && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4"
+              className="bg-white border border-slate-200 rounded-xl p-6 max-w-sm w-full shadow-xl space-y-4"
             >
               <div className="flex items-center gap-2 text-slate-800 mb-2">
-                <Edit3 className="w-5 h-5 text-indigo-500" />
-                <h3 className="text-sm font-black uppercase tracking-wider">Ubah Judul Test Case</h3>
+                <div className="w-7 h-7 rounded-lg bg-[#405189]/10 text-[#405189] flex items-center justify-center">
+                  <Edit3 className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Ubah Judul Test Case</h3>
               </div>
               <input
                 autoFocus
                 type="text"
                 value={caseEditTitle}
                 onChange={(e) => setCaseEditTitle(e.target.value)}
-                className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold"
+                className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:border-[#405189] focus:outline-none focus:ring-1 focus:ring-[#405189]/20 font-medium text-slate-800"
                 placeholder="Masukkan judul test case..."
               />
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-2 pt-3">
                 <button
                   onClick={() => setCaseToEditInfo(null)}
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-black uppercase tracking-wider rounded-xl transition-all"

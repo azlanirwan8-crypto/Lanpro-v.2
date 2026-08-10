@@ -28,7 +28,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="bg-white rounded-2xl w-full max-w-lg shadow-2xl relative my-auto overflow-hidden flex flex-col"
+          className="bg-white rounded-xl w-full max-w-lg shadow-2xl relative my-auto overflow-hidden flex flex-col"
           onClick={e => e.stopPropagation()}
         >
           <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">

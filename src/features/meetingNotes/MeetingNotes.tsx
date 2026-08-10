@@ -397,17 +397,17 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
             {/* DataTable Container */}
             <div className="flex-1 overflow-x-auto overflow-y-auto m-6 bg-white rounded-lg border border-slate-200/60 shadow-xs">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="bg-slate-50/50 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    <th className="py-4 px-5 w-16 text-center">No</th>
-                    <th className="py-4 px-5">Meeting Title</th>
-                    <th className="py-4 px-5 w-48">Datetime Meeting</th>
-                    <th className="py-4 px-5 w-44">Meeting Link</th>
-                    <th className="py-4 px-5 w-40">Document File</th>
-                    <th className="py-4 px-5 w-48">Author</th>
-                    <th className="py-4 px-5">Description</th>
-                    <th className="py-4 px-5 w-32 text-center">Action</th>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    <th className="py-3.5 px-4 w-14 text-center">No</th>
+                    <th className="py-3.5 px-4 min-w-[180px] max-w-[260px]">Meeting Title</th>
+                    <th className="py-3.5 px-4 w-44">Datetime Meeting</th>
+                    <th className="py-3.5 px-4 w-40">Meeting Link</th>
+                    <th className="py-3.5 px-4 w-40">Document File</th>
+                    <th className="py-3.5 px-4 w-36">Author</th>
+                    <th className="py-3.5 px-4 min-w-[180px] max-w-[260px]">Description</th>
+                    <th className="py-3.5 px-4 w-28 text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">

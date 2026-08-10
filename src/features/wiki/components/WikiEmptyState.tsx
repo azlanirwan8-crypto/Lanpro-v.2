@@ -23,7 +23,7 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="bg-white/45 backdrop-blur-xl rounded-[2.5rem] border border-slate-200/50 p-8 sm:p-14 text-center max-w-xl mx-auto mt-8 shadow-[0_8px_32px_0_rgba(99,102,241,0.04),inset_0_1.5px_1.5px_rgba(255,255,255,0.8)] select-none relative overflow-hidden"
+      className="bg-white/45 backdrop-blur-xl rounded-xl border border-slate-200/50 p-8 sm:p-14 text-center max-w-xl mx-auto mt-8 shadow-[0_8px_32px_0_rgba(99,102,241,0.04),inset_0_1.5px_1.5px_rgba(255,255,255,0.8)] select-none relative overflow-hidden"
     >
       {/* Decorative ambient background glows */}
       <div className="absolute -top-12 -left-12 w-40 h-40 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none" />
@@ -135,7 +135,7 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
         {isFiltered && (
           <button
             onClick={onResetFilters}
-            className="flex items-center gap-2 px-5 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-2xl font-black text-xs transition-all cursor-pointer active:scale-95"
+            className="flex items-center gap-2 px-5 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl font-black text-xs transition-all cursor-pointer active:scale-95"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Bersihkan Pencarian</span>
@@ -146,7 +146,7 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.98 }}
           onClick={onCreateClick}
-          className="flex items-center gap-2 px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-indigo-600/20 active:scale-95 transition-all cursor-pointer relative overflow-hidden group"
+          className="flex items-center gap-2 px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-lg shadow-indigo-600/20 active:scale-95 transition-all cursor-pointer relative overflow-hidden group"
         >
           {/* Dynamic shimmer gloss on button hover */}
           <div className="absolute inset-0 w-1/2 h-full bg-white/10 skew-x-12 -translate-x-full group-hover:animate-shimmer pointer-events-none" />
