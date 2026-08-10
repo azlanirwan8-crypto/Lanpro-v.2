@@ -4232,7 +4232,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             </button>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col min-h-0 h-full relative overflow-hidden space-y-4">
+          <div className="flex-1 flex flex-col min-h-0 relative space-y-4">
             
             {/* Panel 1: Top Actions */}
             <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between shadow-sm shrink-0">
